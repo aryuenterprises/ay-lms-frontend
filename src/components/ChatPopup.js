@@ -99,7 +99,7 @@ const StyledTextField = styled(TextField)({
 
 const ChatPopup = () => {
   const {
-    isChatOpen,
+    openChats,
     closeChat,
     selectedUser,
     rooms,
@@ -263,7 +263,7 @@ const ChatPopup = () => {
   }
   
   if (senderType !== 'tutor') return null;
-  if (!isChatOpen) return null;
+  if (!openChats) return null;
 
   return (
     <>
@@ -760,7 +760,7 @@ const ChatPopup = () => {
 };
 
 ChatPopup.propTypes = {
-  isChatOpen: PropTypes.bool,
+  openChats: PropTypes.bool,
   closeChat: PropTypes.func,
   open: PropTypes.bool,
   onClose: PropTypes.func
