@@ -302,29 +302,7 @@ const ParticipantTable = () => {
           {/* )} */}
         </Box>
       )
-    },
-
-    ...(canUpdate || canDelete
-      ? [
-          {
-            name: 'Actions',
-            cell: (row) => (
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                {canUpdate && (
-                  <IconButton color="info" onClick={() => handleEdit(row)}>
-                    <Edit />
-                  </IconButton>
-                )}
-                {canDelete && (
-                  <IconButton color="error" onClick={() => handleDelete(row.id)}>
-                    <Delete />
-                  </IconButton>
-                )}
-              </Box>
-            )
-          }
-        ]
-      : [])
+    }
   ];
 
   const allRows = useMemo(() => {

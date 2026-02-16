@@ -28,7 +28,6 @@ import { Quill } from 'react-quill';
 import 'quill-emoji/dist/quill-emoji.css';
 import * as Emoji from 'quill-emoji';
 
-Quill.register('modules/emoji', Emoji);
 
 //css import
 import 'assets/css/commonStyle.css';
@@ -38,7 +37,7 @@ import { APP_PATH_BASE_URL } from 'config';
 import Swal from 'sweetalert2';
 import { Capitalise } from 'utils/capitalise';
 import { usePermission } from 'hooks/usePermission';
-
+Quill.register('modules/emoji', Emoji);
 const Announcement = () => {
   const { checkPermission } = usePermission();
 

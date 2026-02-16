@@ -1,3 +1,4 @@
+import React from 'react';
 import PropTypes from 'prop-types';
 import { useRef, useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router';
@@ -7,7 +8,7 @@ import { useTheme } from '@mui/material/styles';
 import { Box, ButtonBase, CardContent, ClickAwayListener, Grid, Paper, Popper, Stack, Tooltip, Typography } from '@mui/material';
 
 // project-imports
-const avatarImage = require.context('assets/images/users/', true);
+
 // import Avatar from 'components/@extended/Avatar';
 import MainCard from 'components/MainCard';
 import Transitions from 'components/@extended/Transitions';
@@ -54,6 +55,7 @@ TabPanel.propTypes = {
 // ==============================|| HEADER CONTENT - PROFILE ||============================== //
 
 const ProfilePage = () => {
+  const avatarImage = require.context('assets/images/users/', true);
   const theme = useTheme();
   const navigate = useNavigate();
 

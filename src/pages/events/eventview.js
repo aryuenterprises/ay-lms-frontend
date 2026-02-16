@@ -1,5 +1,6 @@
 // EventView.js (with integrated form - show/hide version)
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { dispatch } from 'store';
 import {
   Box,
   Grid,
@@ -57,6 +58,7 @@ const EventView = () => {
   const [error, setError] = useState('');
   const [loadingQuestions, setLoadingQuestions] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
+  const ws = useRef(null);
 
   // Formik initial values
   const initialValues = {

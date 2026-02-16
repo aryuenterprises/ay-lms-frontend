@@ -1,41 +1,49 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from "react";
 
 // material-ui
-import { useTheme } from '@mui/material/styles';
-import { Button, Grid, Stack, Typography, TextField } from '@mui/material';
+import { useTheme } from "@mui/material/styles";
+import { Button, Grid, Stack, Typography, TextField } from "@mui/material";
 
 // third-party
-import * as Yup from 'yup';
-import { Formik } from 'formik';
+import * as Yup from "yup";
+import { Formik } from "formik";
 // import {CloseTwoToneIcon} from @mui/
 
-import CloseTwoTone from '@mui/icons-material/CloseTwoTone';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import CloseTwoTone from "@mui/icons-material/CloseTwoTone";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 // project-imports
-import AnimateButton from 'components/@extended/AnimateButton';
-import { ThemeMode } from 'config';
+import AnimateButton from "components/@extended/AnimateButton";
+import { ThemeMode } from "config";
 // import { useLocation, useNavigate } from 'react-router';
-import axiosInstance from 'utils/axios';
-import { APP_PATH_BASE_URL } from 'config';
-import Swal from 'sweetalert2';
+import axiosInstance from "utils/axios";
+import { APP_PATH_BASE_URL } from "config";
+import Swal from "sweetalert2";
 
 // ============================|| STATIC - CODE VERIFICATION ||============================ //
 
-const AuthCodeVerification = ({ setOpen, setverify,setPassword,curemail}) => {
+const AuthCodeVerification = ({
+  setOpen,
+  setverify,
+  setPassword,
+  curemail,
+}) => {
   const theme = useTheme();
   // const navigate = useNavigate();
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const inputRefs = useRef([]);
   const [timer, setTimer] = useState(0);
   const [canResend, setCanResend] = useState(false);
-// console.log(curemail,"enter success")
+  // console.log(curemail,"enter success")
   // const location = useLocation();
-  const email = curemail|| {};
+  const email = curemail || {};
 
   // console.log(email,"EMAIL")
 
-  const borderColor = theme.palette.mode === ThemeMode.DARK ? theme.palette.secondary[200] : theme.palette.secondary.light;
+  const borderColor =
+    theme.palette.mode === ThemeMode.DARK
+      ? theme.palette.secondary[200]
+      : theme.palette.secondary.light;
 
   // Timer effect
   useEffect(() => {
@@ -58,12 +66,14 @@ const AuthCodeVerification = ({ setOpen, setverify,setPassword,curemail}) => {
 
   // Validation Schema
   const validationSchema = Yup.object({
-    code: Yup.string().length(6, 'Code must be exactly 6 characters').required('Verification code is required')
+    code: Yup.string()
+      .length(6, "Code must be exactly 6 characters")
+      .required("Verification code is required"),
   });
 
   // Initial Values
   const initialValues = {
-    code: ''
+    code: "",
   };
 
   const handleChange = (index, value, setFieldValue) => {
@@ -73,8 +83,8 @@ const AuthCodeVerification = ({ setOpen, setverify,setPassword,curemail}) => {
       setOtp(newOtp);
 
       // Update Formik field value
-      const code = newOtp.join('');
-      setFieldValue('code', code);
+      const code = newOtp.join("");
+      setFieldValue("code", code);
 
       // Auto-focus to next input
       if (value && index < 5) {
@@ -85,15 +95,15 @@ const AuthCodeVerification = ({ setOpen, setverify,setPassword,curemail}) => {
 
   const handleKeyDown = (index, e) => {
     // Move to previous input on backspace if current input is empty
-    if (e.key === 'Backspace' && !otp[index] && index > 0) {
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
       inputRefs.current[index - 1].focus();
     }
   };
 
   const handlePaste = (e, setFieldValue) => {
     e.preventDefault();
-    const pastedData = e.clipboardData.getData('text').slice(0, 6);
-    const pastedArray = pastedData.split('');
+    const pastedData = e.clipboardData.getData("text").slice(0, 6);
+    const pastedArray = pastedData.split("");
 
     const newOtp = [...otp];
     pastedArray.forEach((char, index) => {
@@ -105,8 +115,8 @@ const AuthCodeVerification = ({ setOpen, setverify,setPassword,curemail}) => {
     setOtp(newOtp);
 
     // Update Formik field value
-    const code = newOtp.join('');
-    setFieldValue('code', code);
+    const code = newOtp.join("");
+    setFieldValue("code", code);
 
     // Focus on the last filled input or the last one
     const lastFilledIndex = Math.min(pastedArray.length - 1, 5);
@@ -117,25 +127,28 @@ const AuthCodeVerification = ({ setOpen, setverify,setPassword,curemail}) => {
 
   const handleSubmit = async (values, { setSubmitting, setErrors }) => {
     try {
-      const res = await axiosInstance.post(`${APP_PATH_BASE_URL}api/verify-otp/`, {
-        email,
-        otp: values.code
-      });
-   
-      
+      const res = await axiosInstance.post(
+        `${APP_PATH_BASE_URL}api/verify-otp/`,
+        {
+          email,
+          otp: values.code,
+        },
+      );
+
       if (res.data.success === false) {
         setErrors({ submit: res.data.message });
         return;
       } else {
-        await Swal.fire('Success', res.data.message, 'success');
+        await Swal.fire("Success", res.data.message, "success");
         // navigate('/reset-password', { state: { email } });
-        setverify(false)
-        setPassword(true)
-        
+        setverify(false);
+        setPassword(true);
       }
     } catch (err) {
       console.error(err);
-      setErrors({ submit: err.response?.data?.message || 'Verification failed' });
+      setErrors({
+        submit: err.response?.data?.message || "Verification failed",
+      });
     } finally {
       setSubmitting(false);
     }
@@ -145,11 +158,14 @@ const AuthCodeVerification = ({ setOpen, setverify,setPassword,curemail}) => {
     if (canResend) return;
     setCanResend(true);
     try {
-      const res = await axiosInstance.post(`${APP_PATH_BASE_URL}api/resend-otp/`, {
-        email
-      });
+      const res = await axiosInstance.post(
+        `${APP_PATH_BASE_URL}api/resend-otp/`,
+        {
+          email,
+        },
+      );
       if (res.data.success === false) {
-        setErrors({ submit: res.data.message });
+        await Swal.fire("Error", res.data.message, "error");
         return;
       } else {
         // await Swal.fire('Success', res.data.message, 'success');
@@ -162,25 +178,32 @@ const AuthCodeVerification = ({ setOpen, setverify,setPassword,curemail}) => {
 
   // Format timer display
   const formatTime = (seconds) => {
-    return `00:${seconds < 10 ? '0' : ''}${seconds}`;
+    return `00:${seconds < 10 ? "0" : ""}${seconds}`;
   };
 
   return (
-    <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleSubmit}>
+    <Formik
+      initialValues={initialValues}
+      validationSchema={validationSchema}
+      onSubmit={handleSubmit}>
       {({ errors, touched, handleSubmit, isSubmitting, setFieldValue }) => (
         <form onSubmit={handleSubmit}>
-          <Grid justifyContent={'space-between'} display={'flex'}>
+          <Grid justifyContent={"space-between"} display={"flex"}>
             <Button
               variant="body1"
-              sx={{ textDecoration: 'none' }}
+              sx={{ textDecoration: "none" }}
               color="primary"
               onClick={() => {
-                setOpen(true), setverify(false);
-              }}
-            >
+                setOpen(true);
+                setverify(false);
+              }}>
               <ArrowBackIcon />
             </Button>
-            <Button variant="body1" sx={{ textDecoration: 'none' }} color="primary" onClick={() => setverify(false)}>
+            <Button
+              variant="body1"
+              sx={{ textDecoration: "none" }}
+              color="primary"
+              onClick={() => setverify(false)}>
               <CloseTwoTone />
             </Button>
           </Grid>
@@ -192,59 +215,79 @@ const AuthCodeVerification = ({ setOpen, setverify,setPassword,curemail}) => {
                     key={index}
                     inputRef={(ref) => (inputRefs.current[index] = ref)}
                     value={digit}
-                    onChange={(e) => handleChange(index, e.target.value, setFieldValue)}
+                    onChange={(e) =>
+                      handleChange(index, e.target.value, setFieldValue)
+                    }
                     onKeyDown={(e) => handleKeyDown(index, e)}
                     onPaste={(e) => handlePaste(e, setFieldValue)}
                     error={touched.code && Boolean(errors.code)}
                     inputProps={{
                       maxLength: 1,
-                      style: { textAlign: 'center' }
+                      style: { textAlign: "center" },
                     }}
                     sx={{
                       width: 50,
-                      '& .MuiOutlinedInput-root': {
-                        '& fieldset': {
-                          borderColor: borderColor
-                        }
-                      }
+                      "& .MuiOutlinedInput-root": {
+                        "& fieldset": {
+                          borderColor: borderColor,
+                        },
+                      },
                     }}
                   />
                 ))}
               </Stack>
               {touched.code && errors.code && (
-                <Typography color="error" variant="caption" display="block" textAlign="center" mt={1}>
+                <Typography
+                  color="error"
+                  variant="caption"
+                  display="block"
+                  textAlign="center"
+                  mt={1}>
                   {errors.code}
                 </Typography>
               )}
               {errors.submit && (
-                <Typography color="error" variant="caption" display="block" textAlign="center" mt={1}>
+                <Typography
+                  color="error"
+                  variant="caption"
+                  display="block"
+                  textAlign="center"
+                  mt={1}>
                   {errors.submit}
                 </Typography>
               )}
             </Grid>
             <Grid item xs={12}>
               <AnimateButton>
-                <Button disableElevation fullWidth size="large" type="submit" variant="contained" disabled={isSubmitting}>
-                  {isSubmitting ? 'Verifying...' : 'Continue'}
+                <Button
+                  disableElevation
+                  fullWidth
+                  size="large"
+                  type="submit"
+                  variant="contained"
+                  disabled={isSubmitting}>
+                  {isSubmitting ? "Verifying..." : "Continue"}
                 </Button>
               </AnimateButton>
             </Grid>
             <Grid item xs={12}>
-              <Stack direction="row" justifyContent="space-between" alignItems="baseline">
+              <Stack
+                direction="row"
+                justifyContent="space-between"
+                alignItems="baseline">
                 <Typography>Not received Code?</Typography>
                 <Button
                   variant="body1"
                   sx={{
                     minWidth: 85,
                     ml: 2,
-                    textDecoration: 'none',
-                    cursor: !canResend ? 'pointer' : 'default',
-                    color: !canResend ? 'primary.main' : 'text.secondary'
+                    textDecoration: "none",
+                    cursor: !canResend ? "pointer" : "default",
+                    color: !canResend ? "primary.main" : "text.secondary",
                   }}
                   onClick={handleResendCode}
-                  disabled={canResend}
-                >
-                  {!canResend ? 'Resend code' : formatTime(timer)}
+                  disabled={canResend}>
+                  {!canResend ? "Resend code" : formatTime(timer)}
                 </Button>
               </Stack>
             </Grid>

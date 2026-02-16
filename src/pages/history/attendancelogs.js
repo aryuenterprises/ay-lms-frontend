@@ -908,9 +908,7 @@ const filteredData = useMemo(() => {
         highlightOnHover
         responsive
         progressPending={loading}
-        noDataComponent="No attendance records found"
-        onChangePage={(page) => setCurrentPage(page)}
-       
+        noDataComponent="No attendance records found"       
       />
     </MainCard>
   );
