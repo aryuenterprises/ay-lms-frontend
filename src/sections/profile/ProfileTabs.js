@@ -18,13 +18,12 @@ import { ThemeMode } from 'config';
 // assets
 import { Camera } from 'iconsax-react';
 
-
+const avatarImage = require.context('assets/images/users/', true);
 import { APP_PATH_BASE_URL } from 'config';
 import { Capitalise } from 'utils/capitalise';
 import axiosInstance from 'utils/axios';
 
 const ProfileTabs = () => {
-  const avatarImage = require.context('assets/images/users/', true);
   const theme = useTheme();
   const [data, setData] = useState([]);
   const [avatar, setAvatar] = useState(avatarImage(`./avatar-thumb-1.png`));
