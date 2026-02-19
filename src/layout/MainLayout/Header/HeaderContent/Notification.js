@@ -98,7 +98,7 @@ const NotificationPage = () => {
   // WebSocket connection for real-time notifications
   useEffect(() => {
     if (userType === 'admin' || userType === 'super_admin') return;
-    const socketUrl = `wss://aylms.aryuprojects.com/ws/notifications/?token=${token}`;
+    const socketUrl = `wss://portal.aryuacademy.com/ws/notifications/?token=${token}`;
     ws.current = new WebSocket(socketUrl);
     ws.current.onopen = () => {
       // setWsConnected(true);

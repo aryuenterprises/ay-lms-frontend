@@ -29,6 +29,7 @@ import 'quill-emoji/dist/quill-emoji.css';
 import * as Emoji from 'quill-emoji';
 
 
+
 //css import
 import 'assets/css/commonStyle.css';
 import 'assets/css/DataTable.css';

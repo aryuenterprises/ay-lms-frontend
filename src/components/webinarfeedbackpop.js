@@ -231,7 +231,7 @@ export default function WebinarFeedbackDialog({ open, onClose, webinarUuid }) {
                         <Grid >
                           <Box
                             component="img"
-                            src={`https://aylms.aryuprojects.com/api/${feedbacks.rating_screenshot}`}
+                            src={`https://portal.aryuacademy.com/api/${feedbacks.rating_screenshot}`}
                             alt="Screenshot"
                             sx={{
                               width: 200,

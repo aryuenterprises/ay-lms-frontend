@@ -120,7 +120,7 @@ export const ChatProvider = ({ children }) => {
       ws.current.close();
     }
 
-    const socketUrl = `wss://aylms.aryuprojects.com/ws/chat/${roomId}/`;
+    const socketUrl = `wss://portal.aryuacademy.com/ws/chat/${roomId}/`;
     ws.current = new WebSocket(socketUrl);
 
     ws.current.onopen = () => {

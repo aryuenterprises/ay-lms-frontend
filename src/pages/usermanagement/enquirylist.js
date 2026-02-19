@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Box,
   Typography,
@@ -22,8 +22,8 @@ import {
   Select,
   InputAdornment,
   FormHelperText,
-  FormLabel,
-} from "@mui/material";
+  FormLabel
+} from '@mui/material';
 import {
   Visibility,
   Phone,
@@ -36,40 +36,38 @@ import {
   Call,
   AddComment,
   Source,
-  BookOnline,
-} from "@mui/icons-material";
-import DataTable from "react-data-table-component";
-import "assets/css/DataTable.css";
-import MainCard from "components/MainCard";
-import axiosInstance from "utils/axios";
-import { useFormik } from "formik";
-import * as Yup from "yup";
-import { APP_PATH_BASE_URL } from "config";
-import { CloseSquare, SearchNormal1, UserAdd } from "iconsax-react";
-import Swal from "sweetalert2";
-import { formatDateTime } from "utils/dateUtils";
-import { Capitalise } from "utils/capitalise";
-import "assets/css/DataTable.css";
-import PropTypes from "prop-types";
-import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import useDate from "../../config";
+  BookOnline
+} from '@mui/icons-material';
+import DataTable from 'react-data-table-component';
+import 'assets/css/DataTable.css';
+import MainCard from 'components/MainCard';
+import axiosInstance from 'utils/axios';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
+import { APP_PATH_BASE_URL } from 'config';
+import { CloseSquare, SearchNormal1, UserAdd } from 'iconsax-react';
+import Swal from 'sweetalert2';
+import { formatDateTime } from 'utils/dateUtils';
+import { Capitalise } from 'utils/capitalise';
+import 'assets/css/DataTable.css';
+import PropTypes from 'prop-types';
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import useDate from '../../config';
 
 // Validation schemas
 const enquiryValidationSchema = Yup.object({
-  name: Yup.string().required("Student name is required"),
-  phone: Yup.string().required("Phone number is required"),
-  email: Yup.string()
-    .email("Invalid email format")
-    .required("Email is required"),
-  enquiryDate: Yup.date().required("Enquiry date is required"),
-  course: Yup.string().required("Course is required"),
-  status: Yup.string().required("Status is required"),
-  source: Yup.string().required("Source is required"),
+  name: Yup.string().required('Student name is required'),
+  phone: Yup.string().required('Phone number is required'),
+  email: Yup.string().email('Invalid email format').required('Email is required'),
+  enquiryDate: Yup.date().required('Enquiry date is required'),
+  course: Yup.string().required('Course is required'),
+  status: Yup.string().required('Status is required'),
+  source: Yup.string().required('Source is required')
 });
 
 const followUpValidationSchema = Yup.object({
-  notes: Yup.string().required("Notes are required"),
+  notes: Yup.string().required('Notes are required')
 });
 
 const EnquiryList = () => {
@@ -83,9 +81,9 @@ const EnquiryList = () => {
   const [selectedMenuId, setSelectedMenuId] = useState(null);
   const [selectedFollowUp, setSelectedFollowUp] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [filterText, setFilterText] = useState("");
+  const [filterText, setFilterText] = useState('');
   const [resetPaginationToggle, setResetPaginationToggle] = useState(false);
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState('all');
   const [canCreate] = useState(true);
 
   const fetchData = useCallback(async () => {
@@ -95,12 +93,12 @@ const EnquiryList = () => {
       const motifyData = response.data.leads.map((item, index) => {
         return {
           ...item,
-          sno: index + 1,
+          sno: index + 1
         };
       });
       setEnquiries(motifyData);
     } catch (err) {
-      console.error("Error fetching enquiries:", err);
+      console.error('Error fetching enquiries:', err);
       setEnquiries([]);
     } finally {
       setLoading(false);
@@ -114,35 +112,29 @@ const EnquiryList = () => {
   // Enquiry Formik
   const enquiryFormik = useFormik({
     initialValues: {
-      name: "",
-      phone: "",
-      email: "",
-      course: "",
-      enquiryDate: "",
-      status: "",
-      source: "",
+      name: '',
+      phone: '',
+      email: '',
+      course: '',
+      enquiryDate: '',
+      status: '',
+      source: ''
     },
     validationSchema: enquiryValidationSchema,
     onSubmit: async (values, { resetForm }) => {
       try {
         if (selectedEnquiry && selectedEnquiry.id) {
           // Edit existing enquiry
-          await axiosInstance.patch(
-            `${APP_PATH_BASE_URL}api/leads/${selectedEnquiry.id}`,
-            values,
-          );
+          await axiosInstance.patch(`${APP_PATH_BASE_URL}api/leads/${selectedEnquiry.id}`, values);
         } else {
           // Add new enquiry
-          const res = await axiosInstance.post(
-            `${APP_PATH_BASE_URL}api/leads`,
-            values,
-          );
+          const res = await axiosInstance.post(`${APP_PATH_BASE_URL}api/leads`, values);
           // console.log('enquery form submit :', res);
           if (res.data.success === false) {
-            await Swal.fire("Error", res.data.message, "error");
+            await Swal.fire('Error', res.data.message, 'error');
             return;
           } else {
-            await Swal.fire("Success", res.data.message, "success");
+            await Swal.fire('Success', res.data.message, 'success');
           }
         }
 
@@ -151,15 +143,15 @@ const EnquiryList = () => {
         setSelectedEnquiry(null);
         fetchData(); // Refresh data
       } catch (error) {
-        console.error("Error saving enquiry:", error);
+        console.error('Error saving enquiry:', error);
       }
-    },
+    }
   });
 
   // Follow Up Formik
   const followUpFormik = useFormik({
     initialValues: {
-      notes: "",
+      notes: ''
     },
     validationSchema: followUpValidationSchema,
     onSubmit: async (values, { resetForm }) => {
@@ -167,22 +159,22 @@ const EnquiryList = () => {
         if (selectedEnquiry && selectedEnquiry.id) {
           const res = await axiosInstance.post(
             `${APP_PATH_BASE_URL}api/leads/${selectedEnquiry.id}/call/${selectedFollowUp}/notes`,
-            values,
+            values
           );
-          console.log("follow up res :", res);
+          console.log('follow up res :', res);
           if (res.data.success === false) {
-            await Swal.fire("Error", res.data.message, "error");
+            await Swal.fire('Error', res.data.message, 'error');
           } else {
-            await Swal.fire("Success", res.data.message, "success");
+            await Swal.fire('Success', res.data.message, 'success');
           }
           resetForm();
           setFollowUpDialogOpen(false);
           fetchData();
         }
       } catch (error) {
-        console.error("Error adding follow up:", error);
+        console.error('Error adding follow up:', error);
       }
-    },
+    }
   });
 
   const handleViewDetails = (enquiry) => {
@@ -202,18 +194,16 @@ const EnquiryList = () => {
 
   const handleCallNow = async () => {
     try {
-      const res = await axiosInstance.post(
-        `${APP_PATH_BASE_URL}api/leads/${selectedEnquiry.id}/call`,
-      );
+      const res = await axiosInstance.post(`${APP_PATH_BASE_URL}api/leads/${selectedEnquiry.id}/call`);
       if (res.data.success === false) {
-        await Swal.fire("Error", res.data.message, "error");
+        await Swal.fire('Error', res.data.message, 'error');
       } else {
-        await Swal.fire("Success", res.data.message, "success");
+        await Swal.fire('Success', res.data.message, 'success');
       }
       fetchData();
       setCallDialogOpen(false);
     } catch (error) {
-      console.error("Error adding follow up:", error);
+      console.error('Error adding follow up:', error);
     }
   };
 
@@ -226,14 +216,14 @@ const EnquiryList = () => {
   const handleEditEnquiry = (enquiry) => {
     setSelectedEnquiry(enquiry);
     enquiryFormik.setValues({
-      name: enquiry.name || "",
-      phone: enquiry.phone || "",
-      email: enquiry.email || "",
-      course: enquiry.course || "",
-      enquiryDate: enquiry.enquiryDate || "",
-      status: enquiry.status || "New",
-      source: enquiry.source || "",
-      notes: enquiry.notes || "",
+      name: enquiry.name || '',
+      phone: enquiry.phone || '',
+      email: enquiry.email || '',
+      course: enquiry.course || '',
+      enquiryDate: enquiry.enquiryDate || '',
+      status: enquiry.status || 'New',
+      source: enquiry.source || '',
+      notes: enquiry.notes || ''
     });
     setEnquiryDialogOpen(true);
   };
@@ -241,13 +231,11 @@ const EnquiryList = () => {
   const handleDeleteEnquiry = async () => {
     if (selectedMenuId) {
       try {
-        await axiosInstance.delete(
-          `${APP_PATH_BASE_URL}api/leads/${selectedMenuId}`,
-        );
+        await axiosInstance.delete(`${APP_PATH_BASE_URL}api/leads/${selectedMenuId}`);
         handleMenuClose();
         fetchData(); // Refresh data
       } catch (error) {
-        console.error("Error deleting enquiry:", error);
+        console.error('Error deleting enquiry:', error);
       }
     }
   };
@@ -264,36 +252,34 @@ const EnquiryList = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case "New":
-        return "primary";
-      case "Follow Up":
-        return "warning";
-      case "Converted":
-        return "success";
+      case 'New':
+        return 'primary';
+      case 'Follow Up':
+        return 'warning';
+      case 'Converted':
+        return 'success';
       default:
-        return "default";
+        return 'default';
     }
   };
 
   // DataTable columns configuration
   const columns = [
     {
-      name: "S.No",
+      name: 'S.No',
       selector: (row, index) => index + 1,
       sortable: true,
-      width: "80px",
+      width: '80px'
     },
     {
-      name: "Student Name",
+      name: 'Student Name',
       selector: (row) => row.name,
       sortable: true,
-      cell: (row) => (
-        <Box sx={{ display: "flex", alignItems: "center" }}>{row.name}</Box>
-      ),
-      width: "200px",
+      cell: (row) => <Box sx={{ display: 'flex', alignItems: 'center' }}>{row.name}</Box>,
+      width: '200px'
     },
     {
-      name: "Contact",
+      name: 'Contact',
       selector: (row) => `${row.phone} | ${row.email}`,
       sortable: true,
       cell: (row) => (
@@ -304,65 +290,50 @@ const EnquiryList = () => {
           </Typography>
         </Box>
       ),
-      width: "220px",
+      width: '220px'
     },
     {
-      name: "Course",
+      name: 'Course',
       selector: (row) => row.course,
       sortable: true,
-      width: "180px",
+      width: '180px'
     },
     {
-      name: "Enquiry Date",
+      name: 'Enquiry Date',
       selector: (row) => formatDateTime(row.created_at),
       sortable: true,
-      width: "150px",
+      width: '150px'
     },
     {
-      name: "Status",
+      name: 'Status',
       selector: (row) => row.status,
       sortable: true,
-      cell: (row) => (
-        <Chip
-          label={row.status}
-          color={getStatusColor(row.status)}
-          size="small"
-        />
-      ),
-      width: "120px",
+      cell: (row) => <Chip label={row.status} color={getStatusColor(row.status)} size="small" />,
+      width: '120px'
     },
     {
-      name: "Last Follow Up",
-      selector: (row) =>
-        row.followup_date
-          ? formatDateTime(row.followup_date, { includeTime: false })
-          : "-",
+      name: 'Last Follow Up',
+      selector: (row) => (row.followup_date ? formatDateTime(row.followup_date, { includeTime: false }) : '-'),
       sortable: true,
-      width: "140px",
+      width: '140px'
     },
     {
-      name: "Source",
+      name: 'Source',
       selector: (row) => row.source,
       sortable: true,
-      width: "120px",
+      width: '120px'
     },
     {
-      name: "Actions",
+      name: 'Actions',
       cell: (row) => (
         <Box>
           <Tooltip title="View Details">
-            <IconButton
-              color="primary"
-              onClick={() => handleViewDetails(row)}
-              size="small">
+            <IconButton color="primary" onClick={() => handleViewDetails(row)} size="small">
               <Visibility />
             </IconButton>
           </Tooltip>
           <Tooltip title="Follow Up">
-            <IconButton
-              color="secondary"
-              onClick={() => handleFollowUpCall(row)}
-              size="small">
+            <IconButton color="secondary" onClick={() => handleFollowUpCall(row)} size="small">
               <Phone />
             </IconButton>
           </Tooltip>
@@ -371,31 +342,26 @@ const EnquiryList = () => {
           </IconButton>
         </Box>
       ),
-      width: "150px",
-      ignoreRowClick: true,
-    },
+      width: '150px',
+      ignoreRowClick: true
+    }
   ];
 
   const subHeaderComponentMemo = useMemo(() => {
     const handleClear = () => {
       if (filterText) {
         setResetPaginationToggle(!resetPaginationToggle);
-        setFilterText("");
+        setFilterText('');
       }
     };
 
     const handleStatusClear = () => {
-      setStatusFilter("all");
+      setStatusFilter('all');
     };
 
     return (
       <Grid container justifyContent="space-between" alignItems="center" my={3}>
-        <Grid
-          item
-          xs={12}
-          md={8}
-          display="flex"
-          flexDirection={{ xs: "column", sm: "row" }}>
+        <Grid item xs={12} md={8} display="flex" flexDirection={{ xs: 'column', sm: 'row' }}>
           <Stack direction="row" spacing={2}>
             <TextField
               placeholder="Search..."
@@ -417,7 +383,7 @@ const EnquiryList = () => {
                       </IconButton>
                     )}
                   </InputAdornment>
-                ),
+                )
               }}
             />
             <FormControl size="small" sx={{ minWidth: 180 }}>
@@ -425,17 +391,15 @@ const EnquiryList = () => {
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
                 endAdornment={
-                  statusFilter !== "all" && (
+                  statusFilter !== 'all' && (
                     <InputAdornment position="end" sx={{ mr: 3 }}>
-                      <IconButton
-                        onClick={handleStatusClear}
-                        edge="end"
-                        size="small">
+                      <IconButton onClick={handleStatusClear} edge="end" size="small">
                         <CloseSquare size={16} />
                       </IconButton>
                     </InputAdornment>
                   )
-                }>
+                }
+              >
                 <MenuItem value="all">Select Status</MenuItem>
                 <MenuItem value="active">Active</MenuItem>
                 <MenuItem value="inactive">In active</MenuItem>
@@ -445,44 +409,32 @@ const EnquiryList = () => {
         </Grid>
         <Grid item xs={12} md={4} textAlign="right">
           {canCreate && (
-            <Button
-              color="success"
-              variant="contained"
-              startIcon={<UserAdd />}
-              onClick={handleAddEnquiry}>
+            <Button color="success" variant="contained" startIcon={<UserAdd />} onClick={handleAddEnquiry}>
               Add Enquiry
             </Button>
           )}
         </Grid>
       </Grid>
     );
-  }, [
-    filterText,
-    resetPaginationToggle,
-    statusFilter,
-    canCreate,
-    handleAddEnquiry,
-  ]);
+  }, [filterText, resetPaginationToggle, statusFilter, canCreate, handleAddEnquiry]);
 
   const InfoRow = ({ label, value, icon }) => (
     <Box
       sx={{
-        display: "flex",
-        alignItems: "center",
+        display: 'flex',
+        alignItems: 'center',
         mb: 2.5,
         p: 1.5,
         borderRadius: 1,
-        backgroundColor: "grey.50",
-        "&:hover": {
-          backgroundColor: "grey.100",
-        },
-      }}>
-      {icon && <Box sx={{ mr: 2, color: "text.secondary" }}>{icon}</Box>}
+        backgroundColor: 'grey.50',
+        '&:hover': {
+          backgroundColor: 'grey.100'
+        }
+      }}
+    >
+      {icon && <Box sx={{ mr: 2, color: 'text.secondary' }}>{icon}</Box>}
       <Box sx={{ flex: 1 }}>
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          sx={{ fontWeight: 500 }}>
+        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
           {label}
         </Typography>
         <Typography variant="body1" sx={{ fontWeight: 500 }}>
@@ -495,7 +447,7 @@ const EnquiryList = () => {
   InfoRow.propTypes = {
     label: PropTypes.string,
     value: PropTypes.string,
-    icon: PropTypes.node,
+    icon: PropTypes.node
   };
 
   // FollowUpCard Component for individual follow-up items
@@ -503,34 +455,21 @@ const EnquiryList = () => {
     <Box
       sx={{
         p: 2.5,
-        backgroundColor: "grey.50",
+        backgroundColor: 'grey.50',
         borderRadius: 2,
-        border: "1px solid",
-        borderColor: "grey.200",
-        position: "relative",
-        transition: "all 0.2s ease",
-        "&:hover": {
-          backgroundColor: "white",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-        },
-      }}>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          mb: 2,
-        }}>
-        <Chip
-          label={followUp.type || "Call"}
-          size="small"
-          color="primary"
-          variant="outlined"
-        />
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          sx={{ fontWeight: 500 }}>
+        border: '1px solid',
+        borderColor: 'grey.200',
+        position: 'relative',
+        transition: 'all 0.2s ease',
+        '&:hover': {
+          backgroundColor: 'white',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+        }
+      }}
+    >
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+        <Chip label={followUp.type || 'Call'} size="small" color="primary" variant="outlined" />
+        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
           {formatDateTime(followUp.call_time)}
         </Typography>
       </Box>
@@ -539,12 +478,7 @@ const EnquiryList = () => {
         {followUp.notes}
       </Typography>
 
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Typography variant="caption" color="text.secondary">
           By: <strong>{followUp.called_by_name}</strong>
         </Typography>
@@ -553,12 +487,13 @@ const EnquiryList = () => {
           size="small"
           onClick={onAddComment}
           sx={{
-            backgroundColor: "primary.main",
-            color: "white",
-            "&:hover": {
-              backgroundColor: "primary.dark",
-            },
-          }}>
+            backgroundColor: 'primary.main',
+            color: 'white',
+            '&:hover': {
+              backgroundColor: 'primary.dark'
+            }
+          }}
+        >
           <AddComment size={16} />
         </IconButton>
       </Box>
@@ -567,7 +502,7 @@ const EnquiryList = () => {
 
   FollowUpCard.propTypes = {
     followUp: PropTypes.object,
-    onAddComment: PropTypes.func,
+    onAddComment: PropTypes.func
   };
 
   return (
@@ -576,10 +511,7 @@ const EnquiryList = () => {
 
       {/* Enquiry List DataTable */}
       {loading ? (
-        <Stack
-          alignItems="center"
-          justifyContent="center"
-          sx={{ minHeight: 300 }}>
+        <Stack alignItems="center" justifyContent="center" sx={{ minHeight: 300 }}>
           <CircularProgress />
         </Stack>
       ) : (
@@ -595,21 +527,12 @@ const EnquiryList = () => {
       )}
 
       {/* Add/Edit Enquiry Dialog */}
-      <Dialog
-        open={enquiryDialogOpen}
-        onClose={() => setEnquiryDialogOpen(false)}
-        maxWidth="md"
-        fullWidth>
+      <Dialog open={enquiryDialogOpen} onClose={() => setEnquiryDialogOpen(false)} maxWidth="md" fullWidth>
         <form onSubmit={enquiryFormik.handleSubmit}>
           <DialogTitle>
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <Typography variant="h5" component="div" sx={{ fontWeight: 600 }}>
-                {selectedEnquiry ? "Edit Enquiry" : "Add New Enquiry"}
+                {selectedEnquiry ? 'Edit Enquiry' : 'Add New Enquiry'}
               </Typography>
               <IconButton onClick={() => setEnquiryDialogOpen(false)}>
                 <CloseSquare />
@@ -628,13 +551,8 @@ const EnquiryList = () => {
                     value={enquiryFormik.values.name}
                     onChange={enquiryFormik.handleChange}
                     onBlur={enquiryFormik.handleBlur}
-                    error={
-                      enquiryFormik.touched.name &&
-                      Boolean(enquiryFormik.errors.name)
-                    }
-                    helperText={
-                      enquiryFormik.touched.name && enquiryFormik.errors.name
-                    }
+                    error={enquiryFormik.touched.name && Boolean(enquiryFormik.errors.name)}
+                    helperText={enquiryFormik.touched.name && enquiryFormik.errors.name}
                   />
                 </Stack>
               </Grid>
@@ -648,13 +566,8 @@ const EnquiryList = () => {
                     value={enquiryFormik.values.phone}
                     onChange={enquiryFormik.handleChange}
                     onBlur={enquiryFormik.handleBlur}
-                    error={
-                      enquiryFormik.touched.phone &&
-                      Boolean(enquiryFormik.errors.phone)
-                    }
-                    helperText={
-                      enquiryFormik.touched.phone && enquiryFormik.errors.phone
-                    }
+                    error={enquiryFormik.touched.phone && Boolean(enquiryFormik.errors.phone)}
+                    helperText={enquiryFormik.touched.phone && enquiryFormik.errors.phone}
                   />
                 </Stack>
               </Grid>
@@ -669,13 +582,8 @@ const EnquiryList = () => {
                     value={enquiryFormik.values.email}
                     onChange={enquiryFormik.handleChange}
                     onBlur={enquiryFormik.handleBlur}
-                    error={
-                      enquiryFormik.touched.email &&
-                      Boolean(enquiryFormik.errors.email)
-                    }
-                    helperText={
-                      enquiryFormik.touched.email && enquiryFormik.errors.email
-                    }
+                    error={enquiryFormik.touched.email && Boolean(enquiryFormik.errors.email)}
+                    helperText={enquiryFormik.touched.email && enquiryFormik.errors.email}
                   />
                 </Stack>
               </Grid>
@@ -689,14 +597,8 @@ const EnquiryList = () => {
                     value={enquiryFormik.values.course}
                     onChange={enquiryFormik.handleChange}
                     onBlur={enquiryFormik.handleBlur}
-                    error={
-                      enquiryFormik.touched.course &&
-                      Boolean(enquiryFormik.errors.course)
-                    }
-                    helperText={
-                      enquiryFormik.touched.course &&
-                      enquiryFormik.errors.course
-                    }
+                    error={enquiryFormik.touched.course && Boolean(enquiryFormik.errors.course)}
+                    helperText={enquiryFormik.touched.course && enquiryFormik.errors.course}
                   />
                 </Stack>
               </Grid>
@@ -707,59 +609,41 @@ const EnquiryList = () => {
                     <DatePicker
                       format={useDate.dateFormat}
                       minDate={new Date()}
-                      value={
-                        enquiryFormik.values.enquiryDate
-                          ? new Date(enquiryFormik.values.enquiryDate)
-                          : null
-                      }
+                      value={enquiryFormik.values.enquiryDate ? new Date(enquiryFormik.values.enquiryDate) : null}
                       onChange={(newValue) => {
-                        enquiryFormik.setFieldValue("enquiryDate", newValue);
+                        enquiryFormik.setFieldValue('enquiryDate', newValue);
                       }}
                       slotProps={{
                         textField: {
                           fullWidth: true,
-                          name: "enquiryDate",
-                          error:
-                            enquiryFormik.touched.enquiryDate &&
-                            Boolean(enquiryFormik.errors.enquiryDate),
-                          helperText:
-                            enquiryFormik.touched.enquiryDate &&
-                            enquiryFormik.errors.enquiryDate,
-                          onBlur: enquiryFormik.handleBlur,
-                        },
+                          name: 'enquiryDate',
+                          error: enquiryFormik.touched.enquiryDate && Boolean(enquiryFormik.errors.enquiryDate),
+                          helperText: enquiryFormik.touched.enquiryDate && enquiryFormik.errors.enquiryDate,
+                          onBlur: enquiryFormik.handleBlur
+                        }
                       }}
                     />
                   </LocalizationProvider>
-                  <FormHelperText>
-                    {enquiryFormik.touched.enquiryDate &&
-                      enquiryFormik.errors.enquiryDate}
-                  </FormHelperText>
+                  <FormHelperText>{enquiryFormik.touched.enquiryDate && enquiryFormik.errors.enquiryDate}</FormHelperText>
                 </Stack>
               </Grid>
               <Grid item xs={12} md={6}>
                 <Stack spacing={1}>
                   <FormLabel>Status</FormLabel>
-                  <FormControl
-                    fullWidth
-                    error={
-                      enquiryFormik.touched.status &&
-                      Boolean(enquiryFormik.errors.status)
-                    }>
+                  <FormControl fullWidth error={enquiryFormik.touched.status && Boolean(enquiryFormik.errors.status)}>
                     <Select
                       name="status"
                       value={enquiryFormik.values.status}
                       onChange={enquiryFormik.handleChange}
                       onBlur={enquiryFormik.handleBlur}
-                      displayEmpty>
+                      displayEmpty
+                    >
                       <MenuItem value="">Select Status</MenuItem>
                       <MenuItem value="New">New</MenuItem>
                       <MenuItem value="Follow Up">Follow Up</MenuItem>
                       <MenuItem value="Converted">Converted</MenuItem>
                     </Select>
-                    <FormHelperText>
-                      {enquiryFormik.touched.status &&
-                        enquiryFormik.errors.status}
-                    </FormHelperText>
+                    <FormHelperText>{enquiryFormik.touched.status && enquiryFormik.errors.status}</FormHelperText>
                   </FormControl>
                 </Stack>
               </Grid>
@@ -773,14 +657,8 @@ const EnquiryList = () => {
                     value={enquiryFormik.values.source}
                     onChange={enquiryFormik.handleChange}
                     onBlur={enquiryFormik.handleBlur}
-                    error={
-                      enquiryFormik.touched.source &&
-                      Boolean(enquiryFormik.errors.source)
-                    }
-                    helperText={
-                      enquiryFormik.touched.source &&
-                      enquiryFormik.errors.source
-                    }
+                    error={enquiryFormik.touched.source && Boolean(enquiryFormik.errors.source)}
+                    helperText={enquiryFormik.touched.source && enquiryFormik.errors.source}
                   />
                 </Stack>
               </Grid>
@@ -789,7 +667,7 @@ const EnquiryList = () => {
           <DialogActions>
             <Button onClick={() => setEnquiryDialogOpen(false)}>Cancel</Button>
             <Button type="submit" variant="contained">
-              {selectedEnquiry ? "Update" : "Add"} Enquiry
+              {selectedEnquiry ? 'Update' : 'Add'} Enquiry
             </Button>
           </DialogActions>
         </form>
@@ -802,20 +680,17 @@ const EnquiryList = () => {
         maxWidth="md"
         fullWidth
         PaperProps={{
-          sx: { borderRadius: 3 },
-        }}>
+          sx: { borderRadius: 3 }
+        }}
+      >
         <DialogTitle
           sx={{
-            backgroundColor: "primary.secondary",
-            color: "black",
-            py: 2,
-          }}>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}>
+            backgroundColor: 'primary.secondary',
+            color: 'black',
+            py: 2
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <Typography variant="h5" component="div" sx={{ fontWeight: 600 }}>
               Student Enquiry Details
             </Typography>
@@ -833,46 +708,34 @@ const EnquiryList = () => {
                 <Card
                   variant="outlined"
                   sx={{
-                    border: "none",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                    borderRadius: 2,
-                  }}>
+                    border: 'none',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                    borderRadius: 2
+                  }}
+                >
                   <CardContent sx={{ p: 3 }}>
-                    <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
                       <Box
                         sx={{
-                          backgroundColor: "secondary.light",
-                          borderRadius: "50%",
+                          backgroundColor: 'secondary.light',
+                          borderRadius: '50%',
                           p: 1,
                           mr: 2,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}>
-                        <Person
-                          sx={{ color: "secondary.main", fontSize: 20 }}
-                        />
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                      >
+                        <Person sx={{ color: 'secondary.main', fontSize: 20 }} />
                       </Box>
                       <Typography variant="h6" sx={{ fontWeight: 600 }}>
                         Personal Information
                       </Typography>
                     </Box>
 
-                    <InfoRow
-                      label="Full Name"
-                      value={Capitalise(selectedEnquiry.name)}
-                      icon={<Person fontSize="small" />}
-                    />
-                    <InfoRow
-                      label="Phone"
-                      value={selectedEnquiry.phone}
-                      icon={<Phone fontSize="small" />}
-                    />
-                    <InfoRow
-                      label="Email"
-                      value={selectedEnquiry.email}
-                      icon={<Email fontSize="small" />}
-                    />
+                    <InfoRow label="Full Name" value={Capitalise(selectedEnquiry.name)} icon={<Person fontSize="small" />} />
+                    <InfoRow label="Phone" value={selectedEnquiry.phone} icon={<Phone fontSize="small" />} />
+                    <InfoRow label="Email" value={selectedEnquiry.email} icon={<Email fontSize="small" />} />
                   </CardContent>
                 </Card>
               </Grid>
@@ -882,46 +745,38 @@ const EnquiryList = () => {
                 <Card
                   variant="outlined"
                   sx={{
-                    border: "none",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                    borderRadius: 2,
-                  }}>
+                    border: 'none',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                    borderRadius: 2
+                  }}
+                >
                   <CardContent sx={{ p: 3 }}>
-                    <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
                       <Box
                         sx={{
-                          backgroundColor: "secondary.light",
-                          borderRadius: "50%",
+                          backgroundColor: 'secondary.light',
+                          borderRadius: '50%',
                           p: 1,
                           mr: 2,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}>
-                        <School
-                          sx={{ color: "secondary.main", fontSize: 20 }}
-                        />
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                      >
+                        <School sx={{ color: 'secondary.main', fontSize: 20 }} />
                       </Box>
                       <Typography variant="h6" sx={{ fontWeight: 600 }}>
                         Academic Information
                       </Typography>
                     </Box>
 
-                    <InfoRow
-                      label="Course Interested"
-                      value={Capitalise(selectedEnquiry.course)}
-                      icon={<BookOnline fontSize="small" />}
-                    />
+                    <InfoRow label="Course Interested" value={Capitalise(selectedEnquiry.course)} icon={<BookOnline fontSize="small" />} />
                     <InfoRow
                       label="Enquiry Date"
                       value={formatDateTime(selectedEnquiry.created_at)}
                       icon={<CalendarToday fontSize="small" />}
                     />
-                    <InfoRow
-                      label="Source"
-                      value={selectedEnquiry.source}
-                      icon={<Source fontSize="small" />}
-                    />
+                    <InfoRow label="Source" value={selectedEnquiry.source} icon={<Source fontSize="small" />} />
                   </CardContent>
                 </Card>
               </Grid>
@@ -931,23 +786,25 @@ const EnquiryList = () => {
                 <Card
                   variant="outlined"
                   sx={{
-                    border: "none",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                    borderRadius: 2,
-                  }}>
+                    border: 'none',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                    borderRadius: 2
+                  }}
+                >
                   <CardContent sx={{ p: 3 }}>
-                    <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
                       <Box
                         sx={{
-                          backgroundColor: "secondary.light",
-                          borderRadius: "50%",
+                          backgroundColor: 'secondary.light',
+                          borderRadius: '50%',
                           p: 1,
                           mr: 2,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}>
-                        <Notes sx={{ color: "secondary.main", fontSize: 20 }} />
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                      >
+                        <Notes sx={{ color: 'secondary.main', fontSize: 20 }} />
                       </Box>
                       <Typography variant="h6" sx={{ fontWeight: 600 }}>
                         Follow-up History
@@ -957,24 +814,19 @@ const EnquiryList = () => {
                     {selectedEnquiry.call_logs.length > 0 ? (
                       <Stack spacing={2}>
                         {selectedEnquiry.call_logs.map((followUp, index) => (
-                          <FollowUpCard
-                            key={index}
-                            followUp={followUp}
-                            onAddComment={() => handleFollowUp(followUp.id)}
-                          />
+                          <FollowUpCard key={index} followUp={followUp} onAddComment={() => handleFollowUp(followUp.id)} />
                         ))}
                       </Stack>
                     ) : (
                       <Box
                         sx={{
-                          textAlign: "center",
+                          textAlign: 'center',
                           py: 4,
-                          color: "text.secondary",
-                        }}>
+                          color: 'text.secondary'
+                        }}
+                      >
                         <Notes sx={{ fontSize: 48, mb: 2, opacity: 0.5 }} />
-                        <Typography variant="body1">
-                          No follow-up history yet
-                        </Typography>
+                        <Typography variant="body1">No follow-up history yet</Typography>
                       </Box>
                     )}
                   </CardContent>
@@ -988,7 +840,8 @@ const EnquiryList = () => {
           <Button
             onClick={() => {
               setDetailDialogOpen(false);
-            }}>
+            }}
+          >
             Close
           </Button>
           <Button
@@ -996,31 +849,24 @@ const EnquiryList = () => {
             onClick={() => {
               setDetailDialogOpen(false);
               handleFollowUpCall(selectedEnquiry);
-            }}>
+            }}
+          >
             Add Follow Up
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Follow Up Dialog */}
-      <Dialog
-        open={followUpDialogOpen}
-        onClose={() => setFollowUpDialogOpen(false)}
-        maxWidth="sm"
-        fullWidth>
+      <Dialog open={followUpDialogOpen} onClose={() => setFollowUpDialogOpen(false)} maxWidth="sm" fullWidth>
         <form onSubmit={followUpFormik.handleSubmit}>
           <DialogTitle
             sx={{
-              backgroundColor: "primary.secondary",
-              color: "black",
-              py: 2,
-            }}>
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}>
+              backgroundColor: 'primary.secondary',
+              color: 'black',
+              py: 2
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <Typography variant="h5" component="div" sx={{ fontWeight: 600 }}>
                 Add Follow Up - {selectedEnquiry?.name}
               </Typography>
@@ -1042,13 +888,8 @@ const EnquiryList = () => {
                   onBlur={followUpFormik.handleBlur}
                   fullWidth
                   placeholder="Enter follow-up details..."
-                  error={
-                    followUpFormik.touched.notes &&
-                    Boolean(followUpFormik.errors.notes)
-                  }
-                  helperText={
-                    followUpFormik.touched.notes && followUpFormik.errors.notes
-                  }
+                  error={followUpFormik.touched.notes && Boolean(followUpFormik.errors.notes)}
+                  helperText={followUpFormik.touched.notes && followUpFormik.errors.notes}
                 />
               </Grid>
             </Grid>
@@ -1056,9 +897,9 @@ const EnquiryList = () => {
           <DialogActions sx={{ p: 3, gap: 1 }}>
             <Button
               onClick={() => {
-                setFollowUpDialogOpen(false);
-                followUpFormik.resetForm();
-              }}>
+                setFollowUpDialogOpen(false); followUpFormik.resetForm();
+              }}
+            >
               Cancel
             </Button>
             <Button type="submit" variant="contained">
@@ -1069,23 +910,16 @@ const EnquiryList = () => {
       </Dialog>
 
       {/* New Call Dialog */}
-      <Dialog
-        open={callDialogOpen}
-        onClose={() => setCallDialogOpen(false)}
-        maxWidth="sm"
-        fullWidth>
+      <Dialog open={callDialogOpen} onClose={() => setCallDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>
-          <Typography
-            variant="h5"
-            component="div"
-            sx={{ display: "flex", alignItems: "center" }}>
+          <Typography variant="h5" component="div" sx={{ display: 'flex', alignItems: 'center' }}>
             <Call sx={{ mr: 1 }} /> Make a Call
           </Typography>
         </DialogTitle>
         <DialogContent>
           {selectedEnquiry && (
-            <Box sx={{ textAlign: "center", py: 3 }}>
-              <Call sx={{ fontSize: 64, color: "primary.main", mb: 2 }} />
+            <Box sx={{ textAlign: 'center', py: 3 }}>
+              <Call sx={{ fontSize: 64, color: 'primary.main', mb: 2 }} />
               <Typography variant="h6" gutterBottom>
                 Call {Capitalise(selectedEnquiry.name)}
               </Typography>
@@ -1101,39 +935,29 @@ const EnquiryList = () => {
             </Box>
           )}
         </DialogContent>
-        <DialogActions sx={{ justifyContent: "center", pb: 3 }}>
-          <Button
-            onClick={() => setCallDialogOpen(false)}
-            variant="outlined"
-            sx={{ mr: 2 }}>
+        <DialogActions sx={{ justifyContent: 'center', pb: 3 }}>
+          <Button onClick={() => setCallDialogOpen(false)} variant="outlined" sx={{ mr: 2 }}>
             Cancel
           </Button>
-          <Button
-            onClick={handleCallNow}
-            variant="contained"
-            color="primary"
-            startIcon={<Call />}
-            size="large">
+          <Button onClick={handleCallNow} variant="contained" color="primary" startIcon={<Call />} size="large">
             Call Now
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Action Menu */}
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}>
+      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
         <MenuItem
           onClick={() => {
             handleEditEnquiry(enquiries.find((e) => e.id === selectedMenuId));
             handleMenuClose();
-          }}>
+          }}
+        >
           Edit Enquiry
         </MenuItem>
         <MenuItem onClick={handleMenuClose}>Change Status</MenuItem>
         <MenuItem onClick={handleMenuClose}>Send Email</MenuItem>
-        <MenuItem onClick={handleDeleteEnquiry} sx={{ color: "error.main" }}>
+        <MenuItem onClick={handleDeleteEnquiry} sx={{ color: 'error.main' }}>
           Delete Enquiry
         </MenuItem>
       </Menu>

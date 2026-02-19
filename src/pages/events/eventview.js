@@ -1,6 +1,5 @@
 // EventView.js (with integrated form - show/hide version)
-import React, { useState, useEffect, useRef } from 'react';
-import { dispatch } from 'store';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Grid,
@@ -32,7 +31,8 @@ import {
   Close
 } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
-
+import { useRef } from 'react';
+import { dispatch } from 'store';
 import { ArrowBack } from '@mui/icons-material';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
@@ -48,7 +48,7 @@ const EventView = () => {
   const navigate=useNavigate();
   const EventData = location.state?.eventData || null;
   const { eventId } = location.state || {};
-
+  const ws = useRef(null);
   const [event, setEvent] = useState(null);
   const [questions, setQuestions] = useState([]);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -58,7 +58,6 @@ const EventView = () => {
   const [error, setError] = useState('');
   const [loadingQuestions, setLoadingQuestions] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
-  const ws = useRef(null);
 
   // Formik initial values
   const initialValues = {
@@ -288,7 +287,7 @@ const EventView = () => {
   const handleStartQuestion = (question) => {
     // Logic to start the question (e.g., navigate to a live view or trigger start action)
     console.log('Starting question:', question);
-    const socketUrl = `wss://aylms.aryuprojects.com/ws/live-quiz/room/${question.room}/`;
+    const socketUrl = `wss://portal.aryuacademy.com/ws/live-quiz/room/${question.room}/`;
     ws.current = new WebSocket(socketUrl);
     ws.current.onmessage = (event) => {
       const data = JSON.parse(event.data);

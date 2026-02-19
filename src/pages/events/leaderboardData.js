@@ -31,6 +31,7 @@ const initialUsers = [
   { id: 30, name: 'Lennox Allen', points: 410, previousPosition: 30, avatarColor: '#e91e63', streak: 4 }
 ];
 
+
 // Helper function to generate mock data
 export const fetchUserData = async () => {
   // Simulate API delay

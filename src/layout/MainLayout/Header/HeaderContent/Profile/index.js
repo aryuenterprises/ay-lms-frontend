@@ -1,4 +1,3 @@
-import React from 'react';
 import PropTypes from 'prop-types';
 import { useRef, useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router';
@@ -27,11 +26,11 @@ import { Capitalise } from 'utils/capitalise';
 
 import { APP_PATH_BASE_URL } from 'config';
 import axiosInstance from 'utils/axios';
-
+const avatarImage = require.context('assets/images/users/', true);
 // tab panel wrapper
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
-
+  
   return (
     <Box
       role="tabpanel"
@@ -55,7 +54,6 @@ TabPanel.propTypes = {
 // ==============================|| HEADER CONTENT - PROFILE ||============================== //
 
 const ProfilePage = () => {
-  const avatarImage = require.context('assets/images/users/', true);
   const theme = useTheme();
   const navigate = useNavigate();
 

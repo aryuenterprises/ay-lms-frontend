@@ -43,116 +43,117 @@ const FooterBlock = () => {
   // };
 
   return (
-    <>
-      <Box sx={{
-        mt: 'auto',
-        pt: 2,
-        pb: 2,
-        bgcolor: 'secondary.200',
-        borderTop: `1px solid ${theme.palette.divider}`,
-      }}>
-        <Container>
-          <Grid container spacing={2}>
-            <Grid item xs={8} md={3}>
-              <motion.div
-                initial={{ opacity: 0, translateY: 550 }}
-                animate={{ opacity: 1, translateY: 0 }}
-                transition={{
-                  type: 'spring',
-                  stiffness: 150,
-                  damping: 30
-                }}
-              >
-                <Grid container spacing={2}>
-                  <Grid item xs={12}>
-                    {/* <Logo reverse to="/" /> */}
-                  </Grid>
-                </Grid>
-              </motion.div>
-            </Grid>
-            
-            
-            <Grid item xs={12} md={6}>
-              <Grid container spacing={{ xs: 5, md: 2 }} xs={12} alignItems="center">
-                <Grid item xs={12}>
-                  <Stack spacing={3}>
-                    <Stack
-                      direction="row"
-                      spacing={3}
-                      sx={{
-                        mb: { xs: 2, sm: 0 },
-                        justifyContent: { xs: 'center', sm: 'center' },
-                        alignItems: { xs: 'center', sm: 'center' },
-                        display: { xs: 'none', sm: 'flex' },
-                        gap: 1
-                      }}
-                    >
-                      <FooterLink
-                        component={RouterLink}
-                        to="/terms-and-conditions"
-                        underline="none"
-                      >
-                        Terms and condition
-                      </FooterLink>
-                      <FooterLink
-                        component={RouterLink}
-                        to="/privacy-policy"
-                        underline="none"
-                      >
-                        Privacy policy
-                      </FooterLink>
+  <Box
+    sx={{
+      position: 'relative',
+      overflow: 'hidden',
+      mt: 'auto',
+      pt: { xs: 1, md: 2 },
+      pb: { xs: 3, md: 4 },
+      background: 'linear-gradient(180deg, #fff5f7 0%, #ffffff 70%)',
+      borderTop: `1px solid ${theme.palette.divider}`
+    }}
+  >
+    {/* ===== Pink glow blobs ===== */}
+    <Box
+      component={motion.div}
+      animate={{ y: [0, -20, 0] }}
+      transition={{ duration: 20, repeat: Infinity }}
+      sx={{
+        position: 'absolute',
+        width: 260,
+        height: 260,
+        borderRadius: '50%',
+        background: 'rgba(196, 120, 143, 0.25)',
+        top: -120,
+        left: -120,
+        filter: 'blur(70px)',
+        zIndex: 0
+      }}
+    />
 
-                      <FooterLink href="/refund-policy" target="_blank" underline="none">
-                        Refund policy
-                      </FooterLink>
-                    </Stack>
-                    <Stack
-                      direction="row"
-                      spacing={3}
-                      sx={{
-                        mb: { xs: 2, sm: 0 },
-                        display: { xs: 'none', sm: 'flex' },
-                        gap: 1,
-                        justifyContent: 'center',
-                        alignItems: 'center'
-                      }}
-                    >
-                      <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center' }}>
-                        © all rights reserved by Aryu Academy
-                      </Typography>
-                    </Stack>
-                  </Stack>
-                </Grid>
-              </Grid>
-            </Grid>
-            <Grid item xs={12} md={3}>
-              <motion.div
-                initial={{ opacity: 0, translateY: 550 }}
-                animate={{ opacity: 1, translateY: 0 }}
-                transition={{
-                  type: 'spring',
-                  stiffness: 150,
-                  damping: 30
-                }}
-              >
-                <Grid container spacing={2}>
-                  <Grid
-                    item
-                    xs={12}
-                    sx={{ textAlign: 'center', ml: 4, cursor: 'pointer' }}
-                    onClick={() => window.open('https://aryutechnologies.com/', '_blank')}
-                  >
-                    <img src={TechLogo} alt="Aryu Technologies" style={{ width: '60%' }} />
-                  </Grid>
-                </Grid>
-              </motion.div>
-            </Grid>
-          </Grid>
-        </Container>
-      </Box>
-    </>
-  );
-};
+    <Box
+      component={motion.div}
+      animate={{ y: [0, 25, 0] }}
+      transition={{ duration: 24, repeat: Infinity }}
+      sx={{
+        position: 'absolute',
+        width: 220,
+        height: 220,
+        borderRadius: '50%',
+        background: 'rgba(255, 170, 200, 0.25)',
+        bottom: -120,
+        right: -120,
+        filter: 'blur(70px)',
+        zIndex: 0
+      }}
+    />
+
+    {/* ===== Footer Content ===== */}
+    <Container sx={{ position: 'relative', zIndex: 1 }}>
+      <Grid container spacing={3} alignItems="center">
+        {/* LEFT (empty / reserved for future logo if needed) */}
+        <Grid item xs={12} md={3} />
+
+        {/* CENTER LINKS */}
+        <Grid item xs={12} md={6}>
+          <Stack spacing={2} alignItems="center">
+            <Stack
+              direction="row"
+              spacing={3}
+              sx={{
+                flexWrap: 'wrap',
+                justifyContent: 'center'
+              }}
+            >
+              <FooterLink component={RouterLink} to="/terms-and-conditions" underline="none">
+                Terms & Conditions
+              </FooterLink>
+
+              <FooterLink component={RouterLink} to="/privacy-policy" underline="none">
+                Privacy Policy
+              </FooterLink>
+
+              <FooterLink href="/refund-policy" target="_blank" underline="none">
+                Refund Policy
+              </FooterLink>
+            </Stack>
+
+            <Typography
+              variant="body2"
+              sx={{
+                color: 'text.secondary',
+                textAlign: 'center'
+              }}
+            >
+              © all rights reserved by <strong>Aryu Academy</strong>
+            </Typography>
+          </Stack>
+        </Grid>
+
+        {/* RIGHT – TECH LOGO */}
+        <Grid item xs={12} md={3} textAlign="center">
+          <Box
+            component={motion.div}
+            whileHover={{ scale: 1.05 }}
+            sx={{ cursor: 'pointer' }}
+            onClick={() => window.open('https://aryutechnologies.com/', '_blank')}
+          >
+            <img
+              src={TechLogo}
+              alt="Aryu Technologies"
+              style={{
+                width: '140px',
+                opacity: 0.9
+              }}
+            />
+          </Box>
+        </Grid>
+      </Grid>
+    </Container>
+  </Box>
+);
+}
 
 FooterBlock.propTypes = {
   isFull: PropTypes.bool

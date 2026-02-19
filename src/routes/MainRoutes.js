@@ -6,15 +6,13 @@ import CommonLayout from 'layout/CommonLayout';
 import Loadable from 'components/Loadable';
 import AuthGuard from 'utils/route-guard/AuthGuard';
 import { PermissionGuard } from 'utils/route-guard/PermissionGuard';
-// import Header from 'layout/CommonLayout/Header'; 
+// import Header from 'layout/CommonLayout/Header';
 import Login from 'pages/auth/auth1/login';
 import WebinarFeedbackForm from 'pages/webinar/Feedback/feedbackform';
-
 
 // 🔹 Pages
 // import CompanyListPage from '../pages/organizations/CompanyListPage';
 // import coorprate from '../menu-items/coorprate';
-
 
 // import coorprate from 'menu-items/coorprate';
 
@@ -25,9 +23,6 @@ import WebinarFeedbackForm from 'pages/webinar/Feedback/feedbackform';
 // const LandingWithLogin = Loadable(
 //   lazy(() => import('../sections/landing/landingwithlogin'))
 // );
-
-
-
 
 // render - dashboard
 const DashboardDefault = Loadable(lazy(() => import('pages/dashboard/default')));
@@ -42,9 +37,8 @@ const TutorView = Loadable(lazy(() => import('pages/usermanagement/studentView')
 const AdminsListPage = Loadable(lazy(() => import('pages/usermanagement/adminlist')));
 const AdminView = Loadable(lazy(() => import('pages/usermanagement/studentView')));
 const BatchListPage = Loadable(lazy(() => import('pages/usermanagement/batchlist')));
-const EnquiryList = Loadable(
-  lazy(() => import('pages/usermanagement/enquirylist'))
-);
+const EnquiryList = Loadable(lazy(() => import('pages/usermanagement/enquirylist')));
+const TutorSignUP = Loadable(lazy(() => import('pages/usermanagement/TutorSignupPage')));
 
 const TicketListPage = Loadable(lazy(() => import('pages/ticket/ticketlist')));
 const StudentTicketPage = Loadable(lazy(() => import('pages/ticket/studentTicket')));
@@ -58,15 +52,9 @@ const UserTabStudent = Loadable(lazy(() => import('sections/profile/TabStudent')
 const UserTabRecording = Loadable(lazy(() => import('sections/profile/TabRecording')));
 const UserTabPassword = Loadable(lazy(() => import('sections/profile/TabPassword')));
 //coorprate
-const Logs= Loadable(lazy(() => import('sections/profile/tablog')));
-const Organizations = Loadable(
-  lazy(() => import('pages/usermanagement/coorprate/organizations'))
-);
-const OrganizationEmployee = Loadable(
-  lazy(() => import('pages/usermanagement/coorprate/organizationemployee'))
-);
-
-
+const Logs = Loadable(lazy(() => import('sections/profile/tablog')));
+const Organizations = Loadable(lazy(() => import('pages/usermanagement/coorprate/organizations')));
+const OrganizationEmployee = Loadable(lazy(() => import('pages/usermanagement/coorprate/organizationemployee')));
 
 //events
 const EventScanner = Loadable(lazy(() => import('pages/events/eventscanner')));
@@ -76,13 +64,12 @@ const EventView = Loadable(lazy(() => import('pages/events/eventview')));
 const EventQuizPage = Loadable(lazy(() => import('pages/events/eventquiz')));
 const EventPointsPage = Loadable(lazy(() => import('pages/events/eventpoints')));
 const EventPollPage = Loadable(lazy(() => import('pages/events/pollpage')));
+const AdminQuizPage = Loadable(lazy(() => import('pages/events/adminquizpage')));
 
 //webinar
 const WebinarList = Loadable(lazy(() => import('pages/webinar/webinarlist')));
 const WebinarView = Loadable(lazy(() => import('pages/webinar/webinarview')));
-const Feedback = Loadable(
-lazy(() => import('pages/webinar/Feedback/feedbackform'))
-);
+const Feedback = Loadable(lazy(() => import('pages/webinar/Feedback/feedbackform')));
 
 // const ParticipantTable = Loadable(lazy(() => import('pages/webinar/webinarview')));
 
@@ -138,8 +125,6 @@ const TermsAndConditions = Loadable(lazy(() => import('layout/CommonLayout/terms
 const PrivacyPolicy = Loadable(lazy(() => import('layout/CommonLayout/privacy-policy')));
 const RefundPolicy = Loadable(lazy(() => import('layout/CommonLayout/refund-policy')));
 
-
-
 // ==============================|| MAIN ROUTES ||============================== //
 
 const MainRoutes = {
@@ -189,7 +174,7 @@ const MainRoutes = {
                   )
                 },
                 {
-                  title:'organization-employees',
+                  title: 'organization-employees',
                   path: 'organization-employees',
                   element: (
                     <PermissionGuard module="Organization Employer">
@@ -210,8 +195,7 @@ const MainRoutes = {
         //           )
         //         },
         //  {
-         
-           
+
         //           title: 'Organizations',
         //           path: 'organizations',
         //           element: (
@@ -219,9 +203,8 @@ const MainRoutes = {
         //               <Organizations />
         //             </PermissionGuard>
         //           )
-                
-        // },
 
+        // },
 
         {
           id: 'Admins',
@@ -379,9 +362,9 @@ const MainRoutes = {
               element: <Certification />
             },
             {
-              title:'logs',
-              path:'logs',
-              element:<Logs/>
+              title: 'logs',
+              path: 'logs',
+              element: <Logs />
             }
           ]
         },
@@ -552,15 +535,12 @@ const MainRoutes = {
           path: 'webinar/:id/',
           element: <WebinarView />
         },
-         {
-      path: '/webinar/feedback',
-      element: <Feedback />
-    }
+        {
+          path: '/webinar/feedback',
+          element: <Feedback />
+        }
       ]
     },
-
-  
-
 
     // {
     //   path: '/',
@@ -593,27 +573,34 @@ const MainRoutes = {
           element: <RefundPolicy />
         }
       ]
-    }, 
+    },
     {
       path: '/feedback/:id',
       element: <WebinarFeedbackForm />
-
     },
     {
       path: '/events/:id/qr',
       element: <EventScanner />
     },
     {
-      path: '/events/user/:Id/form/in',
+      path: '/tutor-signup',
+      element: <TutorSignUP />
+    },
+    {
+      path: '/events/user/:id/form/in',
       element: <EventFormPage />
     },
     {
-      path: '/events/user/:Id/quiz/in',
+      path: '/events/user/:id/quiz/in',
       element: <EventQuizPage />
     },
     {
-      path: '/events/user/:Id/points/in',
+      path: '/events/user/:id/points/in',
       element: <EventPointsPage />
+    },
+    {
+      path: '/events/admin/:roomId/live',
+      element: <AdminQuizPage />
     },
     {
       path: '/events/user/:Id/poll/in',
@@ -658,14 +645,13 @@ const MainRoutes = {
           element: <MaintenanceError />
         }
       ]
-    },
+    }
     // {
     //   Breadcrumbs: false,
     //   path: '/:title',
     //   element: <TemplateCms />
     // },
   ]
-
 };
 
 export default MainRoutes;

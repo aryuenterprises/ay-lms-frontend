@@ -7,6 +7,8 @@ export const linkedInColor = '#0e76a8';
 // export const APP_PATH_BASE_URL = '/dashboard';
 export const APP_PATH_BASE_URL = 'https://portal.aryuacademy.com/'; //Live URL
 // export const APP_PATH_BASE_URL = 'https://aylms.aryuprojects.com/'; //Staging URL
+// export const APP_PATH_BASE_URL = 'http://127.0.0.1:8000/';
+// export const APP_PATH_BASE_URL = 'http://192.168.0.119/';
 
 export const APP_DEFAULT_PATH = '/dashboard';
 export const HORIZONTAL_MAX_ITEM = 6;

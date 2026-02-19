@@ -302,7 +302,7 @@ const ParticipantTable = () => {
           {/* )} */}
         </Box>
       )
-    }
+    },
   ];
 
   const allRows = useMemo(() => {

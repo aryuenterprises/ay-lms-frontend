@@ -10,7 +10,7 @@ const LandingWithLogin = () => {
   const auth = JSON.parse(localStorage.getItem('auth'));
   const isLoggedIn = !!auth?.token;
 
-  // ✅ Redirect logged-in users
+  // Redirect logged-in users
   if (isLoggedIn) {
     return <Navigate to="/dashboard" replace />;
   }

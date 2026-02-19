@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Box,
   Typography,
@@ -20,11 +20,21 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import MilitaryTechIcon from '@mui/icons-material/MilitaryTech';
 import TrendingFlatIcon from '@mui/icons-material/TrendingFlat';
-import RefreshIcon from '@mui/icons-material/Refresh';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { motion, AnimatePresence } from 'framer-motion';
-import { fetchUserData, getLeaderboardStats } from './leaderboardData';
+import { useParams } from 'react-router-dom';
+
+const getCookie = (name) => {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+  return null;
+};
+
+const getAvatarUrl = (name) => {
+  return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}&backgroundColor=b6e3f4,c0aede,d1d4f9`;
+};
 
 const MotionCard = motion(Card);
 
@@ -53,40 +63,90 @@ const EventPoints = () => {
   const [users, setUsers] = useState([]);
   const [sortedUsers, setSortedUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [simulationActive, setSimulationActive] = useState(false);
-  const [updatedUserIds, setUpdatedUserIds] = useState(new Set());
   const [error, setError] = useState(null);
+  const wsRef = useRef(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [showAllUsers, setShowAllUsers] = useState(false);
+  const updatedUserIds = useRef(new Set()).current;
+  const [stats, setStats] = useState({
+    totalParticipants: 0,
+    highestScore: 0,
+    averageScore: 0
+  });
   const previousPositions = useRef({});
-  const animationId = useRef(0);
-  const requestRef = useRef();
+  const { id: roomId } = useParams();
 
-  // Initialize and fetch data
+  // websocket connection
   useEffect(() => {
-    loadUserData();
-    return () => {
-      if (requestRef.current) {
-        cancelAnimationFrame(requestRef.current);
+    if (!roomId) return;
+
+    const token = getCookie('token'); // ADMIN COOKIE TOKEN
+
+    console.log('admin token:', token);
+    const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    const host = window.location.host;
+    if (!token) {
+      setError('Admin session expired. Please login again.');
+      setSnackbarOpen(true);
+      setLoading(false);
+      return;
+    }
+
+    const ws = new WebSocket(
+      `${protocol}://${host}/ws/room/${roomId}/?role=admin&token=${token}`
+    );
+
+    wsRef.current = ws;
+
+    ws.onopen = () => {
+      console.log('Leaderboard WebSocket connected');
+      setLoading(false);
+    };
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+
+      if (data.type === 'leaderboard') {
+        const mappedUsers = data.board.map((item, index) => ({
+          id: item.name,
+          name: item.name,
+          points: item.score,
+          avatar: getAvatarUrl(item.name),
+          previousPosition: previousPositions.current[item.name] ?? index + 1
+        }));
+
+        setUsers(mappedUsers);
+
+        if (data.stats) {
+          setStats({
+            totalParticipants: data.stats.total_participants,
+            highestScore: data.stats.highest_score,
+            averageScore: data.stats.average_score
+          });
+        }
+      }
+
+      if (data.type === 'error') {
+        setError(data.message);
+        setSnackbarOpen(true);
       }
     };
-  }, []);
 
-  // Optimized data loading with throttling
-  const loadUserData = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await fetchUserData();
-      setUsers(data);
-    } catch (err) {
-      setError(err.message);
-      setUsers([]);
+    ws.onerror = () => {
+      setError('Leaderboard WebSocket connection failed');
       setSnackbarOpen(true);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    };
+
+    ws.onclose = () => {
+      console.log('Leaderboard WebSocket closed');
+      wsRef.current = null;
+    };
+
+    return () => {
+      ws.close();
+      wsRef.current = null;
+    };
+  }, [roomId]);
 
   // Optimized sorting with memoization
   useEffect(() => {
@@ -138,54 +198,6 @@ const EventPoints = () => {
   const visibleOtherUsers = showAllUsers ? otherUsers : otherUsers.slice(0, 8);
 
   // Optimized simulation with requestAnimationFrame
-  const simulateLiveUpdate = useCallback(async () => {
-    if (simulationActive || users.length === 0) return;
-
-    setSimulationActive(true);
-    setError(null);
-    const currentAnimationId = ++animationId.current;
-
-    try {
-      // Create a Set of all user IDs for animation highlighting
-      const allUserIds = new Set(users.map((user) => user.id));
-      setUpdatedUserIds(allUserIds);
-
-      // Use requestAnimationFrame for smoother animations
-      const animateUpdate = () => {
-        // Update points for ALL users
-        const updatedUsers = users.map((user) => {
-          // Generate a random point change for each user
-          const pointChange = Math.floor(Math.random() * 80) + 20;
-
-          return {
-            ...user,
-            points: user.points + pointChange,
-            previousPosition: user.rank || user.previousPosition
-          };
-        });
-
-        setUsers(updatedUsers);
-
-        // Clean up animation
-        setTimeout(() => {
-          if (currentAnimationId === animationId.current) {
-            setUpdatedUserIds(new Set());
-            setSimulationActive(false);
-          }
-        }, 600);
-      };
-
-      // Schedule animation for next frame
-      requestRef.current = requestAnimationFrame(() => {
-        setTimeout(animateUpdate, 50); // Small delay for visual feedback
-      });
-    } catch (err) {
-      setError('Failed to update points');
-      setSimulationActive(false);
-      setUpdatedUserIds(new Set());
-      setSnackbarOpen(true);
-    }
-  }, [users, simulationActive]);
 
   // Get medal icon based on rank
   const getMedalIcon = (rank) => {
@@ -228,9 +240,6 @@ const EventPoints = () => {
     const maxPoints = Math.max(...sortedUsers.map((u) => u.points), 2000);
     return Math.min((points / maxPoints) * 100, 100);
   };
-
-  // Get stats for header
-  const stats = getLeaderboardStats(users);
 
   const handleCloseSnackbar = () => {
     setSnackbarOpen(false);
@@ -359,21 +368,23 @@ const EventPoints = () => {
                         }}
                       >
                         {/* Avatar */}
+                        {/* Avatar */}
                         <motion.div animate={isUpdated ? { rotateY: 360 } : {}} transition={{ duration: 0.6, ease: 'easeInOut' }}>
                           <Avatar
+                            src={user.avatar}
+                            alt={user.name}
                             sx={{
                               width: avatarSize,
                               height: avatarSize,
-                              bgcolor: COLORS.secondary,
                               border: `2px solid ${user.rank === 1 ? COLORS.gold : user.rank === 2 ? COLORS.silver : COLORS.bronze}`,
                               mb: 1,
-                              boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
+                              boxShadow: '0 4px 15px rgba(0,0,0,0.15)',
+                              backgroundColor: COLORS.white
                             }}
-                          >
-                            <Typography variant="h5" fontWeight="bold" color={COLORS.white}>
-                              {user.name.charAt(0)}
-                            </Typography>
-                          </Avatar>
+                            imgProps={{
+                              loading: 'lazy'
+                            }}
+                          />
                         </motion.div>
 
                         {/* Name */}
@@ -868,48 +879,7 @@ const EventPoints = () => {
                 alignItems: 'center',
                 mb: 2
               }}
-            >
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} transition={{ type: 'spring', stiffness: 300 }}>
-                <Button
-                  variant="contained"
-                  onClick={simulateLiveUpdate}
-                  disabled={simulationActive || users.length === 0}
-                  startIcon={<RefreshIcon />}
-                  sx={{
-                    background: `linear-gradient(135deg, ${COLORS.secondary} 0%, ${COLORS.primary} 100%)`,
-                    color: COLORS.white,
-                    '&:hover': {
-                      background: `linear-gradient(135deg, ${COLORS.primary} 0%, ${COLORS.secondary} 100%)`
-                    },
-                    minWidth: 140,
-                    fontWeight: 600,
-                    boxShadow: '0 4px 15px rgba(52, 152, 219, 0.3)'
-                  }}
-                >
-                  {simulationActive ? 'Updating...' : 'Live Update'}
-                </Button>
-              </motion.div>
-
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} transition={{ type: 'spring', stiffness: 300 }}>
-                <Button
-                  variant="outlined"
-                  onClick={loadUserData}
-                  disabled={loading}
-                  sx={{
-                    borderColor: COLORS.primary,
-                    color: COLORS.primary,
-                    '&:hover': {
-                      borderColor: COLORS.secondary,
-                      backgroundColor: `${COLORS.secondary}10`
-                    },
-                    minWidth: 140,
-                    fontWeight: 600
-                  }}
-                >
-                  Refresh Data
-                </Button>
-              </motion.div>
-            </Box>
+            ></Box>
           </Container>
         </motion.div>
 

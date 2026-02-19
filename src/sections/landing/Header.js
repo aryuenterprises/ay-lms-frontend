@@ -1,45 +1,64 @@
-import { useTheme } from '@mui/material/styles';
+// import { useTheme } from '@mui/material/styles';
 import { Box, Container, Grid, Typography } from '@mui/material';
 import { motion } from 'framer-motion';
 import { useRef, useEffect } from 'react';
 import Login from 'pages/auth/auth1/login';
 
-// import CardContent from '@mui/material/CardContent';
-// import Card from '@mui/material/Card';
-// import {CardMedia,Stack}from '@mui/material';
-// import {useMediaQuery} from "@mui/material";
-// import Aryuimage from 'assets/images/Aryuimage/webimage.png'
-// as
-import techBootstrap from 'assets/images/landing/tech-bootstrap.svg';
-import techReact from 'assets/images/landing/tech-react.svg';
-import techMui from 'assets/images/landing/tech-mui.svg';
-import techHtml from 'assets/images/landing/tech-html.svg';
-import techCss from 'assets/images/landing/tech-css.svg';
-import techJavascript from 'assets/images/landing/tech-javascript.svg';
-import techWordpress from 'assets/images/landing/tech-wordpress.svg';
-import techPython from 'assets/images/landing/tech-python.svg';
-import techFigma from 'assets/images/landing/tech-figma.svg';
-import techNode from 'assets/images/landing/tech-nodejs.svg';
+// tech icons
+// import techBootstrap from 'assets/images/landing/tech-bootstrap.svg';
+// import techReact from 'assets/images/landing/tech-react.svg';
+// import techMui from 'assets/images/landing/tech-mui.svg';
+// import techHtml from 'assets/images/landing/tech-html.svg';
+// import techCss from 'assets/images/landing/tech-css.svg';
+// import techJavascript from 'assets/images/landing/tech-javascript.svg';
+// import techWordpress from 'assets/images/landing/tech-wordpress.svg';
+// import techPython from 'assets/images/landing/tech-python.svg';
+// import techFigma from 'assets/images/landing/tech-figma.svg';
+// import techNode from 'assets/images/landing/tech-nodejs.svg';
+
+const Bubble = ({ size, top, left, right, bottom, delay }) => (
+  <Box
+    component={motion.div}
+    animate={{
+      y: [0, -30, 0],
+      opacity: [0.6, 0.9, 0.6]
+    }}
+    transition={{
+      duration: 18,
+      repeat: Infinity,
+      delay
+    }}
+    sx={{
+      position: 'absolute',
+      width: size,
+      height: size,
+      borderRadius: '50%',
+      background: 'rgba(255, 180, 180, 0.35)', // rose tone
+      top,
+      left,
+      right,
+      bottom,
+      zIndex: 0
+    }}
+  />
+);
 
 const HeaderPage = () => {
-  const theme = useTheme();
+  // const theme = useTheme();
   const scrollContainerRef = useRef(null);
 
-  // const largeSize = useMediaQuery(theme.breakpoints.up('lg'));
-
-
-  const techIcons = [
-    { name: 'Bootstrap 5', image: techBootstrap },
-    { name: 'React', image: techReact },
-    { name: 'React Material UI', image: techMui },
-    { name: 'HTML', image: techHtml },
-    { name: 'CSS', image: techCss },
-    { name: 'JavaScript', image: techJavascript },
-    { name: 'WordPress', image: techWordpress },
-    { name: 'Node.js', image: techNode },
-    { name: 'Python', image: techPython },
-    { name: 'Figma Design System', image: techFigma }
-  ];
+  // const techIcons = [
+  //   { name: 'Bootstrap 5', image: techBootstrap },
+  //   { name: 'React', image: techReact },
+  //   { name: 'React Material UI', image: techMui },
+  //   { name: 'HTML', image: techHtml },
+  //   { name: 'CSS', image: techCss },
+  //   { name: 'JavaScript', image: techJavascript },
+  //   { name: 'WordPress', image: techWordpress },
+  //   { name: 'Node.js', image: techNode },
+  //   { name: 'Python', image: techPython },
+  //   { name: 'Figma Design System', image: techFigma }
+  // ];
 
   useEffect(() => {
     const el = scrollContainerRef.current;
@@ -67,132 +86,156 @@ const HeaderPage = () => {
 
   return (
     <>
-      <Container
-        sx={{
-          flexGrow: 1,
-          pt: { xs: 3, md: 2 }
-        }}
-      >
-        <Grid container spacing={4} alignItems="stretch">
-          {/* LEFT – WELCOME CONTENT */}
-          <Grid item xs={12} md={7} display="flex" height="100%" maxHeight={320} alignItems="center">
-            <Box sx={{ mt: 30, mb: 4 }}>
-              <motion.div
-                initial={{ opacity: 0, y: 80 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ type: 'spring', stiffness: 120, damping: 20 }}
-              >
-                <Typography
-                  variant="h1"
-                  sx={{
-                    fontSize: { xs: '2.0rem', md: '3.4rem' },
-                    fontWeight: 700
-                  }}
-                >
-                  Welcome to the
-                  <Box
-                    component="span"
-                    sx={{
-                      background: 'linear-gradient(90deg,#25a1f4,#ff0d0d,#a825f4)',
-                      backgroundSize: '400%',
-                      WebkitBackgroundClip: 'text',
-                      color: 'transparent'
-                    }}
-                  >
-                    Aryu Academy
-                    <br />
-                  </Box>
-                  Student Portal
-                </Typography>
-
-                <Typography
-                  sx={{
-                    mt: 2,
-                    maxWidth: 520,
-                    lineHeight: 1.6,
-                    color: 'text.secondary'
-                  }}
-                  variant="body1"
-                >
-                  Your personalized dashboard for accessing course materials, class schedules, assignments, progress tracking, and academic
-                  tools.
-                </Typography>
-              </motion.div>
-            </Box>
-          </Grid>
-
-          {/* RIGHT – LOGIN */}
-          <Grid item xs={12} md={5} display="flex" alignItems="stretch">
-            <Box
-              sx={{
-                width: '100%',
-                maxWidth: { xs: 420, sm: 520, md: 560 },
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                bgcolor: 'background.default',
-                p: 2
-              }}
-            >
-              <Box sx={{ width: '100%', maxWidth: 340, mt: 3 }}>
-                <Login />
-              </Box>
-            </Box>
-          </Grid>
-        </Grid>
-      </Container>
-
-      {/* TECH ICONS SECTION */}
+      {/* ================= PINK BLOB BACKGROUND ================= */}
       <Box
         sx={{
-          width: '100%',
-          mt: 4,
-          py: 3,
-          borderTop: '1px solid',
-          borderColor: 'divider',
-          display: 'flex',
-          justifyContent: 'center',
-          overflow: 'hidden'
+          position: 'relative',
+          overflow: 'hidden',
+          background: 'linear-gradient(180deg, #fff5f7 0%, #ffffff 60%)'
         }}
       >
+        {/* Blob 1 */}
+        <Bubble size={420} top="20%" right="-120px" delay={2} />
+        <Bubble size={220} bottom="-100px" left="30%" delay={4} />
+        <Bubble size={180} bottom="10%" right="15%" delay={6} />
+        <Bubble size={180} bottom="30%" right="40%" delay={6} />
+        <Bubble size={100} top="60%" bottom="50%" right="48%" delay={6} />
+        <Box sx={{ position: 'relative', zIndex: 2 }}></Box>
+        <Bubble size={260} top="-80px" left="-80px" delay={0} />
         <Box
-          ref={scrollContainerRef}
+          component={motion.div}
+          animate={{ y: [0, -30, 0] }}
+          transition={{ duration: 18, repeat: Infinity }}
           sx={{
-            display: 'flex',
-            overflowX: 'hidden',
-            alignItems: 'center',
-            backgroundColor: theme.palette.background.paper,
-            minHeight: 50
+            position: 'absolute',
+            width: 420,
+            height: 420,
+            borderRadius: '50%',
+            background: 'rgba(163, 108, 125, 0.25)',
+            top: -120,
+            left: -120,
+            filter: 'blur(60px)',
+            zIndex: 0
+          }}
+        />
+
+        {/* Blob 2 */}
+        <Box
+          component={motion.div}
+          animate={{ y: [0, 40, 0] }}
+          transition={{ duration: 22, repeat: Infinity }}
+          sx={{
+            position: 'absolute',
+            width: 360,
+            height: 360,
+            borderRadius: '50%',
+            background: 'rgba(226, 185, 199, 0.25)',
+            bottom: -140,
+            right: -140,
+            filter: 'blur(70px)',
+            zIndex: 0
+          }}
+        />
+
+        {/* ================= MAIN CONTENT ================= */}
+        <Container
+          maxWidth={false}
+          disableGutters
+          sx={{
+            minHeight: '84vh',
+            px: { xs: 10, md: 20 },
+            mt: 10,
+            mr: 10,
+            position: 'relative',
+            zIndex: 1
           }}
         >
-          {[...techIcons, ...techIcons].map((tech, index) => (
-            <Box
-              key={index}
-              sx={{
-                mx: 3,
-                transition: 'transform 0.3s',
-                '&:hover': { transform: 'scale(1.2)' }
-              }}
-            >
-              <img src={tech.image} alt={tech.name} height={50} />
-            </Box>
-          ))}
-        </Box>
+          <Grid container spacing={4} alignItems="stretch">
+            {/* LEFT – WELCOME CONTENT */}
+            {/* LEFT – LOGIN PAGE CONTENT */}
+            <Grid item xs={12} md={7} display="flex" alignItems="center">
+              <Box sx={{ mt: { xs: 6, md: 10 }, mb: 4 }}>
+                <motion.div
+                  initial={{ opacity: 0, y: 60 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ type: 'spring', stiffness: 110, damping: 18 }}
+                >
+                  {/* Heading */}
+                  <Typography
+                    sx={{
+                      fontSize: { xs: '2.4rem', md: '3.8rem' },
+                      fontWeight: 800,
+                      lineHeight: 1.15,
+                      color: '#1c1c1c'
+                    }}
+                  >
+                    Welcome to the{' '}
+                    <Box
+                      component="span"
+                      sx={{
+                        color: '#e63946'
+                      }}
+                    >
+                      Aryu
+                      <br />
+                      Academy
+                    </Box>
+                    <br />
+                    Student Portal
+                  </Typography>
+
+                  {/* Decorative underline */}
+                  <Box sx={{ mt: 1.5, ml: 1.5 }}>
+                    <svg width="260" height="28" viewBox="0 0 260 28" fill="none" style={{ overflow: 'visible' }}>
+                      <motion.path
+                        d="
+                    M6 30
+                    C 50 9, 150 10, 130 30
+                    C 80 12, 215 5, 280 15
+                    "
+                        stroke="#b71c1c"
+                        strokeWidth="4.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        fill="none"
+                        initial={{ pathLength: 0 }}
+                        animate={{ pathLength: 1 }}
+                        transition={{
+                          duration: 1.2,
+                          ease: 'easeOut'
+                        }}
+                      />
+                    </svg>
+                  </Box>
+
+                  {/* Description */}
+                  <Typography
+                    sx={{
+                      maxWidth: 520,
+                      fontSize: 16,
+                      lineHeight: 1.7,
+                      mt: 3,
+                      color: '#555'
+                    }}
+                  >
+                    Your personalized dashboard for accessing course materials, class schedules, assignments, progress tracking, and
+                    academic tools.
+                  </Typography>
+                </motion.div>
+              </Box>
+            </Grid>
+
+            {/* RIGHT – LOGIN */}
+            <Grid item xs={10} md={5} display="flex" alignItems="center" pt={2}>
+              <Box>
+                <Login />
+              </Box>
+            </Grid>
+          </Grid>
+        </Container>
       </Box>
-      {/* {largeSize && (
-        <Card display="flex" justifyContent="center" alignItems="center" textAlign="center" sx={{ margin: 2, background: '#E60010' }}>
-          <CardContent variant="h4" sx={{ color: 'white' }}>
-            <Stack>
-              <CardMedia
-                component="img" // Use the "img" component for a standard image element
-                height="auto"
-                image={Aryuimage}
-                alt="Paella dish"
-              />
-            </Stack>
-          </CardContent>
-        </Card>
-      )} */}
+
+      {/* ================= TECH ICONS SECTION ================= */}
     </>
   );
 };

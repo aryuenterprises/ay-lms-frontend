@@ -24,7 +24,9 @@ import Swal from 'sweetalert2';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-
+import QrCode2Icon from '@mui/icons-material/QrCode2';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
 // Css import
 import 'assets/css/commonStyle.css';
 import 'assets/css/DataTable.css';
@@ -43,6 +45,36 @@ const EventsList = () => {
   const canCreate = checkPermission('Events', 'create');
   const canUpdate = checkPermission('Events', 'update');
   const canDelete = checkPermission('Events', 'delete');
+
+  const getJoinLink = (roomId) => {
+    return `${window.location.origin}/events/${roomId}/qr`;
+  };
+
+  const getLeaderboardLink = (roomId) => {
+    return `${window.location.origin}/events/user/${roomId}/points/in`;
+  };
+
+  const getAdminQuizLink = (roomId) => {
+    return `${window.location.origin}/events/admin/${roomId}/live`;
+  };
+  const copyToClipboard = async (text, label) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      Swal.fire({
+        icon: 'success',
+        title: 'Copied!',
+        text: `${label} copied to clipboard`,
+        timer: 1500,
+        showConfirmButton: false
+      });
+    } catch {
+      Swal.fire({
+        icon: 'error',
+        title: 'Failed',
+        text: 'Unable to copy link'
+      });
+    }
+  };
 
   const [open, setOpen] = useState(false);
   const [currentEvent, setCurrentEvent] = useState(null);
@@ -308,7 +340,7 @@ const EventsList = () => {
       }
 
       // Make API call only after user confirms
-      const response = await axiosInstance.patch(`api/live-quiz/rooms/${currentEvent.id}/start_quiz/`, { started: actionText });
+      const response = await axiosInstance.post(`api/live-quiz/rooms/${currentEvent.id}/start_quiz/`, { started: actionText });
 
       const result = response.data;
 
@@ -366,10 +398,11 @@ const EventsList = () => {
       selector: (row) => row.max_participants,
       sortable: true
     },
+
     {
       name: 'Status',
       cell: (row) => (
-        <Box sx={{ display: 'flex', gap: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
           {row.started ? (
             <Box>
               <Button variant="contained" color="success" size="small" onClick={() => handleEventChange('stop', row)}>
@@ -387,38 +420,71 @@ const EventsList = () => {
       ),
       sortable: true
     },
+
     ...(canUpdate || canDelete || canView
       ? [
           {
             name: 'Actions',
-            cell: (row) => (
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <Tooltip title="View Details">
-                  <IconButton
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleViewChange(row);
-                    }}
-                  >
-                    <Eye />
-                  </IconButton>
-                </Tooltip>
-                {canUpdate && (
-                  <Tooltip title="Edit">
-                    <IconButton color="info" variant="contained" onClick={() => handleEdit(row)}>
-                      <Edit />
+            cell: (row) => {
+              const joinLink = getJoinLink(row.id);
+              const leaderboardLink = getLeaderboardLink(row.id);
+              const adminQuizLink = getAdminQuizLink(row.id);
+
+              return (
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  {/* View */}
+                  <Tooltip title="View Details">
+                    <IconButton
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleViewChange(row);
+                      }}
+                    >
+                      <Eye />
                     </IconButton>
                   </Tooltip>
-                )}
-                {canDelete && (
-                  <Tooltip title="Delete">
-                    <IconButton variant="contained" color="error" onClick={() => handleDelete(row.id)}>
-                      <Trash />
+
+                  {/* QR Link */}
+                  <Tooltip title="Copy QR Join Link">
+                    <IconButton color="#000000" onClick={() => copyToClipboard(joinLink, 'QR Join Link')}>
+                      <QrCode2Icon />
                     </IconButton>
                   </Tooltip>
-                )}
-              </Box>
-            )
+
+                  {/* Leaderboard Link */}
+                  <Tooltip title="Open Leaderboard">
+                    <IconButton color="success" onClick={() => window.open(leaderboardLink, '_blank')}>
+                      <EmojiEventsIcon />
+                    </IconButton>
+                  </Tooltip>
+
+                  {/* ADMIN QUIZ PAGE */}
+                  <Tooltip title="Open Admin Quiz">
+                    <IconButton size="medium" color="primary" onClick={() => window.open(adminQuizLink)}>
+                      <SportsEsportsIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+
+                  {/* Edit */}
+                  {canUpdate && (
+                    <Tooltip title="Edit">
+                      <IconButton color="info" onClick={() => handleEdit(row)}>
+                        <Edit />
+                      </IconButton>
+                    </Tooltip>
+                  )}
+
+                  {/* Delete */}
+                  {canDelete && (
+                    <Tooltip title="Delete">
+                      <IconButton color="error" onClick={() => handleDelete(row.id)}>
+                        <Trash />
+                      </IconButton>
+                    </Tooltip>
+                  )}
+                </Box>
+              );
+            }
           }
         ]
       : [])
@@ -433,6 +499,36 @@ const EventsList = () => {
       </MainCard>
     );
   }
+  const customStyles = {
+    table: {
+      style: {
+        borderSpacing: 0
+      }
+    },
+    headCells: {
+      style: {
+        paddingTop: '8px',
+        paddingBottom: '8px',
+        paddingLeft: '8px',
+        paddingRight: '8px',
+        fontWeight: 600
+      }
+    },
+    cells: {
+      style: {
+        paddingTop: '6px',
+        paddingBottom: '6px',
+        paddingLeft: '8px',
+        paddingRight: '8px',
+        lineHeight: '1.4'
+      }
+    },
+    rows: {
+      style: {
+        minHeight: '44px' // default is 56px (this is the big gap!)
+      }
+    }
+  };
 
   return (
     <MainCard>
@@ -441,6 +537,7 @@ const EventsList = () => {
       <DataTable
         columns={columns}
         data={filteredItems}
+        customStyles={customStyles}
         pagination
         paginationPerPage={10}
         paginationRowsPerPageOptions={[5, 10, 20, 30]}

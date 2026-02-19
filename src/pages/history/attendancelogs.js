@@ -38,7 +38,7 @@ const AttendanceLogs = () => {
   const [selectedBatch, setSelectedBatch] = useState(null);
   const [filterUserType, setUserType] = useState('');
 
-  // const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
   // const [rowsPerPage, setRowsPerPage] = useState(10);
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -908,7 +908,9 @@ const filteredData = useMemo(() => {
         highlightOnHover
         responsive
         progressPending={loading}
-        noDataComponent="No attendance records found"       
+        noDataComponent="No attendance records found"
+        onChangePage={(page) => setCurrentPage(page)}
+       
       />
     </MainCard>
   );
