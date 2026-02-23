@@ -265,10 +265,29 @@ const WebinarList = () => {
   }, []);
 
   const handleOpen = () => {
-    setCurrentWebinar(null);
-    formik.setFieldValue('mentor', '');
-    formik.setFieldValue('tools', [{ title: '' }]);
-    // formik.setFieldValue("image")
+    setCurrentWebinar(null); // CREATE mode
+    setEditToolsOpen(false);
+    setEditTools([]); // clear edit tools
+    setItems([{ title: '', file: null, preview: null }]); // fresh tools
+
+    // reset form state values
+    setTitle('');
+    setSubtitle('');
+    setDescription('');
+    setSlug('');
+    setWabalink('');
+    setVideoUrl('');
+    setMode('');
+    setLanguage('');
+    setStatus('');
+    setMetatitle('');
+    setMetadesc('');
+    setMetaimg(null);
+    setImagePreview(null);
+    setImagePreviewweb(null);
+    setFaqs([{ question: '', answer: '' }]);
+
+    formik.resetForm();
     setOpen(true);
   };
   // open view model
@@ -554,7 +573,8 @@ const WebinarList = () => {
       ],
 
       waba_link: currentWebinar?.waba_link,
-      mentor: currentWebinar?.mentor
+      mentor: currentWebinar?.mentor,
+      seats_available: currentWebinar?.seats_available ?? 10
     },
 
     onSubmit: async (values, { resetForm, setSubmitting }) => {
@@ -593,9 +613,13 @@ const WebinarList = () => {
         appendIfExists('language', language);
         appendIfExists('slug', slug);
         appendIfExists('webinar_status', status);
+        appendIfExists('seats_available', Number(values.seats_available));
         appendIfExists('waba_link', wabalink?.trim());
         console.log('waba', wabalink?.trim());
         payload.append('video_url', videoUrl);
+        if (!currentWebinar) {
+          payload.append('is_registration_open', true);
+        }
 
         if (values?.webinarType === 'Paid') {
           payload.append('regular_price', Number(values.regular_price));
@@ -807,19 +831,19 @@ const WebinarList = () => {
             <Button
               variant="text"
               onClick={(e) => {
-                e.stopPropagation(); // prevent row click if any
-                handleViewChange(row); // navigate or show details
+                e.stopPropagation();
+                handleViewChange(row);
               }}
               sx={{
                 minWidth: 0,
                 padding: 0,
-                color: '#1976d2',
+                color: row.participants_count >= row.seats_available ? '#d32f2f' : '#1976d2',
                 textDecoration: 'underline',
                 cursor: 'pointer',
                 fontWeight: 600
               }}
             >
-              {row.participants_count}
+              {row.participants_count} / {row.seats_available}
             </Button>
           </Tooltip>
         </Box>
@@ -892,12 +916,7 @@ const WebinarList = () => {
       cell: (row) => (
         <Box sx={{ display: 'flex', gap: 1 }}>
           {row.status === 'COMPLETED' ? (
-            <Button
-      variant="contained"
-      size="small"
-      sx={{ px: 1.2, py: 0.4, minWidth: 'auto' }}
-      onClick={() => handleWebinarstart(row)}
-    >
+            <Button variant="contained" size="small" sx={{ px: 1.2, py: 0.4, minWidth: 'auto' }} onClick={() => handleWebinarstart(row)}>
               Finished
             </Button>
           ) : row.status === 'LIVE' ? (
@@ -920,24 +939,21 @@ const WebinarList = () => {
       sortable: true
     },
     {
-  name: 'FB Link',
-  width: '80px',
-  center: true,
-  cell: (row) => <CopyFBLink row={row} />
-},
+      name: 'FB Link',
+      width: '80px',
+      center: true,
+      cell: (row) => <CopyFBLink row={row} />
+    },
     {
-  name: 'Zoom Link',
-  width: '90px',
-  center: true,
-  cell: (row) => (
-    <IconButton
-      size="small"
-      onClick={() => window.open(row?.zoom_link, '_blank')}
-    >
-      <InsertLinkOutlinedIcon fontSize="small" />
-    </IconButton>
-  )
-},
+      name: 'Zoom Link',
+      width: '90px',
+      center: true,
+      cell: (row) => (
+        <IconButton size="small" onClick={() => window.open(row?.zoom_link, '_blank')}>
+          <InsertLinkOutlinedIcon fontSize="small" />
+        </IconButton>
+      )
+    },
 
     ...(canUpdate || canDelete || canView
       ? [
@@ -1037,8 +1053,8 @@ const WebinarList = () => {
                 <Box />
 
                 {/* Center title */}
-                <Typography fontWeight={600} textAlign="center" justifyContent={'center'}>
-                  Edit Webinar
+                <Typography fontWeight={600} textAlign="center">
+                  {currentWebinar ? 'Edit Webinar' : 'Add Webinar'}
                 </Typography>
 
                 {/* Right close button */}
@@ -1358,17 +1374,40 @@ const WebinarList = () => {
                           </Paper>
                         </Grid>
                         <Grid item xs={12} md={6} sx={{ pt: 3 }}>
-                          <Stack spacing={1.5}>
-                            <Typography fontWeight={500}>WhatsApp Redirection Link *</Typography>
+                          <Stack spacing={2}>
+                            {/* WhatsApp */}
+                            <Stack spacing={1.5}>
+                              <Typography fontWeight={500}>WhatsApp Redirection Link *</Typography>
 
-                            <TextField
-                              fullWidth
-                              name="waba_link"
-                              placeholder="https://wa.me/91XXXXXXXXXX"
-                              value={wabalink}
-                              onChange={(e) => setWabalink(e.target.value)}
-                              helperText={'Enter your WhatsApp business link (wa.me format recommended)'}
-                            />
+                              <TextField
+                                fullWidth
+                                name="waba_link"
+                                placeholder="https://wa.me/91XXXXXXXXXX"
+                                value={wabalink}
+                                onChange={(e) => setWabalink(e.target.value)}
+                                helperText="Enter your WhatsApp business link (wa.me format recommended)"
+                              />
+                            </Stack>
+
+                            {/* Seats Available */}
+                            <Stack spacing={1}>
+                              <Typography fontWeight={400}>Seats Available *</Typography>
+
+                              <TextField
+                                fullWidth
+                                type="number"
+                                name="seats_available"
+                                inputProps={{ min: 1 }}
+                                value={formik.values.seats_available}
+                                onChange={formik.handleChange}
+                                helperText={
+                                  currentWebinar?.participants_count > 0
+                                    ? `Already ${currentWebinar.participants_count} registered`
+                                    : 'Maximum number of participants'
+                                }
+                                disabled={currentWebinar && currentWebinar.participants_count > 0}
+                              />
+                            </Stack>
                           </Stack>
                         </Grid>
                       </Grid>
@@ -1875,6 +1914,31 @@ const WebinarList = () => {
                           }}
                         >
                           {viewDetails && viewDetails?.webinar_status == true ? 'Active' : 'In Active'}
+                        </Typography>
+                      </Stack>
+                    </Grid>
+                    <Grid item xs={12} md={4} sx={{ pt: 4 }}>
+                      <Stack spacing={2}>
+                        <Typography fontWeight={400}>Seats Availability</Typography>
+
+                        <Typography
+                          sx={{
+                            p: 1.5,
+                            border: '1px solid #e0e0e0',
+                            borderRadius: 1,
+                            minHeight: 45,
+                            backgroundColor: viewDetails?.participants_count >= viewDetails?.seats_available ? '#ffeaea' : '#f9f9f9',
+                            fontWeight: 600,
+                            color: viewDetails?.participants_count >= viewDetails?.seats_available ? '#d32f2f' : 'inherit'
+                          }}
+                        >
+                          {viewDetails?.participants_count ?? 0} / {viewDetails?.seats_available ?? '-'}
+                        </Typography>
+
+                        <Typography variant="caption" color="text.secondary">
+                          {viewDetails?.participants_count >= viewDetails?.seats_available
+                            ? 'Registration Full'
+                            : `${(viewDetails?.seats_available ?? 0) - (viewDetails?.participants_count ?? 0)} seats remaining`}
                         </Typography>
                       </Stack>
                     </Grid>
