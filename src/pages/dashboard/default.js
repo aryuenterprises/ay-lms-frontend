@@ -1,28 +1,29 @@
 // material-ui
 import { useTheme } from '@mui/material/styles';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Grid, Typography } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Grid, Typography, Box, Stack } from '@mui/material';
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  LineChart,
+  Line,
 
+} from 'recharts';
 // project-imports
 import EcommerceDataCard from 'components/cards/statistics/EcommerceDataCard';
-// import EcommerceDataChart from 'sections/widget/chart/EcommerceDataChart';
-
-// import RepeatCustomerRate from 'sections/widget/chart/RepeatCustomerRate';
-// import ProjectOverview from 'sections/widget/chart/ProjectOverview';
-// import ProjectRelease from 'sections/dashboard/default/ProjectRelease';
-// import AssignUsers from 'sections/widget/statistics/AssignUsers';
-
 // import Schedule from 'sections/dashboard/Schedule';
 import Attendance from 'sections/dashboard/Attendance';
 import CalendarTab from 'sections/dashboard/CalendarTab';
 import FeaturedCourses from 'sections/dashboard/FeaturedCourses';
-// import Assignments from 'sections/dashboard/Assignments';
 import OrgnizationAttendance from 'sections/dashboard/OrgnizationAttendance';
 
 // assets
 import { Book, Teacher, User } from 'iconsax-react';
-// import WelcomeBanner from 'sections/dashboard/default/WelcomeBanner';
-// import Announcements from 'sections/dashboard/default/Announcements';
-// import AnalyticEcommerce from 'components/cards/statistics/AnalyticEcommerce';
+
 import { APP_PATH_BASE_URL } from 'config';
 import { useCallback, useEffect, useState } from 'react';
 // import Cookies from 'js-cookie';
@@ -54,6 +55,11 @@ const DashboardDefault = () => {
   const [featuredCourses, setFeaturedCourses] = useState([]);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
+  const webinarAnalytics = data?.webinar_analytics;
+  // const overview = webinarAnalytics?.overview;
+  // const performance = webinarAnalytics?.webinar_performance || [];
+  const monthlyRevenue = webinarAnalytics?.monthly_revenue || [];
+  const monthlyRegistrations = webinarAnalytics?.monthly_registrations || [];
   const handleEnrollNow = (course) => {
     console.log('ENROLL CLICKED');
     console.log('COURSE:', course);
@@ -135,8 +141,8 @@ const DashboardDefault = () => {
         ) : (
           <Grid item xs={12}>
             {/* <WelcomeBanner /> */}
-          {/* </Grid> */}
-        {/* // ))} */} 
+      {/* </Grid> */}
+      {/* // ))} */}
 
       {(userType === 'admin' || userType === 'super_admin') && (
         <>
@@ -227,6 +233,147 @@ const DashboardDefault = () => {
           </Grid>
         </Grid>
       )} */}
+
+      {(userType === 'super_admin') && (
+        <>
+          {/* SECTION WRAPPER */}
+          <Grid item xs={12}>
+            <Box
+              sx={{
+                mt: 5,
+                p: 5,
+                borderRadius: 4,
+                background: 'linear-gradient(145deg, #ffffff, #f5f7fa)',
+                boxShadow: '0 15px 40px rgba(0,0,0,0.06)'
+              }}
+            >
+              <Typography variant="h4" sx={{ fontWeight: 600 }}>
+                Webinar Intelligence
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 5 }}>
+                Executive performance analytics
+              </Typography>
+
+              <Grid item xs={12} sx={{ mt: 5 }}>
+                <Box
+                  sx={{
+                    p: 4,
+                    borderRadius: 4,
+                    bgcolor: '#ffffff',
+                    boxShadow: '0 8px 25px rgba(0,0,0,0.04)'
+                  }}
+                >
+                  <Typography variant="h6" sx={{ mb: 3 }}>
+                    Webinar Performance Matrix
+                  </Typography>
+
+                  <Stack spacing={2}>
+                    {webinarAnalytics?.webinar_performance?.map((w, index) => (
+                      <Box
+                        key={index}
+                        sx={{
+                          p: 3,
+                          borderRadius: 3,
+                          bgcolor: '#f9fafb',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center'
+                        }}
+                      >
+                        <Box>
+                          <Typography fontWeight={500}>{w.title}</Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {w.participants} participants • {w.attendance_rate}% attendance
+                          </Typography>
+                        </Box>
+
+                        <Box textAlign="right">
+                          <Typography fontWeight={600}>₹ {w.revenue}</Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            Avg Rating: {w.avg_rating || 0}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    ))}
+                  </Stack>
+                </Box>
+              </Grid>
+            </Box>
+          </Grid>
+          <Grid item xs={12} md={7}>
+            <Box
+              sx={{
+                p: 4,
+                borderRadius: 4,
+                bgcolor: '#ffffff',
+                boxShadow: '0 15px 35px rgba(0,0,0,0.06)'
+              }}
+            >
+              <Typography variant="h6" sx={{ mb: 3 }}>
+                Revenue Trend
+              </Typography>
+
+              <ResponsiveContainer width="100%" height={300}>
+                <AreaChart data={monthlyRevenue}>
+                  <defs>
+                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.8} />
+                      <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis
+                    dataKey="month"
+                    tickFormatter={(value) =>
+                      new Date(value).toLocaleString('default', {
+                        month: 'short',
+                        year: '2-digit'
+                      })
+                    }
+                  />
+                  <YAxis />
+                  <Tooltip />
+                  <Area type="monotone" dataKey="total" stroke="#0ea5e9" fillOpacity={1} fill="url(#colorRevenue)" strokeWidth={3} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </Box>
+          </Grid>
+          <Grid item xs={12} md={5}>
+            <Box
+              sx={{
+                p: 4,
+                borderRadius: 4,
+                bgcolor: '#ffffff',
+                boxShadow: '0 15px 35px rgba(0,0,0,0.06)'
+              }}
+            >
+              <Typography variant="h6" sx={{ mb: 3 }}>
+                Registration Growth
+              </Typography>
+
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={monthlyRegistrations}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis
+                    dataKey="month"
+                    tickFormatter={(value) =>
+                      new Date(value).toLocaleString('default', {
+                        month: 'short'
+                      })
+                    }
+                  />
+                  <YAxis />
+                  <Tooltip />
+                  <Line type="monotone" dataKey="total" stroke="#6366f1" strokeWidth={3} dot={{ r: 5 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </Box>
+          </Grid>
+          
+        </>
+      )}
+
       {userType === 'employer' && (
         <Grid item xs={12}>
           <Grid container spacing={3}>

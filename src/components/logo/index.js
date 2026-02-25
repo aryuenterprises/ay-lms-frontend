@@ -34,9 +34,22 @@ const LogoSection = ({ isIcon, sx, to }) => {
 
   // Render loading state or default logo while fetching
   return (
-    <ButtonBase disableRipple component={Link} to={!to ? APP_DEFAULT_PATH : to} sx={sx}>
-      {isIcon ? <img src={favicon} alt="Logo" /> : <img src={logo} alt="Logo" />}
-    </ButtonBase>
+    <ButtonBase
+    disableRipple
+    component={Link}
+    to={!to ? APP_DEFAULT_PATH : to}
+    sx={sx}
+  >
+    <img
+      src={isIcon ? favicon : logo}
+      alt="Logo"
+      style={{
+        height: 35,        // change this value (30–45 ideal)
+        width: 'auto',
+        objectFit: 'contain'
+      }}
+    />
+  </ButtonBase>
   );
 };
 
