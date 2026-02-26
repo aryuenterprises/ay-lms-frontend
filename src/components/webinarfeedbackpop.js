@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react';
 import {
   Dialog,
-  DialogTitle,
   DialogContent,
   Typography,
   CircularProgress,
   Stack,
-  Grid,
   IconButton,
   Box,
-  // Divider
+  Divider,
+  Chip,
+  DialogActions,
+  Button
 } from '@mui/material';
 import { CloseSquare } from 'iconsax-react';
 
@@ -34,226 +35,223 @@ export default function WebinarFeedbackDialog({ open, onClose, webinarUuid }) {
     setLoading(true);
     setFeedbacks(webinarUuid);
     setLoading(false)
-    // getFeedbackByWebinar(webinarUuid)
-    //   .then((res) => {
-    //     setFeedbacks(res.data || []);
-    //   })
-    //   .catch((err) => {
-    //     console.error(err);
-    //     setFeedbacks([]);
-    //   })
-    //   .finally(() => );
+
   }, [open, webinarUuid]);
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth overflowx='hidden'>
-      <Grid container>
-        <Grid
-          sx={{
-            display: "grid",
-            gridTemplateColumns: "auto 1fr auto",
-            alignItems: "center",
-            width: "100%",
-            px: 2,
-          }}
-        >
-          {/* Left close button */}
-         <Box/>
+  <Dialog
+    open={open}
+    onClose={onClose}
+    fullWidth
+    maxWidth="md"
+    PaperProps={{
+      sx: {
+        borderRadius: 4,
+        overflow: 'hidden',
+        boxShadow: '0 25px 60px rgba(15, 23, 42, 0.2)'
+      }
+    }}
+  >
+    {/* Header */}
+    <Box
+      sx={{
+        px: 4,
+        py: 3,
+        borderBottom: '1px solid #eef1f5',
+        background: 'linear-gradient(180deg, #ffffff 0%, #f9fafb 100%)'
+      }}
+    >
+      <Stack direction="row" justifyContent="space-between" alignItems="center">
+        <Typography variant="h6" sx={{ fontWeight: 700 }}>
+          Webinar Feedback
+        </Typography>
 
-          {/* Center title */}
-          <Typography fontWeight={600} textAlign="center">
-            Webinar Feedback
-          </Typography>
+        <IconButton onClick={onClose}>
+          <CloseSquare />
+        </IconButton>
+      </Stack>
+    </Box>
 
-          {/* Right spacer (keeps title truly centered) */}
-          <IconButton
-            onClick={onClose}
-            size="large"
-            aria-label="close"
-          >
-            <CloseSquare style={{ pointerEvents: "none" }} />
-          </IconButton>
-        </Grid>
+    {/* Content */}
+    <DialogContent sx={{ px: 4, py: 4 }}>
 
+      {loading ? (
+        <Box sx={{ textAlign: 'center', py: 6 }}>
+          <CircularProgress />
+        </Box>
+      ) : !feedbacks || 
+    (Array.isArray(feedbacks) && feedbacks.length === 0) ||
+    (typeof feedbacks === 'object' && Object.keys(feedbacks).length === 0) ? (
+        <Typography color="text.secondary">
+          No feedback available
+        </Typography>
+      ) : (
+        <Stack spacing={4}>
 
-        <DialogContent dividers>
-          {loading ? (
-            <CircularProgress />
-          ) : feedbacks.length === 0 ? (
-            <Typography>No feedback available</Typography>
-          ) : (
-            <Stack spacing={2}>
-              {feedbacks &&
-                <DialogTitle>
-                  <Grid container spacing={2} sx={{ p: 3 }}>
-                    {/* <Grid item sx={12} md={6}> */}
-                    <Grid item xs={5}>
-                      <Typography variant="body1" fontWeight="bold">
-                        <strong>Webinar</strong>
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={5}>
-                      <Typography>
-                        :{feedbacks?.webinar}
-                      </Typography>
-                    </Grid>
+          {/* Basic Info */}
+          <Box>
+            <Typography variant="subtitle2" sx={{ color: '#6b7280', mb: 2 }}>
+              Participant Information
+            </Typography>
 
-                    {/* </Grid> */}
-                    <Grid item xs={5}>
-                      <Typography>
-                        <strong>Phone no</strong>
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={5}>
-                      <Typography>
-                        :{feedbacks?.phone}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={5}>
-                      <Typography>
-                        <strong>Content Quality</strong>
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={5}>
-                      <Typography>
-                        :{feedbacks?.content_quality}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={5}>
-                      <Typography>
-                        <strong>Interaction Rating</strong>
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={5}>
-                      <Typography>
-                        :{feedbacks?.interaction_rating}
-                      </Typography>
-                    </Grid>
+            <Stack direction="row" spacing={6}>
+              <Box>
+                <Typography variant="caption" color="text.secondary">
+                  Webinar
+                </Typography>
+                <Typography fontWeight={600}>
+                  {feedbacks?.webinar}
+                </Typography>
+              </Box>
 
-                    <Grid item xs={5}>
-                      <Typography>
-                        <strong>Pace of Session</strong>
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={5}>
-                      <Typography>
-                        :{feedbacks?.pace_of_session}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={5}>
-                      <Typography>
-                        <strong>Speaker Quality</strong>
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={5}>
-                      <Typography>
-                        :{feedbacks?.speaker_quality}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={5}>
-                      <Typography>
-                        <strong>Overall Rating</strong>
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={5}>
-                      <Typography>
-                        :{feedbacks?.overall_rating}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={5}>
-                      <Typography>
-                        <strong>Interested in Future Webinars</strong>
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={5}>
-                      <Typography>
-                        :{feedbacks?.interested_in_future_webinars == true ? 'Yes' : 'No'}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={5}>
-                      <Typography>
-                        <strong>Interested in Paid Courses</strong>
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={5}>
-                      <Typography>
-                        :{feedbacks?.interested_in_paid_courses == true ? 'Yes' : 'No'}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={5}>
-                      <Typography>
-                        <strong>Learned Something New</strong>
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={5}>
-                      <Typography>
-                        :{feedbacks?.learned_something_new == true ? 'Yes' : 'No'}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={5}>
-                      <Typography>
-                        <strong>Would Recommend</strong>
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={5}>
-                      <Typography>
-                        :{feedbacks?.would_recommend == true ? 'Yes' : 'No'}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={5}>
-                      <Typography>
-                        <strong>Liked Most</strong>
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={5}>
-                      <Typography>
-                        :{feedbacks?.liked_most == true ? 'Yes' : 'No'}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={5}>
-                      <Typography>
-                        <strong>Improvement Suggestions</strong>
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={5}>
-                      <Typography>
-                        :{feedbacks?.improvement_suggestions}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={5}>
-                      <Typography>
-                        <strong>Rating Screenshot</strong>
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={5}>
-
-                      :{feedbacks && feedbacks?.rating_screenshot && (
-                        <Grid >
-                          <Box
-                            component="img"
-                            src={`https://portal.aryuacademy.com/api/${feedbacks.rating_screenshot}`}
-                            alt="Screenshot"
-                            sx={{
-                              width: 200,
-                              mt: 1,
-                              borderRadius: 2,
-                              border: "1px solid #ddd",
-                            }}
-                          />
-                        </Grid>
-
-                      )}
-
-                    </Grid>
-                  </Grid>
-                </DialogTitle>
-              }
-
-
+              <Box>
+                <Typography variant="caption" color="text.secondary">
+                  Phone
+                </Typography>
+                <Typography fontWeight={600}>
+                  {feedbacks?.phone}
+                </Typography>
+              </Box>
             </Stack>
+          </Box>
+
+          <Divider />
+
+          {/* Ratings Section */}
+          <Box>
+            <Typography variant="subtitle2" sx={{ color: '#6b7280', mb: 2 }}>
+              Ratings
+            </Typography>
+
+            <Stack direction="row" spacing={3} flexWrap="wrap" useFlexGap>
+              {[
+                { label: 'Content Quality', value: feedbacks?.content_quality },
+                { label: 'Interaction', value: feedbacks?.interaction_rating },
+                { label: 'Pace', value: feedbacks?.pace_of_session },
+                { label: 'Speaker', value: feedbacks?.speaker_quality },
+                { label: 'Overall', value: feedbacks?.overall_rating }
+              ].map((item) => (
+                <Box key={item.label}>
+                  <Typography variant="caption" color="text.secondary">
+                    {item.label}
+                  </Typography>
+                  <Chip
+                    label={`${item.value}/5`}
+                    size="small"
+                    sx={{
+                      mt: 1,
+                      fontWeight: 600,
+                      backgroundColor: '#eef2ff',
+                      color: '#3730a3'
+                    }}
+                  />
+                </Box>
+              ))}
+            </Stack>
+          </Box>
+
+          <Divider />
+
+          {/* Preferences Section */}
+          <Box>
+            <Typography variant="subtitle2" sx={{ color: '#6b7280', mb: 2 }}>
+              Preferences
+            </Typography>
+
+            <Stack direction="row" spacing={3} flexWrap="wrap" useFlexGap>
+              {[
+                { label: 'Future Webinars', value: feedbacks?.interested_in_future_webinars },
+                { label: 'Paid Courses', value: feedbacks?.interested_in_paid_courses },
+                { label: 'Learned Something New', value: feedbacks?.learned_something_new },
+                { label: 'Would Recommend', value: feedbacks?.would_recommend }
+              ].map((item) => (
+                <Chip
+                  key={item.label}
+                  label={`${item.label}: ${item.value ? 'Yes' : 'No'}`}
+                  size="small"
+                  sx={{
+                    fontWeight: 600,
+                    backgroundColor: item.value ? '#ecfdf5' : '#fef2f2',
+                    color: item.value ? '#065f46' : '#991b1b'
+                  }}
+                />
+              ))}
+            </Stack>
+          </Box>
+
+          <Divider />
+
+          {/* Comments */}
+          <Box>
+            <Typography variant="subtitle2" sx={{ color: '#6b7280', mb: 1 }}>
+              Improvement Suggestions
+            </Typography>
+
+            <Box
+              sx={{
+                p: 2,
+                borderRadius: 2,
+                backgroundColor: '#f9fafb',
+                border: '1px solid #e5e7eb'
+              }}
+            >
+              <Typography variant="body2" color="text.secondary">
+                {feedbacks?.improvement_suggestions || 'No suggestions provided.'}
+              </Typography>
+            </Box>
+          </Box>
+
+          {/* Screenshot */}
+          {feedbacks?.rating_screenshot && (
+            <>
+              <Divider />
+
+              <Box>
+                <Typography variant="subtitle2" sx={{ color: '#6b7280', mb: 2 }}>
+                  Rating Screenshot
+                </Typography>
+
+                <Box
+                  component="img"
+                  src={`https://portal.aryuacademy.com/api/${feedbacks.rating_screenshot}`}
+                  alt="Screenshot"
+                  sx={{
+                    width: 260,
+                    borderRadius: 3,
+                    border: '1px solid #e5e7eb',
+                    boxShadow: '0 8px 20px rgba(0,0,0,0.08)'
+                  }}
+                />
+              </Box>
+            </>
           )}
-        </DialogContent>
-      </Grid>
-    </Dialog>
-  );
+
+        </Stack>
+      )}
+    </DialogContent>
+
+    {/* Footer */}
+    <DialogActions
+      sx={{
+        px: 4,
+        py: 2,
+        borderTop: '1px solid #eef1f5'
+      }}
+    >
+      <Button
+        onClick={onClose}
+        variant="contained"
+        sx={{
+          textTransform: 'none',
+          fontWeight: 600,
+          borderRadius: 2,
+          backgroundColor: '#111827',
+          '&:hover': { backgroundColor: '#000000' }
+        }}
+      >
+        Close
+      </Button>
+    </DialogActions>
+  </Dialog>
+);
 }
