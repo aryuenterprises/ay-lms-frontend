@@ -179,8 +179,8 @@ const AdminTable = () => {
           .required('Password is required')
           .min(8, 'Password must be at least 8 characters')
           .matches(
-            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-            'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'
+            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/,
+            "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
           ),
 
     email: Yup.string().required('Email is required').email('Email is invalid'),
@@ -646,7 +646,7 @@ const AdminTable = () => {
         aria-describedby="alert-dialog-slide-description"
       >
         <DialogTitle className="dialogTitle">
-          {currentAdmin ? 'Edit Trainer' : 'Add New Trainer'}
+          {currentAdmin ? 'Edit Admin' : 'Add New Admin'}
           <IconButton color="dark" onClick={handleClose} edge="end" size="big" aria-label="close" title="close">
             <CloseSquare height={80} />
           </IconButton>

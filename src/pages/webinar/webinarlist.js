@@ -382,6 +382,7 @@ const WebinarList = () => {
       logs: webinar.logs,
       mentor: webinar?.mentor,
       waba_link: webinar?.waba_link,
+      seats_available: webinar?.seats_available,
 
       // mode:webinar?.mode,
       video_url: webinar?.video_url
@@ -574,7 +575,7 @@ const WebinarList = () => {
 
       waba_link: currentWebinar?.waba_link,
       mentor: currentWebinar?.mentor,
-      seats_available: currentWebinar?.seats_available ?? 10
+      seats_available: currentWebinar?.seats_available || 10,
     },
 
     onSubmit: async (values, { resetForm, setSubmitting }) => {

@@ -41,10 +41,6 @@ const PermissionsForm = ({ onCancel, currentRole }) => {
   const [formValues, setFormValues] = useState({ permissions: [] });
 
   // Open dialog for adding new module
-  const handleOpenAddForm = () => {
-    setCurrentModule(null);
-    setShowAddForm(true);
-  };
 
   // Open dialog for editing module
   const handleEditModule = (module) => {
@@ -322,6 +318,35 @@ const PermissionsForm = ({ onCancel, currentRole }) => {
       setFieldValue('permissions', newPermissions);
     }
   };
+  const handleAddModuleSubmit = async (values, { setSubmitting, resetForm }) => {
+    try {
+      const response = await axiosInstance.post(`${APP_PATH_BASE_URL}api/modules&permissions`, {
+        module: values.moduleName.trim(),
+        actions: permissionsList
+      });
+
+      if (response.data.success) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Module Created',
+          text: 'New module added successfully',
+          confirmButtonColor: '#3085d6'
+        });
+
+        await handleFetchPermissions();
+        setShowAddForm(false);
+        resetForm();
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: error.response?.data?.message || 'Failed to create module'
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   // Handle individual permission toggle
   const handlePermissionToggle = (module, permission, checked, setFieldValue, values) => {
@@ -357,12 +382,33 @@ const PermissionsForm = ({ onCancel, currentRole }) => {
 
   return (
     <>
-      <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={2} sx={{ mb: 3 }}>
-        <Typography variant="h5" fontWeight={700} gutterBottom>
+      <Stack
+        direction="row"
+        alignItems="center"
+        justifyContent="space-between"
+        sx={{
+          mb: 3,
+          p: 2,
+          borderRadius: 2,
+          backgroundColor: '#f8fafc',
+          border: '1px solid #e2e8f0'
+        }}
+      >
+        <Typography variant="h5" fontWeight={700}>
           Set Permissions for {currentRole?.name}
         </Typography>
-        <Button variant="contained" onClick={handleOpenAddForm} disabled className="hidden">
-          Add New Module
+
+        <Button
+          variant="contained"
+          onClick={() => setShowAddForm(true)}
+          sx={{
+            textTransform: 'none',
+            fontWeight: 600,
+            px: 3,
+            borderRadius: 2
+          }}
+        >
+          + Add Module
         </Button>
       </Stack>
       <Divider sx={{ mb: 3 }} />
@@ -421,12 +467,12 @@ const PermissionsForm = ({ onCancel, currentRole }) => {
                           })}
                         </Grid>
                       </CardContent>
-                      <CardActions className="hidden">
+                      <CardActions>
                         <Box sx={{ flex: 1, display: 'flex', justifyContent: 'space-between' }}>
-                          <Button size="small" color="primary" onClick={() => handleEditModule(module)} disabled>
+                          <Button size="small" color="primary" onClick={() => handleEditModule(module)}>
                             Edit
                           </Button>
-                          <Button size="small" color="error" onClick={() => handleDeleteModule(module)} disabled>
+                          <Button size="small" color="error" onClick={() => handleDeleteModule(module)}>
                             Delete
                           </Button>
                         </Box>
@@ -453,7 +499,7 @@ const PermissionsForm = ({ onCancel, currentRole }) => {
       {/* Module Add/Edit Form Dialog */}
       <Dialog open={showAddForm} onClose={handleCloseAddForm} maxWidth="xs" fullWidth>
         <DialogTitle className="dialogTitle">
-          {currentModule ? 'Edit Module' : 'Add Module'}
+          {currentModule ? `Edit ${currentModule.module}` : 'Add Module'}
           <IconButton color="dark" onClick={handleCloseAddForm} edge="end" size="big" aria-label="close" title="close">
             <CloseSquare height={30} />
           </IconButton>
@@ -487,6 +533,71 @@ const PermissionsForm = ({ onCancel, currentRole }) => {
                 </Button>
                 <Button type="submit" variant="contained" disabled={isSubmitting || !values.moduleName.trim()}>
                   {isSubmitting ? 'Saving...' : currentModule ? 'Update' : 'Add Module'}
+                </Button>
+              </DialogActions>
+            </Form>
+          )}
+        </Formik>
+      </Dialog>
+      <Dialog open={showAddForm} onClose={handleCloseAddForm} maxWidth="xs" fullWidth>
+        <DialogTitle
+          sx={{
+            fontWeight: 700,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            borderBottom: '1px solid #e5e7eb'
+          }}
+        >
+          Add New Module
+          <IconButton onClick={() => setShowAddForm(false)}>
+            <CloseSquare size={22} />
+          </IconButton>
+        </DialogTitle>
+
+        <Formik
+          initialValues={{ moduleName: '' }}
+          validate={(values) => {
+            const errors = {};
+            if (!values.moduleName) {
+              errors.moduleName = 'Module name is required';
+            }
+            return errors;
+          }}
+          onSubmit={handleAddModuleSubmit}
+        >
+          {({ errors, touched, handleChange, handleBlur, values, isSubmitting, handleSubmit }) => (
+            <Form onSubmit={handleSubmit}>
+              <DialogContent sx={{ py: 3 }}>
+                <Stack spacing={2}>
+                  <FormLabel sx={{ fontWeight: 600 }}>Module Name *</FormLabel>
+
+                  <TextField
+                    fullWidth
+                    name="moduleName"
+                    placeholder="Example: Courses, Batches, Webinar"
+                    value={values.moduleName}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={touched.moduleName && Boolean(errors.moduleName)}
+                    helperText={touched.moduleName && errors.moduleName}
+                    disabled={isSubmitting}
+                  />
+                </Stack>
+              </DialogContent>
+
+              <DialogActions sx={{ px: 3, pb: 3 }}>
+                <Button onClick={() => setShowAddForm(false)} variant="outlined" disabled={isSubmitting}>
+                  Cancel
+                </Button>
+
+                <Button
+                  type="submit"
+                  variant="contained"
+                  disabled={isSubmitting || !values.moduleName.trim()}
+                  sx={{ textTransform: 'none', fontWeight: 600 }}
+                >
+                  {isSubmitting ? 'Saving...' : 'Create Module'}
                 </Button>
               </DialogActions>
             </Form>
