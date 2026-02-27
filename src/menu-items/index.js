@@ -17,6 +17,7 @@ const auth = JSON.parse(localStorage.getItem('auth'));
 
 let items = [widget];
 
+
 if (auth?.user?.user_type === 'super_admin') {
   items = [
     widget,
