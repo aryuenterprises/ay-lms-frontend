@@ -42,6 +42,7 @@ const TutorSignUP = Loadable(lazy(() => import('pages/usermanagement/TutorSignup
 
 const TicketListPage = Loadable(lazy(() => import('pages/ticket/ticketlist')));
 const StudentTicketPage = Loadable(lazy(() => import('pages/ticket/studentTicket')));
+const WebinarTicketPage = Loadable(lazy(() => import('pages/ticket/webinarTicket')));
 
 const UserProfile = Loadable(lazy(() => import('pages/usermanagement/userprofile')));
 const MonthlyAttendance = Loadable(lazy(() => import('pages/usermanagement/monthlyattendance')));
@@ -577,6 +578,10 @@ const MainRoutes = {
     {
       path: '/feedback/:id',
       element: <WebinarFeedbackForm />
+    },
+    {
+      path: '/webinar-ticket',
+      element: <WebinarTicketPage />
     },
     {
       path: '/events/:id/qr',

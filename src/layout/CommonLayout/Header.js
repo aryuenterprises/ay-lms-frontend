@@ -104,6 +104,25 @@ const Header = ({ layout = 'landing', ...others }) => {
               >
                 Webinars
               </Button>
+              <Button
+                variant="contained"
+                component={RouterLink}
+                to="/webinar-ticket"
+                sx={{
+                  ml: 2,
+                  px: 3,
+                  borderRadius: 6,
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  boxShadow: '0 6px 18px rgba(183,28,28,0.25)',
+                  background: 'linear-gradient(135deg, #c62828, #ad1f1f)',
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #ad1f1f, #8e1a1a)'
+                  }
+                }}
+              >
+                Support
+              </Button>
 
               <Button
                 variant="contained"
@@ -132,6 +151,19 @@ const Header = ({ layout = 'landing', ...others }) => {
                 size="small"
                 variant="contained"
                 component={RouterLink}
+                to="/webinar-ticket"
+                sx={{
+                  borderRadius: 5,
+                  textTransform: 'none',
+                  fontWeight: 600
+                }}
+              >
+                Support
+              </Button>
+              <Button
+                size="small"
+                variant="contained"
+                component={RouterLink}
                 to="/tutor-signup"
                 sx={{
                   borderRadius: 5,
@@ -139,7 +171,7 @@ const Header = ({ layout = 'landing', ...others }) => {
                   fontWeight: 600
                 }}
               >
-                Join
+                Join Us
               </Button>
             </Box>
           </Toolbar>
