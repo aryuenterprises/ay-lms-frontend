@@ -19,9 +19,9 @@ const icons = {
 
 // Get login type from session storage
 const auth = JSON.parse(localStorage.getItem('auth'));
-const loginType = auth?.loginType;
+const loginType = auth?.user?.user_type;
 const permissions = auth?.user?.permissions || [];
-const attendance = auth?.user?.attendance_type || [];
+const attendanceType = auth?.user?.attendance_type; // 'manual_attendance' | 'automatic_attendance'
 
 // Function to check if user has read permission for a module
 const hasReadPermission = (moduleName) => {
@@ -38,11 +38,9 @@ const hasReadPermission = (moduleName) => {
 };
 
 const hasAttendancePermission = () => {
-  // Super admin has all permissions
-  if (attendance === 'manual_attendance') return true;
+  const hasReadPermission = permissions.some((p) => p.module_name === 'Attendance' && p.allowed_actions.includes('read'));
 
-  // For other user types, rely on loginType only
-  return false;
+  return hasReadPermission && attendanceType === 'manual_attendance';
 };
 
 // Base menu items
@@ -65,9 +63,9 @@ const baseMenuItems = {
       type: 'item',
       url: '/attendance',
       icon: icons.samplePage,
-      show: (loginType === 'student' || loginType === 'tutor') && hasAttendancePermission()
+      show: ['student', 'tutor', 'admin'].includes(loginType) && hasAttendancePermission()
     },
-    
+
     {
       id: 'admin-list',
       title: <FormattedMessage id="admin-list" defaultMessage="Admins" />,
@@ -92,7 +90,7 @@ const baseMenuItems = {
       icon: icons.userIcon,
       show: ['super_admin', 'admin', 'employer', 'tutor'].includes(loginType) && (loginType !== 'admin' || hasReadPermission('Students'))
     },
-    
+
     {
       id: 'batch-list',
       title: <FormattedMessage id="batch-list" defaultMessage="Batch" />,

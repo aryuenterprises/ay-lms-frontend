@@ -12,7 +12,7 @@ const icons = {
 
 // Get login type from session storage
 const auth = JSON.parse(localStorage.getItem('auth'));
-const loginType = auth?.loginType;
+const loginType = auth?.user?.user_type;
 const permissions = auth?.user?.permissions || [];
 
 // Function to check if user has read permission for a module

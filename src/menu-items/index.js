@@ -1,3 +1,5 @@
+
+// project-imports
 import widget from './widget';
 import user from './user';
 import coorprate from './coorprate';
@@ -9,12 +11,6 @@ import reports from './reports';
 import settings from './settings';
 import support from './supports';
 import events from './events';
-
-// import { CognitoUserSession } from 'amazon-cognito-identity-js';
-
-// ==============================|| MENU ITEMS ||============================== //
-// Define menu items for each login type
-
 
 // Get loginType from sessionStorage or localStorage
 const auth = JSON.parse(localStorage.getItem('auth'));
@@ -59,8 +55,11 @@ if (auth?.user?.user_type === 'super_admin') {
     Tutors: user,
     Organizations: coorprate,
     Students: user,
+    Attendance: user,
     Course: course,
     Reports: reports,
+    Ticket: support,
+    Schedule: course,
     Roles: roles,
     Feedback: feedback,
     Settings: settings,
