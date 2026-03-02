@@ -1,4 +1,3 @@
-// src/pages/forms/SubmissionList.jsx
 import React, { useMemo, useState } from 'react';
 import {
   Box,
@@ -8,12 +7,17 @@ import {
   Paper,
   Stack,
   Fade,
-  InputAdornment
+  InputAdornment,
+  useTheme,
+  useMediaQuery
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 
 /* ================= COMPONENT ================= */
 const SubmissionList = ({ questions, onSelect }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
   const [search, setSearch] = useState('');
   const [active, setActive] = useState(null);
 
@@ -28,7 +32,7 @@ const SubmissionList = ({ questions, onSelect }) => {
             uuid: a.submission_uuid,
             submitted_at: a.submitted_at,
             answers: [],
-            searchIndex: '' // will build later
+            searchIndex: ''
           };
         }
 
@@ -41,14 +45,15 @@ const SubmissionList = ({ questions, onSelect }) => {
 
     return Object.values(map)
       .map((s) => {
-        // Build searchable text
         const answerText = s.answers
           .map((a) =>
             [
               a.question,
               a.value_text,
               a.value_number,
-              Array.isArray(a.value_json) ? a.value_json.join(' ') : a.value_json
+              Array.isArray(a.value_json)
+                ? a.value_json.join(' ')
+                : a.value_json
             ]
               .filter(Boolean)
               .join(' ')
@@ -63,11 +68,12 @@ const SubmissionList = ({ questions, onSelect }) => {
       .sort((a, b) => new Date(b.submitted_at) - new Date(a.submitted_at));
   }, [questions]);
 
-  /* -------- FILTER (ALL FIELDS) -------- */
+  /* -------- FILTER -------- */
   const filtered = useMemo(() => {
     if (!search) return submissions;
-    const term = search.toLowerCase();
-    return submissions.filter((s) => s.searchIndex.includes(term));
+    return submissions.filter((s) =>
+      s.searchIndex.includes(search.toLowerCase())
+    );
   }, [search, submissions]);
 
   return (
@@ -76,8 +82,8 @@ const SubmissionList = ({ questions, onSelect }) => {
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        borderRight: { md: '1px solid #e0e0e0' },
-        bgcolor: '#fff'
+        bgcolor: '#fff',
+        borderRight: isMobile ? 'none' : '1px solid #e0e0e0'
       }}
     >
       {/* ================= HEADER ================= */}
@@ -97,7 +103,7 @@ const SubmissionList = ({ questions, onSelect }) => {
         <TextField
           size="small"
           fullWidth
-          placeholder="Search by name, answer, keyword…"
+          placeholder="Search name, answer, keyword…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           InputProps={{
@@ -113,20 +119,26 @@ const SubmissionList = ({ questions, onSelect }) => {
       <Divider />
 
       {/* ================= LIST ================= */}
-      <Box sx={{ flex: 1, overflowY: 'auto', p: 1 }}>
-        <Stack spacing={1}>
+      <Box
+        sx={{
+          flex: 1,
+          overflowY: 'auto',
+          px: isMobile ? 1.5 : 1,
+          py: 1
+        }}
+      >
+        <Stack spacing={isMobile ? 1.5 : 1}>
           {filtered.map((s, index) => (
-            <Fade in timeout={200 + index * 30} key={s.uuid}>
+            <Fade in timeout={150 + index * 30} key={s.uuid}>
               <Paper
                 onClick={() => {
                   setActive(s.uuid);
                   onSelect(s);
                 }}
                 sx={{
-                  p: 1.8,
-                  borderRadius: 2,
+                  p: isMobile ? 2 : 1.8,
+                  borderRadius: 2.5,
                   cursor: 'pointer',
-                  transition: 'all 0.2s ease',
                   border:
                     active === s.uuid
                       ? '2px solid'
@@ -134,18 +146,27 @@ const SubmissionList = ({ questions, onSelect }) => {
                   borderColor:
                     active === s.uuid ? 'primary.main' : 'transparent',
                   bgcolor:
-                    active === s.uuid ? 'primary.lighter' : '#fafafa',
-                  '&:hover': {
-                    bgcolor: 'primary.lighter',
-                    transform: 'translateX(2px)'
-                  }
+                    active === s.uuid
+                      ? 'primary.lighter'
+                      : '#fafafa',
+                  transition: 'all 0.2s ease',
+                  '&:hover': !isMobile
+                    ? {
+                        bgcolor: 'primary.lighter',
+                        transform: 'translateX(2px)'
+                      }
+                    : undefined
                 }}
               >
                 <Typography fontWeight={600}>
                   Submission #{filtered.length - index}
                 </Typography>
 
-                <Typography variant="caption" color="text.secondary">
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ display: 'block', mt: 0.5 }}
+                >
                   {new Date(s.submitted_at).toLocaleString()}
                 </Typography>
               </Paper>

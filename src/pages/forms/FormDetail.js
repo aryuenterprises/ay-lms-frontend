@@ -1,4 +1,3 @@
-// src/pages/forms/FormDetail.jsx
 import React, { useEffect, useState } from 'react';
 import {
   Box,
@@ -15,8 +14,7 @@ import {
   DialogContent,
   DialogTitle,
   useMediaQuery,
-  useTheme,
-  Paper
+  useTheme
 } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CloseIcon from '@mui/icons-material/Close';
@@ -32,12 +30,15 @@ const FormDetail = () => {
   const [form, setForm] = useState(null);
   const [selectedSubmission, setSelectedSubmission] = useState(null);
   const [openQuestions, setOpenQuestions] = useState(false);
+  const [openSubmission, setOpenSubmission] = useState(false);
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
-    axiosInstance.get(`/api/webinar/forms/${uuid}`).then((res) => setForm(res.data.data));
+    axiosInstance
+      .get(`/api/webinar/forms/${uuid}`)
+      .then((res) => setForm(res.data.data));
   }, [uuid]);
 
   if (!form) return null;
@@ -54,6 +55,11 @@ const FormDetail = () => {
     });
   };
 
+  const handleSelectSubmission = (submission) => {
+    setSelectedSubmission(submission);
+    if (isMobile) setOpenSubmission(true);
+  };
+
   return (
     <MainCard
       sx={{
@@ -63,44 +69,40 @@ const FormDetail = () => {
       }}
     >
       {/* ================= HEADER ================= */}
-      <Fade in timeout={400}>
+      <Fade in timeout={300}>
         <Box pb={3} mb={2}>
           <Stack
             direction={{ xs: 'column', md: 'row' }}
             justifyContent="space-between"
-            alignItems={{ xs: 'flex-start', md: 'center' }}
             spacing={2}
           >
             <Box>
               <Typography variant="h4" fontWeight={700}>
                 {form.title}
               </Typography>
-
-              <Typography color="text.secondary" mt={0.5}>
+              <Typography color="text.secondary">
                 {form.description}
               </Typography>
             </Box>
 
             <Stack direction="row" spacing={1.5} alignItems="center">
-              <Chip label={form.is_active ? 'Active' : 'Inactive'} color={form.is_active ? 'success' : 'default'} />
-              <Tooltip title="View questions">
-                <Chip
-                  label={`${form.questions.length} Questions`}
-                  clickable
-                  onClick={() => setOpenQuestions(true)}
-                  sx={{
-                    cursor: 'pointer',
-                    fontWeight: 600,
-                    '&:hover': {
-                      bgcolor: 'primary.light',
-                      color: 'primary.contrastText'
-                    }
-                  }}
-                />
-              </Tooltip>
-              <Chip label={`${form.submissions_count} Submissions`} color="primary" />
+              <Chip
+                label={form.is_active ? 'Active' : 'Inactive'}
+                color={form.is_active ? 'success' : 'default'}
+              />
 
-              <Tooltip title="Copy public submission link">
+              <Chip
+                label={`${form.questions.length} Questions`}
+                clickable
+                onClick={() => setOpenQuestions(true)}
+              />
+
+              <Chip
+                label={`${form.submissions_count} Submissions`}
+                color="primary"
+              />
+
+              <Tooltip title="Copy public link">
                 <IconButton onClick={handleCopyLink}>
                   <ContentCopyIcon fontSize="small" />
                 </IconButton>
@@ -113,36 +115,36 @@ const FormDetail = () => {
       </Fade>
 
       {/* ================= CONTENT ================= */}
-      <Slide in direction="up" timeout={500}>
+      {!isMobile ? (
+        /* ===== DESKTOP VIEW ===== */
         <Grid container sx={{ flex: 1, minHeight: 0 }}>
-          <Grid
-            item
-            xs={12}
-            md={4}
-            lg={3}
-            sx={{
-              height: '100%',
-              borderRight: { md: '1px solid #e0e0e0' }
-            }}
-          >
-            <SubmissionList questions={form.questions} onSelect={setSelectedSubmission} />
+          <Grid item md={4} lg={3} sx={{ borderRight: '1px solid #e0e0e0' }}>
+            <SubmissionList
+              questions={form.questions}
+              onSelect={handleSelectSubmission}
+            />
           </Grid>
 
-          <Grid item xs={12} md={8} lg={9} sx={{ height: '100%' }}>
+          <Grid item md={8} lg={9}>
             <SubmissionDrawer submission={selectedSubmission} />
           </Grid>
         </Grid>
-      </Slide>
+      ) : (
+        /* ===== MOBILE VIEW ===== */
+        <Box sx={{ flex: 1 }}>
+          <SubmissionList
+            questions={form.questions}
+            onSelect={handleSelectSubmission}
+          />
+        </Box>
+      )}
 
-      {/* ================= QUESTIONS POPUP ================= */}
+      {/* ================= MOBILE SUBMISSION DRAWER ================= */}
       <Dialog
-        open={openQuestions}
-        onClose={() => setOpenQuestions(false)}
-        fullScreen={isMobile}
-        maxWidth="md"
-        fullWidth
+        open={openSubmission}
+        onClose={() => setOpenSubmission(false)}
+        fullScreen
         TransitionComponent={Slide}
-        transitionDuration={400}
       >
         <DialogTitle
           sx={{
@@ -151,54 +153,57 @@ const FormDetail = () => {
             alignItems: 'center'
           }}
         >
-          <Typography fontWeight={700}>Form Questions</Typography>
-          <IconButton onClick={() => setOpenQuestions(false)}>
+          <Typography fontWeight={700}>Submission</Typography>
+          <IconButton onClick={() => setOpenSubmission(false)}>
             <CloseIcon />
           </IconButton>
         </DialogTitle>
 
-        <DialogContent
-          sx={{
-            bgcolor: '#f7f9fc',
-            pb: 4
-          }}
-        >
+        <DialogContent sx={{ p: 0 }}>
+          <SubmissionDrawer submission={selectedSubmission} />
+        </DialogContent>
+      </Dialog>
+
+      {/* ================= QUESTIONS POPUP ================= */}
+      <Dialog
+        open={openQuestions}
+        onClose={() => setOpenQuestions(false)}
+        fullScreen={isMobile}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          <Stack direction="row" justifyContent="space-between">
+            <Typography fontWeight={700}>Form Questions</Typography>
+            <IconButton onClick={() => setOpenQuestions(false)}>
+              <CloseIcon />
+            </IconButton>
+          </Stack>
+        </DialogTitle>
+
+        <DialogContent sx={{ bgcolor: '#f7f9fc' }}>
           <Stack spacing={2}>
-            {form.questions.map((q, index) => (
-              <Fade in timeout={200 + index * 80} key={q.id}>
-                <Paper
-                  sx={{
-                    p: 2.5,
-                    borderRadius: 3,
-                    boxShadow: '0px 4px 14px rgba(0,0,0,0.06)',
-                    transition: '0.2s',
-                    '&:hover': { transform: 'translateY(-2px)' }
-                  }}
-                >
-                  <Typography fontWeight={600}>
-                    {index + 1}. {q.label}
-                  </Typography>
+            {form.questions.map((q, i) => (
+              <Box
+                key={q.id}
+                sx={{
+                  p: 2.5,
+                  borderRadius: 3,
+                  bgcolor: '#fff',
+                  boxShadow: '0 4px 14px rgba(0,0,0,0.06)'
+                }}
+              >
+                <Typography fontWeight={600}>
+                  {i + 1}. {q.label}
+                </Typography>
 
-                  <Stack direction="row" spacing={1} mt={1}>
-                    <Chip label={q.type} size="small" />
-                    {q.is_required && <Chip label="Required" color="error" size="small" />}
-                  </Stack>
-
-                  {q.validation_rules && Object.keys(q.validation_rules).length > 0 && (
-                    <Typography variant="caption" color="text.secondary" display="block" mt={1}>
-                      Validation: {JSON.stringify(q.validation_rules)}
-                    </Typography>
+                <Stack direction="row" spacing={1} mt={1}>
+                  <Chip label={q.type} size="small" />
+                  {q.is_required && (
+                    <Chip label="Required" size="small" color="error" />
                   )}
-
-                  {q.options?.length > 0 && (
-                    <Stack direction="row" spacing={1} flexWrap="wrap" mt={1}>
-                      {q.options.map((opt) => (
-                        <Chip key={opt.id} label={opt.value} size="small" />
-                      ))}
-                    </Stack>
-                  )}
-                </Paper>
-              </Fade>
+                </Stack>
+              </Box>
             ))}
           </Stack>
         </DialogContent>

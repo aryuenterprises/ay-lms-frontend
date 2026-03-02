@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import ShareIcon from '@mui/icons-material/Share';
 import Tooltip from '@mui/material/Tooltip';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
   Box,
   Typography,
@@ -20,7 +21,8 @@ import {
   Chip,
   Stack,
   MenuItem,
-  Paper
+  Paper,
+  useTheme, useMediaQuery, Accordion, AccordionSummary, AccordionDetails 
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -71,6 +73,8 @@ const FormList = () => {
       ]
     }));
   };
+  const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const updateQuestion = (index, field, value) => {
     const updated = [...formData.questions];
@@ -118,6 +122,68 @@ const FormList = () => {
       Swal.fire('Error', 'Failed to copy link', 'error');
     }
   };
+  const renderQuestionEditor = (q, index) => (
+  <Stack spacing={2}>
+    <Stack direction="row" justifyContent="space-between">
+      <Typography fontWeight={600}>Question {index + 1}</Typography>
+      <IconButton color="error" onClick={() => removeQuestion(index)}>
+        <DeleteIcon />
+      </IconButton>
+    </Stack>
+
+    <TextField
+      fullWidth
+      label="Question Label"
+      value={q.label}
+      onChange={(e) => updateQuestion(index, 'label', e.target.value)}
+    />
+
+    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+      <TextField
+        select
+        label="Type"
+        value={q.type}
+        onChange={(e) => updateQuestion(index, 'type', e.target.value)}
+        fullWidth
+      >
+        {QUESTION_TYPES.map((t) => (
+          <MenuItem key={t} value={t}>{t}</MenuItem>
+        ))}
+      </TextField>
+
+      <FormControlLabel
+        control={
+          <Switch
+            checked={q.is_required}
+            onChange={(e) =>
+              updateQuestion(index, 'is_required', e.target.checked)
+            }
+          />
+        }
+        label="Required"
+      />
+    </Stack>
+
+    {q.type === 'CHECKBOX' && (
+      <Box>
+        <Typography fontWeight={500}>Options</Typography>
+        {q.options.map((opt, oIdx) => (
+          <TextField
+            key={oIdx}
+            fullWidth
+            margin="dense"
+            label={`Option ${oIdx + 1}`}
+            value={opt.value}
+            onChange={(e) => updateOption(index, oIdx, e.target.value)}
+          />
+        ))}
+        <Button size="small" onClick={() => addOption(index)}>
+          + Add Option
+        </Button>
+      </Box>
+    )}
+  </Stack>
+);
 
   /* ---------------- CREATE FORM ---------------- */
   const handleCreate = async () => {
@@ -160,7 +226,7 @@ const FormList = () => {
       {/* Form Cards */}
       <Grid container spacing={3}>
         {forms.map((form) => (
-          <Grid item xs={12} md={6} lg={4} key={form.id}>
+          <Grid item xs={12} sm={6} md={6} lg={4} key={form.id}>
             <Card sx={{ borderRadius: 3, boxShadow: 4 }}>
               <CardContent>
                 <Typography fontWeight={600}>{form.title}</Typography>
@@ -193,7 +259,12 @@ const FormList = () => {
       </Grid>
 
       {/* ================= CREATE FORM DIALOG ================= */}
-      <Dialog open={open} maxWidth="lg" fullWidth>
+      <Dialog
+  open={open}
+  fullScreen={isMobile}
+  maxWidth="lg"
+  fullWidth
+>
         <DialogTitle sx={{ fontWeight: 700 }}>Create New Form</DialogTitle>
         <DialogContent>
           {/* Form Info */}
@@ -317,7 +388,15 @@ const FormList = () => {
           </Button>
         </DialogContent>
 
-        <DialogActions>
+        <DialogActions
+  sx={{
+    position: isMobile ? 'sticky' : 'static',
+    bottom: 0,
+    bgcolor: '#fff',
+    zIndex: 10,
+    px: 2
+  }}
+>
           <Button onClick={() => setOpen(false)}>Cancel</Button>
           <Button variant="contained" onClick={handleCreate}>
             Create Form
