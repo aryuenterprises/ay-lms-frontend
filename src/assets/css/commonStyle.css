@@ -73,6 +73,46 @@ div:where(.swal2-container) div:where(.swal2-popup) {
 .tabs {
   width: 200px;
 }
+/* ===== Floating Blob Animation ===== */
+@keyframes floatBlob {
+  0% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-40px) scale(1.05); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+/* ===== Balloon Drift ===== */
+@keyframes balloon {
+  0% {
+    transform: translateY(0) translateX(0);
+    opacity: 0.4;
+  }
+  100% {
+    transform: translateY(-120vh) translateX(40px);
+    opacity: 0;
+  }
+}
+
+/* ===== Soft Fade Up ===== */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes blobFloat {
+  0% { transform: translate(0,0) scale(1); }
+  50% { transform: translate(40px,-30px) scale(1.1); }
+  100% { transform: translate(0,0) scale(1); }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
 .profile-pic {
   width: 50px;

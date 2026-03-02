@@ -8,7 +8,7 @@ import {
   Card,
   CardContent,
   Typography,
-  Link,
+  // Link,
   Chip,
   Button,
   TextField,
@@ -28,7 +28,7 @@ import { ArrowBack } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import Tooltip from "@mui/material/Tooltip";
 // import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
+// import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
 import { Container } from "@mui/system";
 import { People, CalendarToday, Description } from "@mui/icons-material";
 import DataTable from "react-data-table-component";
@@ -37,13 +37,16 @@ import { formatDateTime } from "utils/dateUtils";
 import * as XLSX from "xlsx";
 // import { jsPDF } from 'jspdf';
 // import autoTable from 'jspdf-autotable';
-import LinkIcon from "@mui/icons-material/Link";
+// import LinkIcon from "@mui/icons-material/Link";
 import CertificateSample from "../../assets/certificate/4016369-ai.png";
 import FeedbackIcon from "@mui/icons-material/Feedback";
 import WebinarFeedbackDialog from "components/webinarfeedbackpop";
 import Swal from "sweetalert2";
 import axiosInstance from "utils/axios";
 // import Certification from 'pages/course/certification';
+//Icon
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CancelIcon from "@mui/icons-material/Cancel";
 
 const ParticipantTable = () => {
   const navigate = useNavigate();
@@ -218,7 +221,83 @@ const ParticipantTable = () => {
     },
     { id: "mobile", name: "Mobile", selector: (row) => row.phone },
     { id: "email", name: "Email", selector: (row) => row.email },
-    { id: "payment", name: "Payment", selector: (row) => row.payment_status },
+   {
+  id: "payment",
+  name: "Payment",
+  center: true,
+  cell: (row) => {
+    const status = row.payment_status?.toLowerCase();
+
+    const isFree = status === "free";
+
+    const isPaid =
+      status === "paid" ||
+      status === "success" ||
+      status === "done" ||
+      status === "completed";
+
+    if (isFree) {
+      return (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              color: "info.main",
+              fontWeight: 600,
+              fontSize: { xs: "12px", sm: "14px" },
+            }}
+          >
+            Free
+          </Typography>
+        </Box>
+      );
+    }
+
+    if (isPaid) {
+      return (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <CheckCircleIcon
+            sx={{
+              color: "success.main",
+              fontSize: { xs: 18, sm: 22 },
+            }}
+          />
+          <Typography
+            variant="body2"
+            sx={{
+              color: "success.main",
+              fontWeight: 600,
+              fontSize: { xs: "12px", sm: "14px" },
+            }}
+          >
+            Done
+          </Typography>
+        </Box>
+      );
+    }
+
+    return (
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+        <CancelIcon
+          sx={{
+            color: "error.main",
+            fontSize: { xs: 18, sm: 22 },
+          }}
+        />
+        <Typography
+          variant="body2"
+          sx={{
+            color: "error.main",
+            fontWeight: 600,
+            fontSize: { xs: "12px", sm: "14px" },
+          }}
+        >
+          Failed
+        </Typography>
+      </Box>
+    );
+  },
+},
     {
       id: "feedback",
       name: "Feedback",
@@ -240,6 +319,8 @@ const ParticipantTable = () => {
       id: "registeredAt",
       name: "Registered At",
       selector: (row) => formatDateTime(row.registered_at),
+      minWidth: "200px",
+      wrap: true,
     },
     {
       id: "certificateStatus",
@@ -1206,7 +1287,7 @@ const ParticipantTable = () => {
         open={feedbackOpen}
         onClose={() => setFeedbackOpen(false)}
         webinarUuid={selectedWebinarUuid}
-        // feedback=[]
+      // feedback=[]
       />
     </Container>
   );

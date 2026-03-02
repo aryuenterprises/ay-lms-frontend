@@ -7,7 +7,7 @@ import { PersistGate } from 'redux-persist/integration/react';
 
 // fonts
 import 'assets/fonts/inter/inter.css';
-
+import './assets/css/commonStyle.css';
 // scroll bar
 import 'simplebar/dist/simplebar.css';
 import 'slick-carousel/slick/slick.css';

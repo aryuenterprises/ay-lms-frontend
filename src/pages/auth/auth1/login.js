@@ -1,103 +1,84 @@
-// import { Link } from 'react-router-dom';
-
-// material-ui
-import { Grid, Typography, Container, Box } from '@mui/material';
-
-// project-imports
-// import Logo from 'components/logo';
-// import useAuth from 'hooks/useAuth';
-// import AuthDivider from 'sections/auth/AuthDivider';
-// import AuthSocButton from 'sections/auth/AuthSocButton';
-
-// import AuthWrapper from 'sections/auth/AuthWrapper';
-import AuthLogin from 'sections/auth/auth-forms/AuthLogin';
-
-// assets
-// import imgGoogle from 'assets/images/auth/google.svg';
-// import imgGithub from 'assets/images/auth/github.svg';
-// import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
-
+import { Grid, Typography, Container, Box, Divider } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-// import { Theme } from 'emoji-picker-react';
-// import { Navigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import AuthLogin from 'sections/auth/auth-forms/AuthLogin';
 
 // ================================|| LOGIN ||================================ //
 const Login = () => {
-  // const { isLoggedIn } = useAuth();
   const theme = useTheme();
-  // const auth = JSON.parse(localStorage.getItem('auth'));
-
-  // if (auth?.token) {
-  //   return <Navigate to="/dashboard" replace />;
-  // }
 
   return (
-    // <GoogleReCaptchaProvider
-    //   reCaptchaKey="6Ld5EyEsAAAAAMsQJ-ioz2ZRzgAsgbfjFIHcT3Hl"
-    //   scriptProps={{
-    //     async: true,
-    //     defer: true,
-    //     appendTo: 'head'
-    //   }}
-    //   container={{
-    //     parameters: {
-    //       badge: 'inline',
-    //       theme: 'light'
-    //     }
-    //   }}
-    // >
-    <Box
+    <Container
+      disableGutters
       sx={{
         width: '100%',
-        maxWidth: { xs: '100%', sm: 480, md: 650 }, // wider
-        m: 2,
-        mt: 10,
-        p: 2.5,
-        borderRadius: 5,
-        backgroundColor: theme.palette.background.paper,
-        boxShadow: 3
+        maxWidth: 390,
+        mx: 'auto',
       }}
     >
-      {/* LOGIN BOX */}
-
-      <Container
-        disableGutters
-        sx={{
-          maxWidth: "md", // your desired width
-          mx: 'auto' // center it
-        }}
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.55, ease: 'easeOut' }}
       >
-        <Grid container spacing={3} >
-          <Grid item xs={12} textAlign="center">
-            <Typography variant="h3">Login</Typography>
+        <Box
+          sx={{
+            px: { xs: 2.5, sm: 3 },
+            py: { xs: 3, sm: 3.5 },
+            borderRadius: 3,
+            backgroundColor: theme.palette.background.paper,
+            boxShadow: '0 20px 45px rgba(0,0,0,0.12)',
+            border: '1px solid rgba(0,0,0,0.06)'
+          }}
+        >
+          <Grid container spacing={2.5}>
+            {/* ---------- Header ---------- */}
+            <Grid item xs={12} textAlign="center">
+              <Typography
+                sx={{
+                  fontSize: '1.6rem',
+                  fontWeight: 700,
+                  color: '#1c1c1c'
+                }}
+              >
+                Welcome Back
+              </Typography>
+
+              <Typography
+                sx={{
+                  mt: 0.5,
+                  fontSize: 14,
+                  color: '#666'
+                }}
+              >
+                Sign in to continue to Aryu Academy
+              </Typography>
+            </Grid>
+
+            <Grid item xs={12}>
+              <Divider sx={{ opacity: 0.6 }} />
+            </Grid>
+
+            {/* ---------- Form ---------- */}
+            <Grid item xs={12}>
+              <AuthLogin />
+            </Grid>
+
+            {/* ---------- Footer ---------- */}
+            <Grid item xs={12} textAlign="center">
+              <Typography
+                sx={{
+                  fontSize: 13,
+                  color: '#777'
+                }}
+              >
+                Secure access for students & staff
+              </Typography>
+            </Grid>
           </Grid>
-
-          {/* <Grid item xs={12}>
-              <AuthSocButton>
-                <img src={imgGithub} alt="Github" style={{ margin: '0 10px' }} />
-                Sign In with Github
-              </AuthSocButton>
-            </Grid> */}
-
-          {/* <Grid item xs={12}>
-              <AuthSocButton>
-                <img src={imgGoogle} alt="Google" style={{ margin: '0 10px', width: 20 }} />
-                Sign In with Google
-              </AuthSocButton>
-            </Grid> */}
-
-          {/* <Grid item xs={12}>
-              <AuthDivider>
-                <Typography variant="body1">OR</Typography>
-              </AuthDivider>
-            </Grid> */}
-
-          <Grid item xs={12}>
-            <AuthLogin />
-          </Grid>
-        </Grid>
-      </Container>
-    </Box>
+        </Box>
+      </motion.div>
+    </Container>
   );
 };
 

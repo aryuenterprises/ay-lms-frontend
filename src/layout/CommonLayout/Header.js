@@ -1,181 +1,190 @@
 import PropTypes from 'prop-types';
-import { cloneElement } from 'react';
+import { cloneElement, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
-// material-ui
-import AppBar from '@mui/material/AppBar';
+// MUI
+import {
+  AppBar,
+  Box,
+  Button,
+  Container,
+  Stack,
+  Toolbar,
+  IconButton,
+  Drawer,
+  Divider,
+  useScrollTrigger
+} from '@mui/material';
+import MenuIcon from '@mui/icons-material/Menu';
+import CloseIcon from '@mui/icons-material/Close';
 import { alpha, useTheme } from '@mui/material/styles';
-import { Box, Button, Container, Stack, Toolbar, useScrollTrigger } from '@mui/material';
 
-// project-imports
+// Project
 import Logo from 'components/logo';
 import { Link as RouterLink } from 'react-router-dom';
 
-// elevation scroll
+/* ---------------- Elevation on Scroll ---------------- */
 function ElevationScroll({ children, window }) {
   const theme = useTheme();
   const trigger = useScrollTrigger({
     disableHysteresis: true,
     threshold: 10,
-    target: window ? window : undefined
+    target: window ?? undefined
   });
 
   return cloneElement(children, {
     style: {
-      boxShadow: trigger ? '0 8px 6px -10px rgba(0,0,0,0.5)' : 'none',
-      backgroundColor: trigger ? alpha(theme.palette.background.default, 0.8) : alpha(theme.palette.background.default, 0.1)
+      backdropFilter: 'blur(12px)',
+      backgroundColor: alpha(theme.palette.background.default, trigger ? 0.85 : 0.5),
+      boxShadow: trigger ? '0 12px 30px rgba(0,0,0,0.12)' : 'none',
+      transition: 'all 0.3s ease'
     }
   });
 }
 
-// ==============================|| HEADER ||============================== //
+/* ---------------- Motion Button ---------------- */
+const MotionButton = motion(Button);
 
+/* ============================== HEADER ============================== */
 const Header = ({ layout = 'landing', ...others }) => {
   const theme = useTheme();
+  const [open, setOpen] = useState(false);
+
+  const menuItems = [
+    {
+      label: 'Webinars',
+      external: true,
+      href: 'https://workshop.aryuacademy.com/'
+    },
+    {
+      label: 'Support',
+      to: '/webinar-ticket'
+    },
+    {
+      label: 'Become a Trainer',
+      to: '/tutor-signup'
+    }
+  ];
 
   return (
     <ElevationScroll layout={layout} {...others}>
-      <AppBar
-        sx={{
-          bgcolor: alpha(theme.palette.background.default, 0.1),
-          backdropFilter: 'blur(8px)',
-          color: theme.palette.text.primary,
-          boxShadow: 'none'
-        }}
-      >
+      <AppBar position="fixed">
         <Container maxWidth="xl">
           <Toolbar
             sx={{
               py: 1.5,
-              px: { xs: 2, sm: 4, md: 6 },
-              backdropFilter: 'blur(6px)',
+              px: { xs: 2, sm: 4 },
               display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center'
+              justifyContent: 'space-between'
             }}
           >
-            {/* LEFT: Logo */}
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <Logo reverse to="/" />
-            </Box>
+            {/* Logo */}
+            <Logo reverse to="/" />
 
-            {/* RIGHT: Desktop Menu */}
-            <Stack direction="row" spacing={4} alignItems="center" sx={{ display: { xs: 'none', md: 'flex' } }}>
-              {/* <Typography
-                sx={{
-                  fontSize: 15,
-                  fontWeight: 500,
-                  cursor: 'pointer',
-                  '&:hover': { color: '#b71c1c' }
-                }}
-              >
-                Programs
-              </Typography>
-
-              <Typography
-                sx={{
-                  fontSize: 15,
-                  fontWeight: 500,
-                  cursor: 'pointer',
-                  '&:hover': { color: '#b71c1c' }
-                }}
-              >
-                Contact
-              </Typography> */}
-
-              {/* CTA */}
-              <Button
-                variant="contained"
-                component="a"
-                href="https://workshop.aryuacademy.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                sx={{
-                  ml: 2,
-                  px: 3,
-                  borderRadius: 6,
-                  textTransform: 'none',
-                  fontWeight: 600,
-                  boxShadow: '0 6px 18px rgba(183,28,28,0.25)',
-                  background: 'linear-gradient(135deg, #c62828, #ad1f1f)',
-                  '&:hover': {
-                    background: 'linear-gradient(135deg, #ad1f1f, #8e1a1a)'
-                  }
-                }}
-              >
-                Webinars
-              </Button>
-              <Button
-                variant="contained"
-                component={RouterLink}
-                to="/webinar-ticket"
-                sx={{
-                  ml: 2,
-                  px: 3,
-                  borderRadius: 6,
-                  textTransform: 'none',
-                  fontWeight: 600,
-                  boxShadow: '0 6px 18px rgba(183,28,28,0.25)',
-                  background: 'linear-gradient(135deg, #c62828, #ad1f1f)',
-                  '&:hover': {
-                    background: 'linear-gradient(135deg, #ad1f1f, #8e1a1a)'
-                  }
-                }}
-              >
-                Support
-              </Button>
-
-              <Button
-                variant="contained"
-                component={RouterLink}
-                to="/tutor-signup"
-                sx={{
-                  ml: 2,
-                  px: 3,
-                  borderRadius: 6,
-                  textTransform: 'none',
-                  fontWeight: 600,
-                  boxShadow: '0 6px 18px rgba(183,28,28,0.25)',
-                  background: 'linear-gradient(135deg, #c62828, #ad1f1f)',
-                  '&:hover': {
-                    background: 'linear-gradient(135deg, #ad1f1f, #8e1a1a)'
-                  }
-                }}
-              >
-                Become a Trainer
-              </Button>
+            {/* Desktop Menu */}
+            <Stack
+              direction="row"
+              spacing={3}
+              alignItems="center"
+              sx={{ display: { xs: 'none', md: 'flex' } }}
+            >
+              {menuItems.map((item) => (
+                <MotionButton
+                  key={item.label}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  variant="contained"
+                  component={item.external ? 'a' : RouterLink}
+                  href={item.external ? item.href : undefined}
+                  to={!item.external ? item.to : undefined}
+                  target={item.external ? '_blank' : undefined}
+                  rel="noopener noreferrer"
+                  sx={{
+                    px: 3,
+                    borderRadius: 6,
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    background:
+                      'linear-gradient(135deg, #c62828, #ad1f1f)',
+                    boxShadow: '0 8px 24px rgba(183,28,28,0.3)'
+                  }}
+                >
+                  {item.label}
+                </MotionButton>
+              ))}
             </Stack>
 
-            {/* Mobile */}
-            <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
-              <Button
-                size="small"
-                variant="contained"
-                component={RouterLink}
-                to="/webinar-ticket"
-                sx={{
-                  borderRadius: 5,
-                  textTransform: 'none',
-                  fontWeight: 600
-                }}
-              >
-                Support
-              </Button>
-              <Button
-                size="small"
-                variant="contained"
-                component={RouterLink}
-                to="/tutor-signup"
-                sx={{
-                  borderRadius: 5,
-                  textTransform: 'none',
-                  fontWeight: 600
-                }}
-              >
-                Join Us
-              </Button>
-            </Box>
+            {/* Mobile Menu Button */}
+            <IconButton
+              sx={{ display: { xs: 'flex', md: 'none' } }}
+              onClick={() => setOpen(true)}
+            >
+              <MenuIcon />
+            </IconButton>
           </Toolbar>
         </Container>
+
+        {/* ---------------- Mobile Drawer ---------------- */}
+        <AnimatePresence>
+          {open && (
+            <Drawer
+              anchor="right"
+              open={open}
+              onClose={() => setOpen(false)}
+              PaperProps={{
+                sx: {
+                  width: '100%',
+                  maxWidth: 360,
+                  background: alpha(theme.palette.background.default, 0.95)
+                }
+              }}
+            >
+              <motion.div
+                initial={{ x: 300, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: 300, opacity: 0 }}
+                transition={{ duration: 0.35, ease: 'easeOut' }}
+              >
+                <Box p={3}>
+                  <Box display="flex" justifyContent="space-between" alignItems="center">
+                    <Logo reverse to="/" />
+                    <IconButton onClick={() => setOpen(false)}>
+                      <CloseIcon />
+                    </IconButton>
+                  </Box>
+
+                  <Divider sx={{ my: 3 }} />
+
+                  <Stack spacing={2}>
+                    {menuItems.map((item) => (
+                      <MotionButton
+                        key={item.label}
+                        fullWidth
+                        whileTap={{ scale: 0.95 }}
+                        variant="contained"
+                        component={item.external ? 'a' : RouterLink}
+                        href={item.external ? item.href : undefined}
+                        to={!item.external ? item.to : undefined}
+                        target={item.external ? '_blank' : undefined}
+                        onClick={() => setOpen(false)}
+                        sx={{
+                          py: 1.5,
+                          borderRadius: 6,
+                          textTransform: 'none',
+                          fontWeight: 600,
+                          background:
+                            'linear-gradient(135deg, #c62828, #ad1f1f)'
+                        }}
+                      >
+                        {item.label}
+                      </MotionButton>
+                    ))}
+                  </Stack>
+                </Box>
+              </motion.div>
+            </Drawer>
+          )}
+        </AnimatePresence>
       </AppBar>
     </ElevationScroll>
   );

@@ -126,6 +126,11 @@ const TermsAndConditions = Loadable(lazy(() => import('layout/CommonLayout/terms
 const PrivacyPolicy = Loadable(lazy(() => import('layout/CommonLayout/privacy-policy')));
 const RefundPolicy = Loadable(lazy(() => import('layout/CommonLayout/refund-policy')));
 
+// forms
+const FormList = Loadable(lazy(() => import('pages/forms/FormList')));
+const FormDetail = Loadable(lazy(() => import('pages/forms/FormDetail')));
+const FormSubmit = Loadable(lazy(() => import('pages/forms/FormSubmit')));
+
 // ==============================|| MAIN ROUTES ||============================== //
 
 const MainRoutes = {
@@ -539,6 +544,16 @@ const MainRoutes = {
         {
           path: '/webinar/feedback',
           element: <Feedback />
+        },
+        {
+          title: 'Forms',
+          path: 'forms',
+          element: <FormList />
+        },
+        {
+          title: 'Form Detail',
+          path: 'forms/:uuid',
+          element: <FormDetail />
         }
       ]
     },
@@ -610,6 +625,11 @@ const MainRoutes = {
     {
       path: '/events/user/:Id/poll/in',
       element: <EventPollPage />
+    },
+    {
+      title: 'Form Submit',
+      path: 'forms/:uuid/submit',
+      element: <FormSubmit />
     },
     {
       path: '/maintenance',
