@@ -197,7 +197,7 @@ const FormList = () => {
 
   /* ---------------- COPY LINK ---------------- */
   const handleCopyLink = async (slug) => {
-    const link = `${window.location.origin}/forms/${slug}/submit`;
+    const link = `${window.location.origin}/forms/${slug}`;
     await navigator.clipboard.writeText(link);
 
     Swal.fire({
@@ -265,7 +265,7 @@ const FormList = () => {
                   </TableCell>
 
                   <TableCell>
-                    <Button size="small" onClick={() => navigate(`/forms/${form.slug}`)}>
+                    <Button size="small" onClick={() => navigate(`/forms/${form.slug}/entries`)}>
                       {form.submissions_count || 0}
                     </Button>
                   </TableCell>
