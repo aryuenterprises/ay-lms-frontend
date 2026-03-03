@@ -19,6 +19,7 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import Header from "layout/CommonLayout/Header";
 import Footer from "layout/CommonLayout/FooterBlock";
+import webinarImage from "assets/images/python 2.jpg";
 import { APP_PATH_BASE_URL } from "config";
 
 const FormSubmit = () => {
@@ -146,9 +147,9 @@ const FormSubmit = () => {
       );
 
       Swal.fire({
-  icon: "success",
-  title: "Thank You!",
-  html: `
+        icon: "success",
+        title: "Thank You!",
+        html: `
     <div style="
       font-size:14px;
       line-height:1.6;
@@ -160,10 +161,10 @@ const FormSubmit = () => {
       Our team will review your requirements and we look forward to meeting you in the webinar.
     </div>
   `,
-  confirmButtonText: "OK",
-  confirmButtonColor: "#d40000",
-  buttonsStyling: true
-});
+        confirmButtonText: "OK",
+        confirmButtonColor: "#d40000",
+        buttonsStyling: true,
+      });
       setAnswers({});
     } catch (err) {
       console.log(err.response?.data);
@@ -310,6 +311,26 @@ const FormSubmit = () => {
             }}>
             {/* ===== TITLE SECTION ===== */}
             <Box mb={6} textAlign="center">
+              <Box
+                sx={{
+                  mb: 4,
+                  display: "flex",
+                  justifyContent: "center",
+                }}>
+                <Box
+                  component="img"
+                  src={webinarImage}
+                  alt="Webinar Banner"
+                  sx={{
+                    width: "100%",
+                    maxWidth: { xs: "100%", sm: 500, md: 650 },
+                    height: "auto",
+                    borderRadius: 2,
+                    objectFit: "cover",
+                    boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
+                  }}
+                />
+              </Box>
               <Typography
                 variant="h4"
                 fontWeight={800}
