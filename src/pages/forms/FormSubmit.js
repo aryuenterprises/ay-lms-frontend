@@ -87,9 +87,9 @@ const FormSubmit = () => {
   };
   const handleSubmit = async () => {
     if (!validateForm()) {
-    Swal.fire("Error", "Please fix the errors before submitting", "error");
-    return;
-  }
+      Swal.fire("Error", "Please fix the errors before submitting", "error");
+      return;
+    }
     try {
       setSubmitting(true);
 
@@ -145,7 +145,25 @@ const FormSubmit = () => {
         { headers: { "Content-Type": "multipart/form-data" } },
       );
 
-      Swal.fire("Success", "Feedback submitted successfully", "success");
+      Swal.fire({
+  icon: "success",
+  title: "Thank You!",
+  html: `
+    <div style="
+      font-size:14px;
+      line-height:1.6;
+      text-align:center;
+      padding:0 5px;
+    ">
+      We appreciate you sharing your expectations with us.
+      <br/><br/>
+      Our team will review your requirements and we look forward to meeting you in the webinar.
+    </div>
+  `,
+  confirmButtonText: "OK",
+  confirmButtonColor: "#d40000",
+  buttonsStyling: true
+});
       setAnswers({});
     } catch (err) {
       console.log(err.response?.data);
