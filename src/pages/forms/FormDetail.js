@@ -1,52 +1,82 @@
 import React, { useEffect, useState } from 'react';
 import {
   Box,
-  Grid,
   Typography,
   Chip,
   Stack,
   Divider,
-  Fade,
-  Slide,
   IconButton,
   Tooltip,
   Dialog,
-  DialogContent,
   DialogTitle,
-  useMediaQuery,
-  useTheme
+  DialogContent,
+  Checkbox,
+  FormControlLabel,
+  Paper,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  TableContainer
 } from '@mui/material';
+import { APP_PATH_BASE_URL } from 'config';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CloseIcon from '@mui/icons-material/Close';
 import { useParams } from 'react-router';
 import axiosInstance from 'utils/axios';
 import MainCard from 'components/MainCard';
-import SubmissionList from './SubmissionList';
-import SubmissionDrawer from './SubmissionDrawer';
 import Swal from 'sweetalert2';
 
 const FormDetail = () => {
-  const { uuid } = useParams();
+  const { slug } = useParams();
   const [form, setForm] = useState(null);
-  const [selectedSubmission, setSelectedSubmission] = useState(null);
-  const [openQuestions, setOpenQuestions] = useState(false);
-  const [openSubmission, setOpenSubmission] = useState(false);
+  const [openColumns, setOpenColumns] = useState(false);
+  const [visibleColumns, setVisibleColumns] = useState([]);
+  console.log('FormDetail Mounted');
+  console.log('Slug param:', slug);
 
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
+  /* ---------------- FETCH FORM ---------------- */
   useEffect(() => {
-    axiosInstance
-      .get(`/api/webinar/forms/${uuid}`)
-      .then((res) => setForm(res.data.data));
-  }, [uuid]);
+    const fetchForm = async () => {
+      try {
+        if (!slug) return;
 
-  if (!form) return null;
+        const res = await axiosInstance.get(`${APP_PATH_BASE_URL}/api/webinar/forms/${slug}/`);
 
-  /* ---------------- SHARE LINK ---------------- */
+        const data = res?.data?.data;
+
+        console.log('Fetched form data:', data);
+
+        if (!data) {
+          throw new Error('Invalid form response');
+        }
+
+        setForm(data);
+        setVisibleColumns(data.questions?.map((q) => q.id) || []);
+      } catch (error) {
+        console.error('Form fetch error:', error);
+
+        Swal.fire('Error', error.response?.data?.message || error.message || 'Failed to load form', 'error');
+      }
+    };
+
+    fetchForm();
+  }, [slug]);
+
+  if (!form) {
+    return (
+      <MainCard>
+        <Typography>Loading form...</Typography>
+      </MainCard>
+    );
+  }
+
+  /* ---------------- COPY LINK ---------------- */
   const handleCopyLink = () => {
-    const link = `${window.location.origin}/forms/${form.uuid}/submit`;
+    const link = `${window.location.origin}/forms/${form.slug}/submit`;
     navigator.clipboard.writeText(link);
+
     Swal.fire({
       icon: 'success',
       title: 'Link copied',
@@ -55,155 +85,124 @@ const FormDetail = () => {
     });
   };
 
-  const handleSelectSubmission = (submission) => {
-    setSelectedSubmission(submission);
-    if (isMobile) setOpenSubmission(true);
+  /* ---------------- DYNAMIC COLUMN HANDLER ---------------- */
+  const toggleColumn = (id) => {
+    setVisibleColumns((prev) => (prev.includes(id) ? prev.filter((col) => col !== id) : [...prev, id]));
+  };
+
+  /* ---------------- PREPARE TABLE DATA ---------------- */
+  const submissions = form.submissions || [];
+
+  const getAnswer = (submission, questionId) => {
+    const answer = submission.answers.find((a) => a.question === questionId);
+
+    if (!answer) return '-';
+
+    return (
+      answer.value_text ||
+      answer.value_number ||
+      (Array.isArray(answer.value_json) ? answer.value_json.join(', ') : answer.value_json) ||
+      '-'
+    );
   };
 
   return (
-    <MainCard
-      sx={{
-        height: 'calc(100vh - 120px)',
-        display: 'flex',
-        flexDirection: 'column'
-      }}
-    >
-      {/* ================= HEADER ================= */}
-      <Fade in timeout={300}>
-        <Box pb={3} mb={2}>
-          <Stack
-            direction={{ xs: 'column', md: 'row' }}
-            justifyContent="space-between"
-            spacing={2}
-          >
-            <Box>
-              <Typography variant="h4" fontWeight={700}>
-                {form.title}
-              </Typography>
-              <Typography color="text.secondary">
-                {form.description}
-              </Typography>
-            </Box>
+    <MainCard>
+      {/* HEADER */}
+      <Box pb={3}>
+        <Stack direction={{ xs: 'column', md: 'row' }} justifyContent="space-between" spacing={2}>
+          <Box>
+            <Typography variant="h4" fontWeight={700}>
+              {form.title}
+            </Typography>
+            <Typography color="text.secondary">{form.description}</Typography>
+          </Box>
 
-            <Stack direction="row" spacing={1.5} alignItems="center">
-              <Chip
-                label={form.is_active ? 'Active' : 'Inactive'}
-                color={form.is_active ? 'success' : 'default'}
-              />
+          <Stack direction="row" spacing={1} alignItems="center">
+            <Chip label={form.is_active ? 'Active' : 'Inactive'} color={form.is_active ? 'success' : 'default'} />
 
-              <Chip
-                label={`${form.questions.length} Questions`}
-                clickable
-                onClick={() => setOpenQuestions(true)}
-              />
+            <Chip label={`${form.submissions_count} Submissions`} color="primary" />
 
-              <Chip
-                label={`${form.submissions_count} Submissions`}
-                color="primary"
-              />
+            <Chip label="Columns" clickable onClick={() => setOpenColumns(true)} />
 
-              <Tooltip title="Copy public link">
-                <IconButton onClick={handleCopyLink}>
-                  <ContentCopyIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            </Stack>
+            <Tooltip title="Copy Public Link">
+              <IconButton onClick={handleCopyLink}>
+                <ContentCopyIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
           </Stack>
+        </Stack>
 
-          <Divider sx={{ mt: 3 }} />
-        </Box>
-      </Fade>
+        <Divider sx={{ mt: 3 }} />
+      </Box>
 
-      {/* ================= CONTENT ================= */}
-      {!isMobile ? (
-        /* ===== DESKTOP VIEW ===== */
-        <Grid container sx={{ flex: 1, minHeight: 0 }}>
-          <Grid item md={4} lg={3} sx={{ borderRight: '1px solid #e0e0e0' }}>
-            <SubmissionList
-              questions={form.questions}
-              onSelect={handleSelectSubmission}
-            />
-          </Grid>
-
-          <Grid item md={8} lg={9}>
-            <SubmissionDrawer submission={selectedSubmission} />
-          </Grid>
-        </Grid>
-      ) : (
-        /* ===== MOBILE VIEW ===== */
-        <Box sx={{ flex: 1 }}>
-          <SubmissionList
-            questions={form.questions}
-            onSelect={handleSelectSubmission}
-          />
-        </Box>
-      )}
-
-      {/* ================= MOBILE SUBMISSION DRAWER ================= */}
-      <Dialog
-        open={openSubmission}
-        onClose={() => setOpenSubmission(false)}
-        fullScreen
-        TransitionComponent={Slide}
+      {/* SUBMISSIONS TABLE */}
+      <Paper
+        elevation={0}
+        sx={{
+          borderRadius: 3,
+          border: '1px solid #e5e7eb',
+          overflowX: 'auto'
+        }}
       >
-        <DialogTitle
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
-          }}
-        >
-          <Typography fontWeight={700}>Submission</Typography>
-          <IconButton onClick={() => setOpenSubmission(false)}>
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
+        <TableContainer>
+          <Table size="small">
+            <TableHead>
+              <TableRow sx={{ backgroundColor: '#f9fafb' }}>
+                <TableCell sx={{ fontWeight: 600 }}>Submitted At</TableCell>
 
-        <DialogContent sx={{ p: 0 }}>
-          <SubmissionDrawer submission={selectedSubmission} />
-        </DialogContent>
-      </Dialog>
+                {form.questions
+                  .filter((q) => visibleColumns.includes(q.id))
+                  .map((q) => (
+                    <TableCell key={q.id} sx={{ fontWeight: 600 }}>
+                      {q.label}
+                    </TableCell>
+                  ))}
+              </TableRow>
+            </TableHead>
 
-      {/* ================= QUESTIONS POPUP ================= */}
-      <Dialog
-        open={openQuestions}
-        onClose={() => setOpenQuestions(false)}
-        fullScreen={isMobile}
-        maxWidth="md"
-        fullWidth
-      >
+            <TableBody>
+              {submissions.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={form.questions.length + 1}>No submissions yet</TableCell>
+                </TableRow>
+              )}
+
+              {submissions.map((submission) => (
+                <TableRow key={submission.id} hover>
+                  <TableCell>{new Date(submission.submitted_at).toLocaleString()}</TableCell>
+
+                  {form.questions
+                    .filter((q) => visibleColumns.includes(q.id))
+                    .map((q) => (
+                      <TableCell key={q.id}>{getAnswer(submission, q.id)}</TableCell>
+                    ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
+
+      {/* COLUMN SELECTION DIALOG */}
+      <Dialog open={openColumns} onClose={() => setOpenColumns(false)} fullWidth maxWidth="sm">
         <DialogTitle>
           <Stack direction="row" justifyContent="space-between">
-            <Typography fontWeight={700}>Form Questions</Typography>
-            <IconButton onClick={() => setOpenQuestions(false)}>
+            <Typography fontWeight={700}>Select Columns</Typography>
+            <IconButton onClick={() => setOpenColumns(false)}>
               <CloseIcon />
             </IconButton>
           </Stack>
         </DialogTitle>
 
-        <DialogContent sx={{ bgcolor: '#f7f9fc' }}>
-          <Stack spacing={2}>
-            {form.questions.map((q, i) => (
-              <Box
+        <DialogContent>
+          <Stack spacing={1}>
+            {form.questions.map((q) => (
+              <FormControlLabel
                 key={q.id}
-                sx={{
-                  p: 2.5,
-                  borderRadius: 3,
-                  bgcolor: '#fff',
-                  boxShadow: '0 4px 14px rgba(0,0,0,0.06)'
-                }}
-              >
-                <Typography fontWeight={600}>
-                  {i + 1}. {q.label}
-                </Typography>
-
-                <Stack direction="row" spacing={1} mt={1}>
-                  <Chip label={q.type} size="small" />
-                  {q.is_required && (
-                    <Chip label="Required" size="small" color="error" />
-                  )}
-                </Stack>
-              </Box>
+                control={<Checkbox checked={visibleColumns.includes(q.id)} onChange={() => toggleColumn(q.id)} />}
+                label={q.label}
+              />
             ))}
           </Stack>
         </DialogContent>

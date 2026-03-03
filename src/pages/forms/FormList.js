@@ -1,12 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import ShareIcon from '@mui/icons-material/Share';
-import Tooltip from '@mui/material/Tooltip';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
   Box,
   Typography,
-  Grid,
   Button,
+  IconButton,
+  Tooltip,
+  Chip,
+  Stack,
+  Paper,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  TableContainer,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -14,49 +21,47 @@ import {
   TextField,
   Switch,
   FormControlLabel,
-  Card,
-  CardContent,
-  IconButton,
   Divider,
-  Chip,
-  Stack,
-  MenuItem,
-  Paper,
-  useTheme, useMediaQuery, Accordion, AccordionSummary, AccordionDetails 
+  useTheme,
+  useMediaQuery,
+  MenuItem
 } from '@mui/material';
+import { useNavigate } from 'react-router';
 import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import axiosInstance from 'utils/axios';
-import MainCard from 'components/MainCard';
-import { useNavigate } from 'react-router';
+import ShareIcon from '@mui/icons-material/Share';
+import { APP_PATH_BASE_URL } from 'config';
 import Swal from 'sweetalert2';
+import axiosInstance from 'utils/axios';
 
-const QUESTION_TYPES = ['TEXT', 'RATING', 'CHECKBOX', 'FILE'];
+/* ---------- SLUG GENERATOR ---------- */
+const generateSlug = (title) =>
+  title
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/\s+/g, '-');
 
 const FormList = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const navigate = useNavigate();
   const [forms, setForms] = useState([]);
   const [open, setOpen] = useState(false);
+  const [editingSlug, setEditingSlug] = useState(null);
+  const [selectedForm, setSelectedForm] = useState(null);
+  const [openViewDialog, setOpenViewDialog] = useState(false);
 
   const [formData, setFormData] = useState({
     title: '',
+    slug: '',
     description: '',
     is_active: true,
     questions: []
   });
 
-  /* ---------------- FETCH FORMS ---------------- */
-  const fetchForms = async () => {
-    const res = await axiosInstance.get('/api/webinar/forms/');
-    setForms(res.data.data);
-  };
-
-  useEffect(() => {
-    fetchForms();
-  }, []);
-
-  /* ---------------- QUESTION HANDLERS ---------------- */
   const addQuestion = () => {
     setFormData((prev) => ({
       ...prev,
@@ -67,15 +72,15 @@ const FormList = () => {
           type: 'TEXT',
           is_required: false,
           order: prev.questions.length + 1,
-          validation_rules: {},
+          validation_rules: {
+            min_length: '',
+            max_length: ''
+          },
           options: []
         }
       ]
     }));
   };
-  const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
   const updateQuestion = (index, field, value) => {
     const updated = [...formData.questions];
     updated[index][field] = value;
@@ -100,233 +105,279 @@ const FormList = () => {
     setFormData({ ...formData, questions: updated });
   };
 
-  const updateOption = (qIndex, oIndex, value) => {
-    const updated = [...formData.questions];
-    updated[qIndex].options[oIndex].value = value;
-    setFormData({ ...formData, questions: updated });
+  /* ---------------- FETCH ---------------- */
+  const fetchForms = async () => {
+    const res = await axiosInstance.get(`${APP_PATH_BASE_URL}/api/webinar/forms/`);
+    setForms(res.data.data || []);
   };
-  const handleCopyLink = async (uuid) => {
-    const link = `${window.location.origin}/forms/${uuid}/submit`;
 
-    try {
-      await navigator.clipboard.writeText(link);
-      Swal.fire({
-        toast: true,
-        position: 'top-end',
-        icon: 'success',
-        title: 'Submission link copied',
-        showConfirmButton: false,
-        timer: 1500
-      });
-    } catch (err) {
-      Swal.fire('Error', 'Failed to copy link', 'error');
+  useEffect(() => {
+    fetchForms();
+  }, []);
+
+  /* ---------------- OPEN CREATE ---------------- */
+  const handleOpenCreate = () => {
+    setEditingSlug(null);
+    setFormData({
+      title: '',
+      slug: '',
+      description: '',
+      is_active: true,
+      questions: []
+    });
+    setOpen(true);
+  };
+
+  /* ---------------- OPEN EDIT ---------------- */
+  const handleOpenEdit = async (slug) => {
+    if (!slug || typeof slug !== 'string') {
+      console.error('Invalid slug:', slug);
+      return;
     }
+
+    const res = await axiosInstance.get(`${APP_PATH_BASE_URL}/api/webinar/forms/${slug}/`);
+
+    const form = res.data.data;
+
+    setEditingSlug(slug);
+    setFormData({
+      title: form.title,
+      slug: form.slug,
+      description: form.description,
+      is_active: form.is_active,
+      questions: form.questions || []
+    });
+
+    setOpen(true);
   };
-  const renderQuestionEditor = (q, index) => (
-  <Stack spacing={2}>
-    <Stack direction="row" justifyContent="space-between">
-      <Typography fontWeight={600}>Question {index + 1}</Typography>
-      <IconButton color="error" onClick={() => removeQuestion(index)}>
-        <DeleteIcon />
-      </IconButton>
-    </Stack>
 
-    <TextField
-      fullWidth
-      label="Question Label"
-      value={q.label}
-      onChange={(e) => updateQuestion(index, 'label', e.target.value)}
-    />
+  /* ---------------- SUBMIT (CREATE / UPDATE) ---------------- */
+  const handleSubmit = async () => {
+    if (!formData.title) {
+      Swal.fire('Title Required', 'Please enter form title', 'warning');
+      return;
+    }
 
-    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-      <TextField
-        select
-        label="Type"
-        value={q.type}
-        onChange={(e) => updateQuestion(index, 'type', e.target.value)}
-        fullWidth
-      >
-        {QUESTION_TYPES.map((t) => (
-          <MenuItem key={t} value={t}>{t}</MenuItem>
-        ))}
-      </TextField>
-
-      <FormControlLabel
-        control={
-          <Switch
-            checked={q.is_required}
-            onChange={(e) =>
-              updateQuestion(index, 'is_required', e.target.checked)
-            }
-          />
-        }
-        label="Required"
-      />
-    </Stack>
-
-    {q.type === 'CHECKBOX' && (
-      <Box>
-        <Typography fontWeight={500}>Options</Typography>
-        {q.options.map((opt, oIdx) => (
-          <TextField
-            key={oIdx}
-            fullWidth
-            margin="dense"
-            label={`Option ${oIdx + 1}`}
-            value={opt.value}
-            onChange={(e) => updateOption(index, oIdx, e.target.value)}
-          />
-        ))}
-        <Button size="small" onClick={() => addOption(index)}>
-          + Add Option
-        </Button>
-      </Box>
-    )}
-  </Stack>
-);
-
-  /* ---------------- CREATE FORM ---------------- */
-  const handleCreate = async () => {
     try {
-      await axiosInstance.post('/api/webinar/forms/', formData);
-
-      Swal.fire({
-        icon: 'success',
-        title: 'Form Created',
-        timer: 1500,
-        showConfirmButton: false
-      });
+      if (editingSlug) {
+        // UPDATE
+        await axiosInstance.put(`/api/webinar/forms/${editingSlug}/`, formData);
+        Swal.fire('Updated', 'Form updated successfully', 'success');
+      } else {
+        // CREATE
+        await axiosInstance.post('/api/webinar/forms/', formData);
+        Swal.fire('Created', 'Form created successfully', 'success');
+      }
 
       setOpen(false);
-      setFormData({
-        title: '',
-        description: '',
-        is_active: true,
-        questions: []
-      });
       fetchForms();
     } catch (err) {
-      Swal.fire('Error', err.response?.data?.message || 'Failed', 'error');
+      Swal.fire('Error', err.response?.data?.message || 'Operation failed', 'error');
     }
   };
 
-  /* ======================== UI ======================== */
+  /* ---------------- DELETE ---------------- */
+  const handleDelete = async (slug) => {
+    if (!slug || typeof slug !== 'string') {
+      return;
+    }
+
+    const confirm = await Swal.fire({
+      title: 'Delete Form?',
+      icon: 'warning',
+      showCancelButton: true
+    });
+
+    if (confirm.isConfirmed) {
+      await axiosInstance.delete(`${APP_PATH_BASE_URL}/api/webinar/forms/${slug}/delete/`);
+      Swal.fire('Deleted', 'Form deleted successfully', 'success');
+      fetchForms();
+    }
+  };
+
+  /* ---------------- COPY LINK ---------------- */
+  const handleCopyLink = async (slug) => {
+    const link = `${window.location.origin}/forms/${slug}/submit`;
+    await navigator.clipboard.writeText(link);
+
+    Swal.fire({
+      toast: true,
+      position: 'top-end',
+      icon: 'success',
+      title: 'Submission link copied',
+      timer: 1500,
+      showConfirmButton: false
+    });
+  };
+
+  /* ================= UI ================= */
   return (
-    <MainCard>
-      {/* Header */}
-      <Box display="flex" justifyContent="space-between" mb={3}>
+    <Box p={isMobile ? 2 : 4}>
+      {/* HEADER */}
+      <Stack direction={isMobile ? 'column' : 'row'} justifyContent="space-between" alignItems="center" mb={4}>
         <Typography variant="h4" fontWeight={700}>
           Forms Management
         </Typography>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setOpen(true)}>
+
+        <Button variant="contained" startIcon={<AddIcon />} onClick={handleOpenCreate}>
           Create Form
         </Button>
-      </Box>
+      </Stack>
 
-      {/* Form Cards */}
-      <Grid container spacing={3}>
-        {forms.map((form) => (
-          <Grid item xs={12} sm={6} md={6} lg={4} key={form.id}>
-            <Card sx={{ borderRadius: 3, boxShadow: 4 }}>
-              <CardContent>
-                <Typography fontWeight={600}>{form.title}</Typography>
-                <Typography variant="body2" color="text.secondary" mt={1}>
-                  {form.description}
-                </Typography>
+      {/* TABLE */}
+      <Paper
+        elevation={0}
+        sx={{
+          borderRadius: 3,
+          border: '1px solid #e5e7eb'
+        }}
+      >
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow sx={{ backgroundColor: '#f9fafb' }}>
+                <TableCell sx={{ fontWeight: 600 }}>Title</TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>Slug</TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>ENTRIES</TableCell>
+                <TableCell align="left" sx={{ fontWeight: 600 }}>
+                  Actions
+                </TableCell>
+              </TableRow>
+            </TableHead>
 
-                <Divider sx={{ my: 2 }} />
+            <TableBody>
+              {forms.map((form) => (
+                <TableRow key={form.slug} hover>
+                  <TableCell>
+                    <Typography fontWeight={600}>{form.title}</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {form.description}
+                    </Typography>
+                  </TableCell>
 
-                <Stack direction="row" justifyContent="space-between">
-                  <Chip label={`Submissions: ${form.submissions_count}`} color="primary" />
-                  <Stack direction="row" spacing={1}>
-                    <Tooltip title="View form details">
-                      <IconButton onClick={() => navigate(`/forms/${form.uuid}`)}>
-                        <VisibilityIcon />
-                      </IconButton>
-                    </Tooltip>
+                  <TableCell>
+                    <Typography sx={{ fontFamily: 'monospace' }}>{form.slug}</Typography>
+                  </TableCell>
 
-                    <Tooltip title="Copy submission link">
-                      <IconButton onClick={() => handleCopyLink(form.uuid)}>
-                        <ShareIcon />
-                      </IconButton>
-                    </Tooltip>
-                  </Stack>
-                </Stack>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
+                  <TableCell>
+                    <Chip label={form.is_active ? 'Active' : 'Inactive'} color={form.is_active ? 'success' : 'default'} size="small" />
+                  </TableCell>
 
-      {/* ================= CREATE FORM DIALOG ================= */}
-      <Dialog
-  open={open}
-  fullScreen={isMobile}
-  maxWidth="lg"
-  fullWidth
->
-        <DialogTitle sx={{ fontWeight: 700 }}>Create New Form</DialogTitle>
+                  <TableCell>
+                    <Button size="small" onClick={() => navigate(`/forms/${form.slug}`)}>
+                      {form.submissions_count || 0}
+                    </Button>
+                  </TableCell>
+
+                  <TableCell align="right">
+                    <Stack direction="row" spacing={1}>
+                      <Tooltip title="View">
+                        <IconButton
+                          onClick={() => {
+                            setSelectedForm(form);
+                            setOpenViewDialog(true);
+                          }}
+                        >
+                          <VisibilityIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Edit">
+                        <IconButton onClick={() => handleOpenEdit(form.slug)}>
+                          <EditIcon />
+                        </IconButton>
+                      </Tooltip>
+
+                      <Tooltip title="Delete">
+                        <IconButton color="error" onClick={() => handleDelete(form.slug)}>
+                          <DeleteIcon />
+                        </IconButton>
+                      </Tooltip>
+
+                      <Tooltip title="Copy Link">
+                        <IconButton onClick={() => handleCopyLink(form.slug)}>
+                          <ShareIcon />
+                        </IconButton>
+                      </Tooltip>
+                    </Stack>
+                  </TableCell>
+                </TableRow>
+              ))}
+
+              {forms.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={5} align="center">
+                    No forms available
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
+
+      {/* ADD / EDIT DIALOG */}
+      <Dialog open={open} fullScreen={isMobile} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700 }}>{editingSlug ? 'Edit Form' : 'Create Form'}</DialogTitle>
+
         <DialogContent>
-          {/* Form Info */}
-          <Paper sx={{ p: 3, mb: 3 }}>
-            <TextField
-              fullWidth
-              label="Form Title"
-              margin="normal"
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            />
-            <TextField
-              fullWidth
-              label="Description"
-              multiline
-              rows={3}
-              margin="normal"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            />
-            <FormControlLabel
-              control={<Switch checked={formData.is_active} onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })} />}
-              label="Active"
-            />
-          </Paper>
+          <TextField
+            fullWidth
+            label="Form Title"
+            margin="normal"
+            value={formData.title}
+            onChange={(e) => {
+              const title = e.target.value;
 
-          {/* Questions */}
-          <Typography variant="h6" fontWeight={600} mb={2}>
+              setFormData({
+                ...formData,
+                title,
+                slug: editingSlug ? formData.slug : generateSlug(title)
+              });
+            }}
+          />
+
+          <TextField fullWidth label="Slug" margin="normal" value={formData.slug} InputProps={{ readOnly: true }} />
+
+          <TextField
+            fullWidth
+            label="Description"
+            multiline
+            rows={3}
+            margin="normal"
+            value={formData.description}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                description: e.target.value
+              })
+            }
+          />
+          <Divider sx={{ my: 3 }} />
+
+          <Typography variant="h6" fontWeight={600}>
             Questions
           </Typography>
 
           {formData.questions.map((q, index) => (
-            <Paper key={index} sx={{ p: 3, mb: 2 }}>
+            <Paper
+              key={index}
+              sx={{
+                p: 3,
+                mt: 3,
+                borderRadius: 3,
+                border: '1px solid #e5e7eb'
+              }}
+            >
               <Stack spacing={2}>
-                <Stack direction="row" justifyContent="space-between">
+                {/* Header */}
+                <Stack
+                  direction={isMobile ? 'column' : 'row'}
+                  justifyContent="space-between"
+                  alignItems={isMobile ? 'flex-start' : 'center'}
+                  spacing={2}
+                >
                   <Typography fontWeight={600}>Question {index + 1}</Typography>
-                  <IconButton color="error" onClick={() => removeQuestion(index)}>
-                    <DeleteIcon />
-                  </IconButton>
-                </Stack>
-
-                <TextField
-                  fullWidth
-                  label="Question Label"
-                  value={q.label}
-                  onChange={(e) => updateQuestion(index, 'label', e.target.value)}
-                />
-
-                <Stack direction="row" spacing={2}>
-                  <TextField
-                    select
-                    label="Type"
-                    value={q.type}
-                    onChange={(e) => updateQuestion(index, 'type', e.target.value)}
-                    sx={{ width: 200 }}
-                  >
-                    {QUESTION_TYPES.map((t) => (
-                      <MenuItem key={t} value={t}>
-                        {t}
-                      </MenuItem>
-                    ))}
-                  </TextField>
 
                   <FormControlLabel
                     control={<Switch checked={q.is_required} onChange={(e) => updateQuestion(index, 'is_required', e.target.checked)} />}
@@ -334,76 +385,133 @@ const FormList = () => {
                   />
                 </Stack>
 
-                {/* Rating Validation */}
-                {q.type === 'RATING' && (
-                  <Stack direction="row" spacing={2}>
-                    <TextField
-                      type="number"
-                      label="Min"
-                      onChange={(e) =>
-                        updateQuestion(index, 'validation_rules', {
-                          ...q.validation_rules,
-                          min: Number(e.target.value)
-                        })
-                      }
-                    />
-                    <TextField
-                      type="number"
-                      label="Max"
-                      onChange={(e) =>
-                        updateQuestion(index, 'validation_rules', {
-                          ...q.validation_rules,
-                          max: Number(e.target.value)
-                        })
-                      }
-                    />
-                  </Stack>
-                )}
+                {/* Label */}
+                <TextField
+                  fullWidth
+                  label="Question Label"
+                  value={q.label}
+                  onChange={(e) => updateQuestion(index, 'label', e.target.value)}
+                />
 
-                {/* Checkbox Options */}
+                {/* Type */}
+                <TextField select fullWidth label="Type" value={q.type} onChange={(e) => updateQuestion(index, 'type', e.target.value)}>
+                  {[
+                    { value: 'TEXT', label: 'Short Text' },
+                    { value: 'TEXTAREA', label: 'Long Text' },
+                    { value: 'RATING', label: 'Rating' },
+                    { value: 'CHECKBOX', label: 'Checkbox' },
+                    { value: 'FILE', label: 'File Upload' }
+                  ].map((type) => (
+                    <MenuItem key={type.value} value={type.value}>
+                      {type.label}
+                    </MenuItem>
+                  ))}
+                </TextField>
+
+
+                {/* CHECKBOX OPTIONS */}
                 {q.type === 'CHECKBOX' && (
                   <Box>
-                    <Typography fontWeight={500}>Options</Typography>
-                    {q.options.map((opt, oIdx) => (
+                    {q.options.map((opt, oIndex) => (
                       <TextField
-                        key={oIdx}
+                        key={oIndex}
                         fullWidth
-                        margin="dense"
-                        label={`Option ${oIdx + 1}`}
+                        sx={{ mb: 2 }}
+                        label={`Option ${oIndex + 1}`}
                         value={opt.value}
-                        onChange={(e) => updateOption(index, oIdx, e.target.value)}
+                        onChange={(e) => {
+                          const updated = [...formData.questions];
+                          updated[index].options[oIndex].value = e.target.value;
+                          setFormData({ ...formData, questions: updated });
+                        }}
                       />
                     ))}
+
                     <Button size="small" onClick={() => addOption(index)}>
-                      + Add Option
+                      Add Option
                     </Button>
                   </Box>
                 )}
+
+                <Button color="error" variant="outlined" onClick={() => removeQuestion(index)}>
+                  Remove Question
+                </Button>
               </Stack>
             </Paper>
           ))}
 
-          <Button startIcon={<AddIcon />} onClick={addQuestion}>
+          <Button startIcon={<AddIcon />} sx={{ mt: 2 }} onClick={addQuestion}>
             Add Question
           </Button>
+
+          <FormControlLabel
+            control={
+              <Switch
+                checked={formData.is_active}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    is_active: e.target.checked
+                  })
+                }
+              />
+            }
+            label="Active"
+          />
         </DialogContent>
 
-        <DialogActions
-  sx={{
-    position: isMobile ? 'sticky' : 'static',
-    bottom: 0,
-    bgcolor: '#fff',
-    zIndex: 10,
-    px: 2
-  }}
->
+        <Divider />
+
+        <DialogActions>
           <Button onClick={() => setOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={handleCreate}>
-            Create Form
+          <Button variant="contained" onClick={handleSubmit}>
+            {editingSlug ? 'Update' : 'Create'}
           </Button>
         </DialogActions>
       </Dialog>
-    </MainCard>
+      <Dialog open={openViewDialog} onClose={() => setOpenViewDialog(false)} maxWidth="md" fullWidth>
+        <DialogTitle>Form Details</DialogTitle>
+
+        <DialogContent>
+          {selectedForm && (
+            <>
+              <Typography variant="h5" fontWeight={600}>
+                {selectedForm.title}
+              </Typography>
+
+              <Typography color="text.secondary" mb={2}>
+                {selectedForm.description}
+              </Typography>
+
+              <Divider sx={{ my: 2 }} />
+
+              <Typography variant="h6" fontWeight={600}>
+                Questions
+              </Typography>
+
+              <Stack spacing={2} mt={2}>
+                {selectedForm.questions?.map((q, index) => (
+                  <Paper key={q.id} sx={{ p: 2 }}>
+                    <Typography fontWeight={600}>
+                      {index + 1}. {q.label}
+                    </Typography>
+
+                    <Stack direction="row" spacing={1} mt={1}>
+                      <Chip label={q.type} size="small" />
+                      {q.is_required && <Chip label="Required" size="small" color="error" />}
+                    </Stack>
+                  </Paper>
+                ))}
+              </Stack>
+            </>
+          )}
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={() => setOpenViewDialog(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   );
 };
 

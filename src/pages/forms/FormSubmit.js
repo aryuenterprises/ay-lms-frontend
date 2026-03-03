@@ -1,6 +1,6 @@
 // src/pages/forms/FormSubmit.jsx
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Typography,
@@ -13,67 +13,94 @@ import {
   Fade,
   CircularProgress,
   Divider
-} from "@mui/material";
-import { useParams } from "react-router";
-import axios from "axios";
-import Swal from "sweetalert2";
-import Header from "layout/CommonLayout/Header";
-import Footer from "layout/CommonLayout/FooterBlock";
-import { APP_PATH_BASE_URL } from "config";
+} from '@mui/material';
+import { useParams } from 'react-router';
+import axios from 'axios';
+import Swal from 'sweetalert2';
+import Header from 'layout/CommonLayout/Header';
+import Footer from 'layout/CommonLayout/FooterBlock';
+import { APP_PATH_BASE_URL } from 'config';
 
 const FormSubmit = () => {
-  const { uuid } = useParams();
+  const { slug } = useParams();
 
   const [form, setForm] = useState(null);
   const [answers, setAnswers] = useState({});
-  const [files, setFiles] = useState({});
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchForm = async () => {
       try {
-        const res = await axios.get(
-          `${APP_PATH_BASE_URL}/api/webinar/public/forms/${uuid}/`
-        );
+        const res = await axios.get(`${APP_PATH_BASE_URL}/api/webinar/public/forms/${slug}/`);
         setForm(res.data.data);
       } catch {
-        Swal.fire("Error", "Unable to load form", "error");
+        Swal.fire('Error', 'Unable to load form', 'error');
       } finally {
         setLoading(false);
       }
     };
 
     fetchForm();
-  }, [uuid]);
+  }, [slug]);
 
   const handleSubmit = async () => {
     try {
       setSubmitting(true);
 
       const payload = new FormData();
-      payload.append("form_uuid", uuid);
+      payload.append('form_slug', slug);
 
-      payload.append(
-        "answers",
-        JSON.stringify(
-          form.questions.map((q) => ({
-            question_id: q.id,
-            value_text: q.type === "TEXT" ? answers[q.id] || null : null,
-            value_number: q.type === "RATING" ? answers[q.id] || null : null,
-            value_json: q.type === "CHECKBOX" ? answers[q.id] || null : null,
-          }))
-        )
-      );
+      const answersArray = [];
 
-      await axios.post(
-        `${APP_PATH_BASE_URL}/api/webinar/submissions/`,
-        payload
-      );
+      form.questions.forEach((q) => {
+        const answerValue = answers[q.id];
 
-      Swal.fire("Success", "Feedback submitted successfully", "success");
-    } catch {
-      Swal.fire("Error", "Submission failed", "error");
+        if (q.type === 'TEXT' || q.type === 'TEXTAREA') {
+          if (answerValue) {
+            answersArray.push({
+              question_id: q.id,
+              value_text: answerValue
+            });
+          }
+        } else if (q.type === 'RATING') {
+          if (answerValue !== undefined && answerValue !== null) {
+            answersArray.push({
+              question_id: q.id,
+              value_number: answerValue
+            });
+          }
+        } else if (q.type === 'CHECKBOX') {
+          if (answerValue && answerValue.length > 0) {
+            answersArray.push({
+              question_id: q.id,
+              value_json: answerValue
+            });
+          }
+        } else if (q.type === 'FILE') {
+          if (answerValue) {
+            const fileKey = `file_${q.id}`;
+
+            // attach actual file
+            payload.append(fileKey, answerValue);
+
+            answersArray.push({
+              question_id: q.id,
+              file_key: fileKey
+            });
+          }
+        }
+      });
+
+      payload.append('answers', JSON.stringify(answersArray));
+
+      await axios.post(`${APP_PATH_BASE_URL}/api/webinar/submissions/`, payload, { headers: { 'Content-Type': 'multipart/form-data' } });
+
+      Swal.fire('Success', 'Feedback submitted successfully', 'success');
+      setAnswers({});
+    } catch (err) {
+      console.log(err.response?.data);
+      Swal.fire('Error', 'Submission failed', 'error');
     } finally {
       setSubmitting(false);
     }
@@ -81,7 +108,7 @@ const FormSubmit = () => {
 
   if (loading) {
     return (
-      <Box sx={{ height: "100vh", display: "grid", placeItems: "center" }}>
+      <Box sx={{ height: '100vh', display: 'grid', placeItems: 'center' }}>
         <CircularProgress />
       </Box>
     );
@@ -92,35 +119,128 @@ const FormSubmit = () => {
   return (
     <Box
       sx={{
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        background: "linear-gradient(135deg, #f7f8fc 0%, #eef1f6 100%)",
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        background: `
+    radial-gradient(circle at 75% 20%, rgba(255,0,0,0.08), transparent 40%),
+    radial-gradient(circle at 15% 70%, rgba(255,0,0,0.05), transparent 40%),
+    linear-gradient(135deg, #fff7f7 0%, #fffafa 40%, #ffffff 100%)
+  `
       }}
     >
-      <Header />
+      {/* ===== Floating Blobs Background ===== */}
+      <Box
+        sx={{
+          position: 'absolute',
+          inset: 0,
+          overflow: 'hidden',
+          zIndex: 0
+        }}
+      >
+        {/* Blob 1 */}
+        <Box
+          sx={{
+            position: 'absolute',
+            width: 350,
+            height: 350,
+            background: 'radial-gradient(circle, rgba(255,0,0,0.15), transparent 70%)',
+            borderRadius: '50%',
+            top: '-80px',
+            right: '-100px',
+            blur: '10px',
+            animation: 'float1 12s ease-in-out infinite'
+          }}
+        />
 
+        {/* Blob 2 */}
+        <Box
+          sx={{
+            position: 'absolute',
+            width: 250,
+            height: 250,
+            background: 'radial-gradient(circle, rgba(255,0,0,0.08), transparent 70%)',
+            borderRadius: '50%',
+            bottom: '-60px',
+            left: '-80px',
+            blur: '10px',
+            animation: 'float2 15s ease-in-out infinite'
+          }}
+        />
+      </Box>
+      <Header />
+      {/* Balloon Accent */}
+      <Box
+        sx={{
+          position: 'absolute',
+          width: 500,
+          height: 500,
+          background: 'rgba(255,0,0,0.07)',
+          borderRadius: '50%',
+          top: '40%',
+          right: '5%',
+          animation: 'float2 10s ease-in-out infinite'
+        }}
+      />
+
+      <Box
+        sx={{
+          position: 'absolute',
+          width: 200,
+          height: 200,
+          background: 'rgba(255,0,0,0.05)',
+          borderRadius: '50%',
+          bottom: '30%',
+          left: '20%',
+          animation: 'float1 14s ease-in-out infinite'
+        }}
+      />
+      <Box
+        sx={{
+          position: 'absolute',
+          width: 200,
+          height: 200,
+          background: 'rgba(255,0,0,0.05)',
+          borderRadius: '50%',
+          bottom: '60%',
+          left: '10%',
+          animation: 'float1 14s ease-in-out infinite'
+        }}
+      />
+      <Box
+        sx={{
+          position: 'absolute',
+          width: 200,
+          height: 200,
+          background: 'rgba(255,0,0,0.05)',
+          borderRadius: '50%',
+          bottom: '10%',
+          right: '5%',
+          animation: 'float1 14s ease-in-out infinite'
+        }}
+      />
       {/* ===== MAIN WRAPPER ===== */}
       <Box
         sx={{
           flex: 1,
-          display: "flex",
-          justifyContent: "center",
+          display: 'flex',
+          justifyContent: 'center',
           px: { xs: 2, sm: 4 },
-          pt: { xs: "100px", sm: 10 },
-          pb: { xs: 6, sm: 10 },
+          pt: { xs: '100px', sm: 10 },
+          pb: { xs: 6, sm: 10 }
         }}
       >
         <Fade in timeout={600}>
           <Box
             sx={{
-              width: "100%",
+              width: '100%',
               maxWidth: 900,
-              borderRadius: 5,
-              background: "#ffffff",
+              borderRadius: 4,
+              background: '#ffffff',
               p: { xs: 3, sm: 6 },
-              boxShadow: "0 30px 80px rgba(0,0,0,0.08)",
-              transition: "all .3s ease",
+              boxShadow: '0 20px 60px rgba(0,0,0,0.06)',
+              border: '1px solid rgba(255,0,0,0.05)',
+              backdropFilter: 'blur(10px)'
             }}
           >
             {/* ===== TITLE SECTION ===== */}
@@ -128,7 +248,11 @@ const FormSubmit = () => {
               <Typography
                 variant="h4"
                 fontWeight={800}
-                sx={{ color: "#1c1c1c" }}
+                sx={{
+                  background: 'linear-gradient(90deg,#000,#b30000)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent'
+                }}
               >
                 {form.title}
               </Typography>
@@ -136,10 +260,10 @@ const FormSubmit = () => {
               <Typography
                 sx={{
                   mt: 2,
-                  color: "text.secondary",
+                  color: 'text.secondary',
                   maxWidth: 650,
-                  mx: "auto",
-                  lineHeight: 1.6,
+                  mx: 'auto',
+                  lineHeight: 1.6
                 }}
               >
                 {form.description}
@@ -152,64 +276,80 @@ const FormSubmit = () => {
             <Stack spacing={4}>
               {form.questions.map((q) => (
                 <Box key={q.id}>
-                  <Typography
-                    fontWeight={600}
-                    sx={{ mb: 1, fontSize: 15 }}
-                  >
+                  <Typography fontWeight={600} sx={{ mb: 1, fontSize: 15 }}>
                     {q.label}
                   </Typography>
 
-                  {q.type === "TEXT" && (
+                  {q.type === 'TEXT' && (
                     <TextField
                       fullWidth
                       variant="outlined"
                       size="medium"
-                      value={answers[q.id] || ""}
+                      value={answers[q.id] || ''}
                       onChange={(e) =>
                         setAnswers({
                           ...answers,
-                          [q.id]: e.target.value,
+                          [q.id]: e.target.value
                         })
                       }
                       sx={{
-                        "& .MuiOutlinedInput-root": {
+                        '& .MuiOutlinedInput-root': {
                           borderRadius: 2,
-                          background: "#fafafa",
-                        },
+                          background: '#fafafa'
+                        }
+                      }}
+                    />
+                  )}
+                  {q.type === 'TEXTAREA' && (
+                    <Box
+                      component="textarea"
+                      rows={4}
+                      value={answers[q.id] || ''}
+                      onChange={(e) =>
+                        setAnswers({
+                          ...answers,
+                          [q.id]: e.target.value
+                        })
+                      }
+                      style={{
+                        width: '100%',
+                        padding: '12px',
+                        borderRadius: '12px',
+                        border: '1px solid #e0e0e0',
+                        background: '#fafafa',
+                        resize: 'vertical',
+                        fontFamily: 'inherit',
+                        fontSize: '14px'
                       }}
                     />
                   )}
 
-                  {q.type === "RATING" && (
+                  {q.type === 'RATING' && (
                     <Rating
                       size="large"
                       value={answers[q.id] || null}
                       onChange={(_, v) =>
                         setAnswers({
                           ...answers,
-                          [q.id]: v,
+                          [q.id]: v
                         })
                       }
                     />
                   )}
 
-                  {q.type === "CHECKBOX" && (
+                  {q.type === 'CHECKBOX' && (
                     <Stack>
                       {q.options.map((opt) => (
                         <FormControlLabel
                           key={opt.id}
                           control={
                             <Checkbox
-                              checked={
-                                answers[q.id]?.includes(opt.value) || false
-                              }
+                              checked={answers[q.id]?.includes(opt.value) || false}
                               onChange={(e) => {
                                 const prev = answers[q.id] || [];
                                 setAnswers({
                                   ...answers,
-                                  [q.id]: e.target.checked
-                                    ? [...prev, opt.value]
-                                    : prev.filter((v) => v !== opt.value),
+                                  [q.id]: e.target.checked ? [...prev, opt.value] : prev.filter((v) => v !== opt.value)
                                 });
                               }}
                             />
@@ -218,6 +358,21 @@ const FormSubmit = () => {
                         />
                       ))}
                     </Stack>
+                  )}
+                  {q.type === 'FILE' && (
+                    <Button variant="outlined" component="label" sx={{ borderRadius: 2 }}>
+                      {answers[q.id] ? 'File Selected' : 'Upload File'}
+                      <input
+                        type="file"
+                        hidden
+                        onChange={(e) =>
+                          setAnswers({
+                            ...answers,
+                            [q.id]: e.target.files[0]
+                          })
+                        }
+                      />
+                    </Button>
                   )}
                 </Box>
               ))}
@@ -236,16 +391,16 @@ const FormSubmit = () => {
                   borderRadius: 50,
                   fontWeight: 700,
                   fontSize: 15,
-                  background: "linear-gradient(90deg,#ff2e2e,#d40000)",
-                  boxShadow: "0 15px 40px rgba(255,0,0,0.35)",
-                  transition: "all .3s ease",
-                  "&:hover": {
-                    transform: "translateY(-2px)",
-                    boxShadow: "0 20px 50px rgba(255,0,0,0.45)",
-                  },
+                  background: 'linear-gradient(90deg,#ff2e2e,#d40000)',
+                  boxShadow: '0 15px 40px rgba(255,0,0,0.35)',
+                  transition: 'all .3s ease',
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 20px 50px rgba(255,0,0,0.45)'
+                  }
                 }}
               >
-                {submitting ? "Submitting..." : "Submit"}
+                {submitting ? 'Submitting...' : 'Submit'}
               </Button>
             </Box>
           </Box>

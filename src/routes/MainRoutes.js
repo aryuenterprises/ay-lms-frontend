@@ -552,7 +552,7 @@ const MainRoutes = {
         },
         {
           title: 'Form Detail',
-          path: 'forms/:uuid',
+          path: 'forms/:slug',
           element: <FormDetail />
         }
       ]
@@ -628,7 +628,7 @@ const MainRoutes = {
     },
     {
       title: 'Form Submit',
-      path: 'forms/:uuid/submit',
+      path: 'forms/:slug/submit',
       element: <FormSubmit />
     },
     {
