@@ -17,8 +17,8 @@ const icons = {
 
 const dashboard = {
   id: 'dashboard',
-  title: <FormattedMessage id="dashboard" />,
-  icon: icons.widgets,
+  // title: <FormattedMessage id="dashboard" />,
+  // icon: icons.widgets,
   type: 'group',
   children: [
     {

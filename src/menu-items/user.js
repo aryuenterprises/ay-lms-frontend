@@ -2,8 +2,10 @@
 import { FormattedMessage } from 'react-intl';
 
 // assets
-import { Profile, DocumentCode2, Note1, OceanProtocol, Level, ShieldCross, Home3, I24Support, Driving } from 'iconsax-react';
+import { Profile, DocumentCode2, Note1, OceanProtocol, Level, ShieldCross, Home3, I24Support,  } from 'iconsax-react';
 
+
+import GroupIcon from '@mui/icons-material/Group';
 // icons
 const icons = {
   userIcon: Profile,
@@ -14,7 +16,7 @@ const icons = {
   disabledMenu: ShieldCross,
   chipMenu: Home3,
   documentation: I24Support,
-  roadmap: Driving
+  // roadmap: Driving
 };
 
 // Get login type from session storage
@@ -49,6 +51,14 @@ const baseMenuItems = {
   title: <FormattedMessage id="user-management" defaultMessage="User Management" />,
   type: 'group',
   children: [
+    {
+      id: 'roles',
+      title: <FormattedMessage id="roles" defaultMessage="Roles" />,
+      type: 'item',
+      url: '/roles',
+      icon: GroupIcon,
+      show: (loginType === 'admin' || loginType === 'super_admin') && hasReadPermission('Roles')
+    },
     {
       id: 'profile',
       title: <FormattedMessage id="profile" defaultMessage="User Profile" />,
@@ -91,17 +101,17 @@ const baseMenuItems = {
       show: ['super_admin', 'admin', 'employer', 'tutor'].includes(loginType) && (loginType !== 'admin' || hasReadPermission('Students'))
     },
 
-    {
-      id: 'batch-list',
-      title: <FormattedMessage id="batch-list" defaultMessage="Batch" />,
-      type: 'item',
-      url: '/batch',
-      icon: icons.roadmap,
-      show:
-        ((loginType === 'admin' || loginType === 'super_admin') && hasReadPermission('Batch')) ||
-        loginType === 'tutor' ||
-        loginType === 'student'
-    }
+    // {
+    //   id: 'batch-list',
+    //   title: <FormattedMessage id="batch-list" defaultMessage="Batch" />,
+    //   type: 'item',
+    //   url: '/batch',
+    //   icon: icons.roadmap,
+    //   show:
+    //     ((loginType === 'admin' || loginType === 'super_admin') && hasReadPermission('Batch')) ||
+    //     loginType === 'tutor' ||
+    //     loginType === 'student'
+    // }
     // {
     //   id: 'enquery-list',
     //   title: <FormattedMessage id="enquery-list" defaultMessage="Enquery List" />,
@@ -120,9 +130,9 @@ const filteredChildren = baseMenuItems.children.filter((item) => item.show === t
 const user =
   filteredChildren.length > 0
     ? {
-        ...baseMenuItems,
-        children: filteredChildren
-      }
+      ...baseMenuItems,
+      children: filteredChildren
+    }
     : null;
 
 export default user;

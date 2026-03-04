@@ -3,7 +3,7 @@ import GroupIcon from '@mui/icons-material/Group';
 
 const corporate = {
   id: 'corporate',
-  title: 'Corporate',
+  title: 'Organization Management',
   type: 'group',
   children: [
     {
@@ -15,7 +15,7 @@ const corporate = {
     },
     {
       id: 'organization-employees',
-      title: 'Organization Employees',
+      title: 'Employee',
       type: 'item',
       url: '/dashboard/corporate/organization-employees',
       icon: GroupIcon

@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Box, Card, CardContent, TextField, Button, Typography, Stepper, Step, StepButton, MenuItem, Stack, Divider } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
-
+import Header  from 'layout/CommonLayout/Header';
+import FooterBlock from 'layout/CommonLayout/FooterBlock';
 /* ------------------ CONSTANTS ------------------ */
 
 const steps = ['Personal Details', 'Professional Details', 'Bank Details'];
@@ -117,6 +118,7 @@ const TrainerSignupPage = () => {
         background: '#fdf4f4'
       }}
     >
+      <Header />
       <Bubble size={420} top="20%" right="-120px" delay={2} />
       <Bubble size={220} bottom="-100px" left="30%" delay={4} />
       <Bubble size={180} bottom="10%" right="15%" delay={6} />
@@ -176,6 +178,7 @@ const TrainerSignupPage = () => {
         sx={{
           minHeight: '100vh',
           display: 'grid',
+          overflow: 'hidden',
           gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
           alignItems: 'center',
           px: { xs: 3, md: 8 },
@@ -437,6 +440,7 @@ const TrainerSignupPage = () => {
           )}
         </AnimatePresence>
       </Box>
+      <FooterBlock />
     </Box>
   );
 };

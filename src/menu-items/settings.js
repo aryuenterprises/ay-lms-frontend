@@ -33,7 +33,7 @@ const hasReadPermission = (moduleName) => {
 
 const baseMenuItems = {
   id: 'settings',
-  title: <FormattedMessage id="settings" defaultMessage="Settings" />,
+  title: <FormattedMessage id="settings" defaultMessage=" System Settings" />,
   type: 'group',
   children: [
     {

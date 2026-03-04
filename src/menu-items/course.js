@@ -2,12 +2,13 @@
 import { FormattedMessage } from 'react-intl';
 
 // assets
-import { Note1, DocumentCode2 } from 'iconsax-react';
+import { Note1, DocumentCode2,Driving} from 'iconsax-react';
 
 // icons
 const icons = {
   Note1: Note1,
-  samplePage: DocumentCode2
+  samplePage: DocumentCode2,
+  roadmap: Driving
 };
 
 // Get login type from session storage
@@ -33,9 +34,17 @@ const hasReadPermission = (moduleName) => {
 
 const baseMenuItems = {
   id: 'course',
-  title: <FormattedMessage id="course" defaultMessage="Course" />,
+  title: <FormattedMessage id="course" defaultMessage="Course Management" />,
   type: 'group',
   children: [
+    {
+      id: 'category',
+      title: <FormattedMessage id="category" defaultMessage="Category" />,
+      type: 'item',
+      url: '/category',
+      icon: icons.samplePage,
+      show: (loginType === 'admin' || loginType === 'super_admin') && hasReadPermission('Category')
+    },
     {
       id: 'course',
       title: <FormattedMessage id="course" defaultMessage="Course" />,
@@ -47,12 +56,25 @@ const baseMenuItems = {
         (loginType !== 'admin' || hasReadPermission('Course'))
     },
     {
-      id: 'category',
-      title: <FormattedMessage id="category" defaultMessage="Category" />,
+      id: 'batch-list',
+      title: <FormattedMessage id="batch-list" defaultMessage="Batch" />,
       type: 'item',
-      url: '/category',
+      url: '/batch',
+      icon: icons.roadmap,
+      show:
+        ((loginType === 'admin' || loginType === 'super_admin') && hasReadPermission('Batch')) ||
+        loginType === 'tutor' ||
+        loginType === 'student'
+    },
+    
+    
+    {
+      id: 'schedule',
+      title: <FormattedMessage id="schedule" defaultMessage="Schedule" />,
+      type: 'item',
+      url: '/schedule',
       icon: icons.samplePage,
-      show: (loginType === 'admin' || loginType === 'super_admin') && hasReadPermission('Category')
+      show: ['super_admin', 'admin', 'tutor'].includes(loginType) && (loginType !== 'admin' || hasReadPermission('Schedule'))
     },
     {
       id: 'assessment',
@@ -61,14 +83,6 @@ const baseMenuItems = {
       url: '/assessment',
       icon: icons.samplePage,
       show: (loginType === 'admin' || loginType === 'super_admin') && hasReadPermission('Assessment')
-    },
-    {
-      id: 'schedule',
-      title: <FormattedMessage id="schedule" defaultMessage="Schedule" />,
-      type: 'item',
-      url: '/schedule',
-      icon: icons.samplePage,
-      show: ['super_admin', 'admin', 'tutor'].includes(loginType) && (loginType !== 'admin' || hasReadPermission('Schedule'))
     }
   ]
 };

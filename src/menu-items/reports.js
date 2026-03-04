@@ -2,7 +2,10 @@
 import { FormattedMessage } from 'react-intl';
 
 // assets
-import { KyberNetwork, Messages2, Calendar1, Kanban, Profile2User, Bill, UserSquare, ShoppingBag } from 'iconsax-react';
+import { KyberNetwork, Messages2, Calendar1, Kanban, Profile2User, Bill, UserSquare, ShoppingBag, Ticket } from 'iconsax-react';
+
+
+import FeedbackIcon from '@mui/icons-material/Feedback';
 
 // icons
 const icons = {
@@ -13,7 +16,8 @@ const icons = {
   customer: Profile2User,
   tiket: Bill,
   profile: UserSquare,
-  ecommerce: ShoppingBag
+  ecommerce: ShoppingBag,
+  icon: Ticket
 };
 
 // Get login type from session storage
@@ -43,49 +47,49 @@ const hasReportsAccess = (loginType === 'admin' || loginType === 'super_admin') 
 
 const baseMenuItems = {
   id: 'reports',
-  title: <FormattedMessage id="reports" defaultMessage="Reports" />,
+  title: <FormattedMessage id="reports" defaultMessage="Support & Communication" />,
   icon: icons.applications,
   type: 'group',
   children: [
-    {
-      id: 'reports-collapse',
-      title: <FormattedMessage id="Reports" />,
-      type: 'collapse',
-      icon: icons.chat,
-      children: [
-        {
-          id: 'organization-reports',
-          title: <FormattedMessage id="Organization Reports" />,
-          type: 'item',
-          url: '/reports/organization-reports',
-          show: hasReportsAccess
-        },
-        {
-          id: 'student-reports',
-          title: <FormattedMessage id="Student Reports" />,
-          type: 'item',
-          url: '/reports/student-reports',
-          show: hasReportsAccess
-        },
-        {
-          id: 'tutor-reports',
-          title: <FormattedMessage id="Tutor Reports" />,
-          type: 'item',
-          url: '/reports/tutor-reports',
-          show: hasReportsAccess
-        },
-        {
-          id: 'payment-reports',
-          title: <FormattedMessage id="Payment Reports" />,
-          type: 'item',
-          url: '/reports/payment-reports',
-          show: hasReportsAccess
-        }
-      ].filter((item) => item.show) // Filter out items that shouldn't be shown
-    },
+    // {
+    //   id: 'reports-collapse',
+    //   title: <FormattedMessage id="Reports" />,
+    //   type: 'collapse',
+    //   icon: icons.chat,
+    //   children: [
+    //     {
+    //       id: 'organization-reports',
+    //       title: <FormattedMessage id="Organization Reports" />,
+    //       type: 'item',
+    //       url: '/reports/organization-reports',
+    //       show: hasReportsAccess
+    //     },
+    //     {
+    //       id: 'student-reports',
+    //       title: <FormattedMessage id="Student Reports" />,
+    //       type: 'item',
+    //       url: '/reports/student-reports',
+    //       show: hasReportsAccess
+    //     },
+    //     {
+    //       id: 'tutor-reports',
+    //       title: <FormattedMessage id="Tutor Reports" />,
+    //       type: 'item',
+    //       url: '/reports/tutor-reports',
+    //       show: hasReportsAccess
+    //     },
+    //     {
+    //       id: 'payment-reports',
+    //       title: <FormattedMessage id="Payment Reports" />,
+    //       type: 'item',
+    //       url: '/reports/payment-reports',
+    //       show: hasReportsAccess
+    //     }
+    //   ].filter((item) => item.show) // Filter out items that shouldn't be shown
+    // },
     {
       id: 'enquery-list',
-      title: <FormattedMessage id="Enquiry List"/>,
+      title: <FormattedMessage id="Enquiry List" />,
       type: 'item',
       url: '/enquiry-list',
       icon: icons.calendar,
@@ -98,7 +102,25 @@ const baseMenuItems = {
       url: '/ticket-list',
       icon: icons.tiket,
       show: true
-    }
+    },
+
+    {
+      id: 'ticket-create',
+      title: <FormattedMessage id="support" defaultMessage="Support" />,
+      type: 'item',
+      icon: icons.tiket,
+      url: '/ticket',
+      show: (loginType === 'student' || loginType === 'tutor') && hasReadPermission('Ticket')
+    },
+
+    {
+      id: 'webinar-feedback',
+      title: <FormattedMessage id="webinar-feedback" defaultMessage="Feedback" />,
+      type: 'item',
+      url: '/webinar/feedback',
+      icon: FeedbackIcon
+    },
+
   ]
 };
 

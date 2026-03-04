@@ -15,8 +15,8 @@ const icons = {
 /* ---------------- MENU CONFIG ---------------- */
 
 const events = {
-  id: 'events-group',
-  title: <FormattedMessage id="events" defaultMessage="Events" />,
+  id: 'Events',
+  title: <FormattedMessage id="events" defaultMessage="Engagement & Events" />,
   type: 'group',
   children: [
     {
