@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useMemo, useEffect } from "react";
+import React, { useCallback, useState, useMemo, useEffect } from 'react';
 import {
   Box,
   Stack,
@@ -20,41 +20,44 @@ import {
   DialogContent,
   DialogTitle,
   Checkbox,
-  FormControlLabel,
-} from "@mui/material";
-import { useLocation } from "react-router-dom";
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import { ArrowBack } from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
-import Tooltip from "@mui/material/Tooltip";
+  FormControlLabel
+} from '@mui/material';
+import { useLocation } from 'react-router-dom';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import { ArrowBack } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
+import Tooltip from '@mui/material/Tooltip';
 // import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 // import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
-import { Container } from "@mui/system";
-import { People, CalendarToday, Description } from "@mui/icons-material";
-import DataTable from "react-data-table-component";
-import { capitalize } from "lodash";
-import { formatDateTime } from "utils/dateUtils";
-import * as XLSX from "xlsx";
+import { Container } from '@mui/system';
+import { People, CalendarToday, Description } from '@mui/icons-material';
+import DataTable from 'react-data-table-component';
+import { capitalize } from 'lodash';
+import { formatDateTime } from 'utils/dateUtils';
+import * as XLSX from 'xlsx';
 // import { jsPDF } from 'jspdf';
 // import autoTable from 'jspdf-autotable';
 // import LinkIcon from "@mui/icons-material/Link";
-import CertificateSample from "../../assets/certificate/4016369-ai.png";
-import FeedbackIcon from "@mui/icons-material/Feedback";
-import WebinarFeedbackDialog from "components/webinarfeedbackpop";
-import Swal from "sweetalert2";
-import axiosInstance from "utils/axios";
+import CertificateSample from '../../assets/certificate/4016369-ai.png';
+import FeedbackIcon from '@mui/icons-material/Feedback';
+import WebinarFeedbackDialog from 'components/webinarfeedbackpop';
+import Swal from 'sweetalert2';
+import axiosInstance from 'utils/axios';
 // import Certification from 'pages/course/certification';
 //Icon
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import CancelIcon from "@mui/icons-material/Cancel";
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
 
 const ParticipantTable = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [attendanceFilter, setAttendanceFilter] = useState("All");
-  const [hoursFilter, setHoursFilter] = useState("All");
+  const [attendanceFilter, setAttendanceFilter] = useState('All');
+  const [hoursFilter, setHoursFilter] = useState('All');
   const { webinarData } = location.state || {};
   const [selectedWebinarUuid, setSelectedWebinarUuid] = useState(null);
+  const [webinarDetail, setWebinarDetail] = useState(null);
+  const [detailLoading, setDetailLoading] = useState(true);
+  const [detailError, setDetailError] = useState(null);
 
   const [feedbackOpen, setFeedbackOpen] = useState(false);
 
@@ -65,6 +68,36 @@ const ParticipantTable = () => {
   const [openLogs, setOpenLogs] = useState(false);
   const [selectedLogs, setSelectedLogs] = useState([]);
   const [selectedLogsUser, setSelectedLogsUser] = useState(null);
+
+  useEffect(() => {
+    // We use the slug from location.state to call the retrieve endpoint.
+    // The list API still returns slug on each webinar object,
+    // so webinarData.slug is always available.
+    const slug = webinarData?.slug;
+
+    if (!slug) {
+      setDetailError('Webinar slug not found. Please go back and try again.');
+      setDetailLoading(false);
+      return;
+    }
+
+    const fetchWebinarDetail = async () => {
+      try {
+        setDetailLoading(true);
+        // This calls your retrieve endpoint: GET /api/webinar/web/{slug}/
+        const response = await axiosInstance.get(`api/webinar/web/${slug}/`);
+        // Your retrieve endpoint wraps data in { status, message, data }
+        setWebinarDetail(response.data.data);
+      } catch (err) {
+        console.error('Failed to fetch webinar detail', err);
+        setDetailError(err.message);
+      } finally {
+        setDetailLoading(false);
+      }
+    };
+
+    fetchWebinarDetail();
+  }, [webinarData?.slug]); // re-runs only if slug changes (i.e., never in practice)
 
   const handleViewParticipant = (participant) => {
     setSelectedParticipant(participant);
@@ -116,7 +149,7 @@ const ParticipantTable = () => {
     feedback: true,
     registeredAt: true,
     certificateStatus: true,
-    certificate: true,
+    certificate: true
   };
 
   const [visibleColumns, setVisibleColumns] = useState(defaultColumnVisibility);
@@ -124,84 +157,87 @@ const ParticipantTable = () => {
   const handleWebinarcertification = useCallback(async (row) => {
     if (!row.attended || !row.eligible_for_certificate) {
       const result = await Swal.fire({
-        title: "Alert",
-        text: "Not Eligible ",
+        title: 'Alert',
+        text: 'Not Eligible ',
         showCancelButton: true,
-        confirmButtonText: "yes,send",
-        cancelButtonText: "cancel",
+        confirmButtonText: 'yes,send',
+        cancelButtonText: 'cancel'
       });
       if (!result.isConfirmed) return;
     }
     try {
       await axiosInstance.post(`api/webinar/certificates/send/`, {
         webinar_uuid: webinarData.uuid,
-        participant_ids: [row.id],
+        participant_ids: [row.id]
       });
       Swal.fire({
-        title: "Certification send",
-        text: "Eligible for certification",
+        title: 'Certification send',
+        text: 'Eligible for certification'
       });
     } catch (error) {
-      console.error("Certificate send failed", error);
+      console.error('Certificate send failed', error);
     }
   }, []);
 
   const formatHoursFixed = (hours) => {
-    if (hours === null || hours === undefined) return "—";
+    if (hours === null || hours === undefined) return '—';
 
     const num = Number(hours);
-    if (Number.isNaN(num)) return "—";
+    if (Number.isNaN(num)) return '—';
 
     return num.toFixed(2); // 0.3 → "0.30"
   };
 
   const columns = [
     {
-      id: "sno",
-      name: "S.No",
+      id: 'sno',
+      name: 'S.No',
       selector: (row) => row.index,
-      width: "80px",
+      width: '80px'
     },
     {
-      id: "name",
-      name: "Name",
+      id: 'name',
+      name: 'Name',
       selector: (row) => row.name,
       wrap: true,
       cell: (row) => (
         <ButtonBase
           onClick={() => handleViewParticipant(row)}
           sx={{
-            justifyContent: "flex-start",
-            textAlign: "left",
-          }}>
+            justifyContent: 'flex-start',
+            textAlign: 'left'
+          }}
+        >
           <Typography
             variant="body2"
             sx={{
-              color: row.attended ? "success.main" : "text.primary",
+              color: row.attended ? 'success.main' : 'text.primary',
               fontWeight: row.attended ? 600 : 400,
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-              "&:hover": { textDecoration: "underline" },
-            }}>
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              '&:hover': { textDecoration: 'underline' }
+            }}
+          >
             {row.attended && (
               <Typography
                 component="span"
                 sx={{
-                  color: "success.main",
-                  fontWeight: 700,
-                }}>
+                  color: 'success.main',
+                  fontWeight: 700
+                }}
+              >
                 ✓
               </Typography>
             )}
             {row.name}
           </Typography>
         </ButtonBase>
-      ),
+      )
     },
     {
-      id: "totalHours",
-      name: "Total Hours",
+      id: 'totalHours',
+      name: 'Total Hours',
       center: true,
       cell: (row) =>
         row.logs && row.logs.length > 0 ? (
@@ -209,98 +245,95 @@ const ParticipantTable = () => {
             <ButtonBase
               onClick={() => handleViewLogs(row)}
               sx={{
-                color: "black",
-                fontSize: "0.9rem",
-              }}>
+                color: 'black',
+                fontSize: '0.9rem'
+              }}
+            >
               {formatHoursFixed(row.total_hours_participated)}
             </ButtonBase>
           </Tooltip>
         ) : (
           <Typography color="text.secondary">—</Typography>
-        ),
+        )
     },
-    { id: "mobile", name: "Mobile", selector: (row) => row.phone },
-    { id: "email", name: "Email", selector: (row) => row.email },
-   {
-  id: "payment",
-  name: "Payment",
-  center: true,
-  cell: (row) => {
-    const status = row.payment_status?.toLowerCase();
-
-    const isFree = status === "free";
-
-    const isPaid =
-      status === "paid" ||
-      status === "success" ||
-      status === "done" ||
-      status === "completed";
-
-    if (isFree) {
-      return (
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Typography
-            variant="body2"
-            sx={{
-              color: "info.main",
-              fontWeight: 600,
-              fontSize: { xs: "12px", sm: "14px" },
-            }}
-          >
-            Free
-          </Typography>
-        </Box>
-      );
-    }
-
-    if (isPaid) {
-      return (
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <CheckCircleIcon
-            sx={{
-              color: "success.main",
-              fontSize: { xs: 18, sm: 22 },
-            }}
-          />
-          <Typography
-            variant="body2"
-            sx={{
-              color: "success.main",
-              fontWeight: 600,
-              fontSize: { xs: "12px", sm: "14px" },
-            }}
-          >
-            Done
-          </Typography>
-        </Box>
-      );
-    }
-
-    return (
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        <CancelIcon
-          sx={{
-            color: "error.main",
-            fontSize: { xs: 18, sm: 22 },
-          }}
-        />
-        <Typography
-          variant="body2"
-          sx={{
-            color: "error.main",
-            fontWeight: 600,
-            fontSize: { xs: "12px", sm: "14px" },
-          }}
-        >
-          Failed
-        </Typography>
-      </Box>
-    );
-  },
-},
+    { id: 'mobile', name: 'Mobile', selector: (row) => row.phone },
+    { id: 'email', name: 'Email', selector: (row) => row.email },
     {
-      id: "feedback",
-      name: "Feedback",
+      id: 'payment',
+      name: 'Payment',
+      center: true,
+      cell: (row) => {
+        const status = row.payment_status?.toLowerCase();
+
+        const isFree = status === 'free';
+
+        const isPaid = status === 'paid' || status === 'success' || status === 'done' || status === 'completed';
+
+        if (isFree) {
+          return (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: 'info.main',
+                  fontWeight: 600,
+                  fontSize: { xs: '12px', sm: '14px' }
+                }}
+              >
+                Free
+              </Typography>
+            </Box>
+          );
+        }
+
+        if (isPaid) {
+          return (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <CheckCircleIcon
+                sx={{
+                  color: 'success.main',
+                  fontSize: { xs: 18, sm: 22 }
+                }}
+              />
+              <Typography
+                variant="body2"
+                sx={{
+                  color: 'success.main',
+                  fontWeight: 600,
+                  fontSize: { xs: '12px', sm: '14px' }
+                }}
+              >
+                Done
+              </Typography>
+            </Box>
+          );
+        }
+
+        return (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <CancelIcon
+              sx={{
+                color: 'error.main',
+                fontSize: { xs: 18, sm: 22 }
+              }}
+            />
+            <Typography
+              variant="body2"
+              sx={{
+                color: 'error.main',
+                fontWeight: 600,
+                fontSize: { xs: '12px', sm: '14px' }
+              }}
+            >
+              Failed
+            </Typography>
+          </Box>
+        );
+      }
+    },
+    {
+      id: 'feedback',
+      name: 'Feedback',
       cell: (row) => (
         <Tooltip title="Webinar Feedback">
           <IconButton
@@ -309,56 +342,55 @@ const ParticipantTable = () => {
               e.stopPropagation();
               setSelectedWebinarUuid(row.feedback);
               setFeedbackOpen(true);
-            }}>
+            }}
+          >
             <FeedbackIcon />
           </IconButton>
         </Tooltip>
-      ),
+      )
     },
     {
-      id: "registeredAt",
-      name: "Registered At",
+      id: 'registeredAt',
+      name: 'Registered At',
       selector: (row) => formatDateTime(row.registered_at),
-      minWidth: "200px",
-      wrap: true,
+      minWidth: '200px',
+      wrap: true
     },
     {
-      id: "certificateStatus",
-      name: "Certificate Status",
+      id: 'certificateStatus',
+      name: 'Certificate Status',
       cell: (row) =>
         row.certificate_sent ? (
           <Button
             variant="text"
             onClick={handleViewCertificate}
             sx={{
-              color: "success.main",
+              color: 'success.main',
               fontWeight: 600,
-              textDecoration: "underline",
+              textDecoration: 'underline',
               padding: 0,
-              minWidth: 0,
-            }}>
+              minWidth: 0
+            }}
+          >
             Yes
           </Button>
         ) : (
           <Typography color="text.secondary">No</Typography>
-        ),
+        )
     },
     {
-      id: "certificate",
-      name: "Certificate",
+      id: 'certificate',
+      name: 'Certificate',
       cell: (row) => (
-        <Box sx={{ display: "flex", gap: 1 }}>
+        <Box sx={{ display: 'flex', gap: 1 }}>
           {/* {row.eligible_for_certificate == true && ( */}
-          <Button
-            variant="contained"
-            size="small"
-            onClick={() => handleWebinarcertification(row)}>
+          <Button variant="contained" size="small" onClick={() => handleWebinarcertification(row)}>
             Send
           </Button>
           {/* )} */}
         </Box>
-      ),
-    },
+      )
+    }
   ];
 
   useEffect(() => {
@@ -374,8 +406,11 @@ const ParticipantTable = () => {
   }, [visibleColumns]);
 
   const allRows = useMemo(() => {
+    // Previously: webinarData?.participants?.map(...)
+    // Now: webinarDetail?.participants?.map(...)
+    // webinarDetail comes from the retrieve endpoint which includes participants
     return (
-      webinarData?.participants?.map((p, index) => ({
+      webinarDetail?.participants?.map((p, index) => ({
         id: p.id,
         index: index + 1,
         name: capitalize(p.name),
@@ -383,8 +418,8 @@ const ParticipantTable = () => {
         phone: p.phone,
         email: p.email,
         registered_at: p.registered_at,
-        webinar_uuid: webinarData?.uuid,
-        scheduled_start: webinarData?.scheduled_start || "-",
+        webinar_uuid: webinarDetail?.uuid,
+        scheduled_start: webinarDetail?.scheduled_start || '-',
         attended: p.attended || false,
         total_hours_participated: Number(p.total_hours_participated) || 0,
         hours_participated: p.hours_participated,
@@ -394,53 +429,71 @@ const ParticipantTable = () => {
         feedback: p.feedback || [],
         price: p.price,
         regular_price: p.regular_price,
-        eligible_for_certificate: p.eligible_for_certificate,
+        eligible_for_certificate: p.eligible_for_certificate
       })) || []
     );
-  }, [webinarData]);
+  }, [webinarDetail]); // dependency is now webinarDetail, not webinarData
 
   // Filter rows based on attendance
   const rows = useMemo(() => {
-    if (attendanceFilter === "Attended")
-      return allRows.filter((r) => r.attended);
-    if (attendanceFilter === "Not Attended")
-      return allRows.filter((r) => !r.attended);
+    if (attendanceFilter === 'Attended') return allRows.filter((r) => r.attended);
+    if (attendanceFilter === 'Not Attended') return allRows.filter((r) => !r.attended);
     return allRows;
   }, [allRows, attendanceFilter]);
   const exportToExcel = useCallback(() => {
     if (!rows || rows.length === 0) {
-      alert("No data to export");
+      alert('No data to export');
       return;
     }
 
     const worksheetData = rows.map((row) => ({
-      "S.No": row.index,
+      'S.No': row.index,
       Name: row.name,
       id: row.id,
-      "Phone Number": row.phone,
+      'Phone Number': row.phone,
       Email: row.email,
       payment: row.payment_status,
       total_hours_participated: formatHoursFixed(row.total_hours_participated),
-      "Registered At": formatDateTime(row.registered_at),
+      'Registered At': formatDateTime(row.registered_at),
       scheduled_start: row.scheduled_start,
       eligible_for_certificate: row.eligible_for_certificate,
-      certificate_sent: row.certificate_sent,
+      certificate_sent: row.certificate_sent
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(worksheetData);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Participants");
-    XLSX.writeFile(
-      workbook,
-      `${webinarData.title || "webinar"}_Participants.xlsx`,
-    );
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Participants');
+    XLSX.writeFile(workbook, `${webinarData.title || 'webinar'}_Participants.xlsx`);
   }, [rows, webinarData]);
 
   const formatTimeOnly = (dateTimeStr) => {
-    if (!dateTimeStr) return "—";
-    return dateTimeStr.split(" ")[1] || dateTimeStr; // "2026-01-27 06:22:17" → "06:22:17"
+    if (!dateTimeStr) return '—';
+    return dateTimeStr.split(' ')[1] || dateTimeStr; // "2026-01-27 06:22:17" → "06:22:17"
   };
+  if (detailLoading) {
+    return (
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+        <Card sx={{ mb: 4, borderRadius: 4, p: 4 }}>
+          <Typography variant="h4" sx={{ fontWeight: 700, color: '#1f2937' }}>
+            {webinarData?.title}
+          </Typography>
+          <Typography sx={{ mt: 2, color: '#6b7280' }}>Loading participants...</Typography>
+        </Card>
+      </Container>
+    );
+  }
 
+  // ─── GUARD: show if the retrieve API call failed ─────────────────────────────
+  if (detailError) {
+    return (
+      <Container maxWidth="lg" sx={{ mt: 4 }}>
+        <Typography color="error">Error: {detailError}</Typography>
+        <Button onClick={() => navigate(-1)} sx={{ mt: 2 }}>
+          Go Back
+        </Button>
+      </Container>
+    );
+  }
   /* ================= UI ================= */
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
@@ -448,19 +501,21 @@ const ParticipantTable = () => {
         sx={{
           mb: 4,
           borderRadius: 4,
-          background: "#ffffff",
-          border: "1px solid #e6e8ec",
-          boxShadow: "0 12px 35px rgba(17, 24, 39, 0.08)",
-          overflow: "hidden",
-        }}>
+          background: '#ffffff',
+          border: '1px solid #e6e8ec',
+          boxShadow: '0 12px 35px rgba(17, 24, 39, 0.08)',
+          overflow: 'hidden'
+        }}
+      >
         {/* Premium Header Section */}
         <Box
           sx={{
             px: 4,
             py: 3,
-            borderBottom: "1px solid #eef1f5",
-            background: "linear-gradient(180deg, #ffffff 0%, #fafbfc 100%)",
-          }}>
+            borderBottom: '1px solid #eef1f5',
+            background: 'linear-gradient(180deg, #ffffff 0%, #fafbfc 100%)'
+          }}
+        >
           <Grid container alignItems="center">
             <Grid item xs>
               <Typography
@@ -468,8 +523,9 @@ const ParticipantTable = () => {
                 sx={{
                   fontWeight: 700,
                   letterSpacing: 0.5,
-                  color: "#1f2937",
-                }}>
+                  color: '#1f2937'
+                }}
+              >
                 {webinarData?.title}
               </Typography>
             </Grid>
@@ -481,17 +537,18 @@ const ParticipantTable = () => {
                 onClick={() => navigate(-1)}
                 startIcon={<ArrowBack />}
                 sx={{
-                  textTransform: "none",
+                  textTransform: 'none',
                   fontWeight: 600,
                   borderRadius: 2,
                   px: 2.5,
-                  borderColor: "#d1d5db",
-                  color: "#374151",
-                  "&:hover": {
-                    backgroundColor: "#f3f4f6",
-                    borderColor: "#9ca3af",
-                  },
-                }}>
+                  borderColor: '#d1d5db',
+                  color: '#374151',
+                  '&:hover': {
+                    backgroundColor: '#f3f4f6',
+                    borderColor: '#9ca3af'
+                  }
+                }}
+              >
                 Back
               </Button>
             </Grid>
@@ -504,23 +561,23 @@ const ParticipantTable = () => {
                 sx={{
                   borderRadius: 3,
                   p: 3,
-                  background:
-                    "linear-gradient(135deg, #4a0d18 0%, #6b1222 100%)",
-                  color: "#ffffff",
-                  boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
-                  position: "relative",
-                  overflow: "hidden",
-                }}>
+                  background: 'linear-gradient(135deg, #4a0d18 0%, #6b1222 100%)',
+                  color: '#ffffff',
+                  boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
+                  position: 'relative',
+                  overflow: 'hidden'
+                }}
+              >
                 {/* Decorative Glow Circle */}
                 <Box
                   sx={{
-                    position: "absolute",
+                    position: 'absolute',
                     bottom: -30,
                     left: -30,
                     width: 120,
                     height: 120,
-                    background: "rgba(255,255,255,0.08)",
-                    borderRadius: "50%",
+                    background: 'rgba(255,255,255,0.08)',
+                    borderRadius: '50%'
                   }}
                 />
 
@@ -528,52 +585,56 @@ const ParticipantTable = () => {
                   {/* Event Date */}
                   <Box
                     sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      backgroundColor: "rgba(255,255,255,0.12)",
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      backgroundColor: 'rgba(255,255,255,0.12)',
                       px: 2,
                       py: 1.5,
-                      borderRadius: 2,
-                    }}>
+                      borderRadius: 2
+                    }}
+                  >
                     <Stack direction="row" spacing={1.5} alignItems="center">
                       <CalendarToday fontSize="small" />
                       <Typography
                         variant="subtitle2"
                         sx={{
-                          textTransform: "uppercase",
+                          textTransform: 'uppercase',
                           letterSpacing: 1,
-                          opacity: 0.85,
-                        }}>
+                          opacity: 0.85
+                        }}
+                      >
                         Event Date
                       </Typography>
                     </Stack>
 
                     <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                      {webinarData?.scheduled_start || "-"}
+                      {webinarData?.scheduled_start || '-'}
                     </Typography>
                   </Box>
 
                   {/* Registered Count */}
                   <Box
                     sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      backgroundColor: "rgba(255,255,255,0.12)",
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      backgroundColor: 'rgba(255,255,255,0.12)',
                       px: 2,
                       py: 1.5,
-                      borderRadius: 2,
-                    }}>
+                      borderRadius: 2
+                    }}
+                  >
                     <Stack direction="row" spacing={1.5} alignItems="center">
                       <People fontSize="small" />
                       <Typography
                         variant="subtitle2"
                         sx={{
-                          textTransform: "uppercase",
+                          textTransform: 'uppercase',
                           letterSpacing: 1,
-                          opacity: 0.85,
-                        }}>
+                          opacity: 0.85
+                        }}
+                      >
                         Registered
                       </Typography>
                     </Stack>
@@ -582,8 +643,9 @@ const ParticipantTable = () => {
                       variant="h5"
                       sx={{
                         fontWeight: 700,
-                        letterSpacing: 1,
-                      }}>
+                        letterSpacing: 1
+                      }}
+                    >
                       {webinarData?.participants_count ?? 0}
                     </Typography>
                   </Box>
@@ -596,23 +658,23 @@ const ParticipantTable = () => {
                 sx={{
                   borderRadius: 3,
                   p: 3,
-                  background:
-                    "linear-gradient(135deg, #5a0f1c 0%, #7a1628 100%)",
-                  color: "#ffffff",
-                  boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
-                  position: "relative",
-                  overflow: "hidden",
-                }}>
+                  background: 'linear-gradient(135deg, #5a0f1c 0%, #7a1628 100%)',
+                  color: '#ffffff',
+                  boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
+                  position: 'relative',
+                  overflow: 'hidden'
+                }}
+              >
                 {/* Subtle Overlay Glow */}
                 <Box
                   sx={{
-                    position: "absolute",
+                    position: 'absolute',
                     top: -40,
                     right: -40,
                     width: 140,
                     height: 140,
-                    background: "rgba(255,255,255,0.08)",
-                    borderRadius: "50%",
+                    background: 'rgba(255,255,255,0.08)',
+                    borderRadius: '50%'
                   }}
                 />
 
@@ -622,51 +684,53 @@ const ParticipantTable = () => {
                     <Typography
                       variant="subtitle2"
                       sx={{
-                        textTransform: "uppercase",
+                        textTransform: 'uppercase',
                         letterSpacing: 1,
                         fontWeight: 600,
                         opacity: 0.8,
-                        mb: 1,
-                      }}>
+                        mb: 1
+                      }}
+                    >
                       Webinar Zoom Link
                     </Typography>
 
                     <Box
                       sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        backgroundColor: "rgba(255,255,255,0.12)",
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        backgroundColor: 'rgba(255,255,255,0.12)',
                         px: 2,
                         py: 1.2,
-                        borderRadius: 2,
-                      }}>
+                        borderRadius: 2
+                      }}
+                    >
                       <Typography
                         variant="body2"
                         sx={{
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          maxWidth: "75%",
-                        }}>
-                        {webinarData?.zoom_link || "-"}
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          maxWidth: '75%'
+                        }}
+                      >
+                        {webinarData?.zoom_link || '-'}
                       </Typography>
 
                       <Button
                         size="small"
                         variant="contained"
-                        onClick={() =>
-                          navigator.clipboard.writeText(webinarData?.zoom_link)
-                        }
+                        onClick={() => navigator.clipboard.writeText(webinarData?.zoom_link)}
                         sx={{
-                          backgroundColor: "#ffffff",
-                          color: "#7a1628",
+                          backgroundColor: '#ffffff',
+                          color: '#7a1628',
                           fontWeight: 600,
-                          textTransform: "none",
-                          "&:hover": {
-                            backgroundColor: "#f3f4f6",
-                          },
-                        }}>
+                          textTransform: 'none',
+                          '&:hover': {
+                            backgroundColor: '#f3f4f6'
+                          }
+                        }}
+                      >
                         Copy
                       </Button>
                     </Box>
@@ -677,33 +741,31 @@ const ParticipantTable = () => {
                     <Typography
                       variant="subtitle2"
                       sx={{
-                        textTransform: "uppercase",
+                        textTransform: 'uppercase',
                         letterSpacing: 1,
                         fontWeight: 600,
                         opacity: 0.8,
-                        mb: 1,
-                      }}>
+                        mb: 1
+                      }}
+                    >
                       Pricing
                     </Typography>
 
                     {webinarData?.is_paid ? (
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                         {webinarData?.regular_price && (
                           <Typography
                             variant="body2"
                             sx={{
-                              textDecoration: "line-through",
-                              opacity: 0.7,
-                            }}>
+                              textDecoration: 'line-through',
+                              opacity: 0.7
+                            }}
+                          >
                             ₹
-                            {Number(webinarData.regular_price).toLocaleString(
-                              "en-IN",
-                              {
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2,
-                              },
-                            )}
+                            {Number(webinarData.regular_price).toLocaleString('en-IN', {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2
+                            })}
                           </Typography>
                         )}
 
@@ -711,25 +773,23 @@ const ParticipantTable = () => {
                           variant="h4"
                           sx={{
                             fontWeight: 700,
-                            letterSpacing: 1,
-                          }}>
+                            letterSpacing: 1
+                          }}
+                        >
                           ₹
-                          {Number(webinarData.price || 0).toLocaleString(
-                            "en-IN",
-                            {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                            },
-                          )}
+                          {Number(webinarData.price || 0).toLocaleString('en-IN', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                          })}
                         </Typography>
                       </Box>
                     ) : (
                       <Chip
                         label="Free Access"
                         sx={{
-                          backgroundColor: "#ffffff",
-                          color: "#7a1628",
-                          fontWeight: 600,
+                          backgroundColor: '#ffffff',
+                          color: '#7a1628',
+                          fontWeight: 600
                         }}
                       />
                     )}
@@ -741,25 +801,26 @@ const ParticipantTable = () => {
             <Grid item xs={12} md={6} sx={{ p: 3 }}>
               <Box
                 sx={{
-                  background:
-                    "linear-gradient(135deg, #f8fafc 0%, #eef2f7 100%)",
+                  background: 'linear-gradient(135deg, #f8fafc 0%, #eef2f7 100%)',
                   borderRadius: 3,
                   p: 3,
-                  boxShadow: "0 6px 18px rgba(0,0,0,0.06)",
-                  border: "1px solid #e5e7eb",
-                }}>
+                  boxShadow: '0 6px 18px rgba(0,0,0,0.06)',
+                  border: '1px solid #e5e7eb'
+                }}
+              >
                 {/* Header */}
                 <Stack direction="row" alignItems="center" spacing={1.5} mb={2}>
                   <Box
                     sx={{
-                      backgroundColor: "#8a1616",
-                      color: "#fff",
+                      backgroundColor: '#8a1616',
+                      color: '#fff',
                       borderRadius: 2,
                       p: 1,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}>
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
                     <Description fontSize="small" />
                   </Box>
 
@@ -768,8 +829,9 @@ const ParticipantTable = () => {
                     sx={{
                       fontWeight: 700,
                       letterSpacing: 0.5,
-                      color: "#1f2937",
-                    }}>
+                      color: '#1f2937'
+                    }}
+                  >
                     Webinar Description
                   </Typography>
                 </Stack>
@@ -778,11 +840,12 @@ const ParticipantTable = () => {
                 <Typography
                   variant="body1"
                   sx={{
-                    color: "#4b5563",
+                    color: '#4b5563',
                     lineHeight: 1.8,
-                    fontSize: "0.95rem",
-                  }}>
-                  {webinarData?.description || "No description available."}
+                    fontSize: '0.95rem'
+                  }}
+                >
+                  {webinarData?.description || 'No description available.'}
                 </Typography>
               </Box>
             </Grid>
@@ -795,30 +858,30 @@ const ParticipantTable = () => {
         sx={{
           mb: 4,
           borderRadius: 4,
-          background: "#ffffff",
-          border: "1px solid #e6e8ec",
-          boxShadow: "0 18px 45px rgba(15, 23, 42, 0.08)",
-          overflow: "hidden",
-        }}>
+          background: '#ffffff',
+          border: '1px solid #e6e8ec',
+          boxShadow: '0 18px 45px rgba(15, 23, 42, 0.08)',
+          overflow: 'hidden'
+        }}
+      >
         {/* Executive Header */}
         <Box
           sx={{
             px: 4,
             py: 3,
-            borderBottom: "1px solid #eef1f5",
-            background: "linear-gradient(180deg, #ffffff 0%, #fafbfc 100%)",
-          }}>
-          <Stack
-            direction="row"
-            alignItems="center"
-            justifyContent="space-between">
+            borderBottom: '1px solid #eef1f5',
+            background: 'linear-gradient(180deg, #ffffff 0%, #fafbfc 100%)'
+          }}
+        >
+          <Stack direction="row" alignItems="center" justifyContent="space-between">
             <Typography
               variant="h5"
               sx={{
                 fontWeight: 700,
                 letterSpacing: 0.5,
-                color: "#111827",
-              }}>
+                color: '#111827'
+              }}
+            >
               Registered Participants
             </Typography>
 
@@ -828,15 +891,16 @@ const ParticipantTable = () => {
                 onClick={handleColumnClick}
                 endIcon={<ArrowDropDownIcon />}
                 sx={{
-                  textTransform: "none",
+                  textTransform: 'none',
                   borderRadius: 2,
                   fontWeight: 600,
-                  borderColor: "#d1d5db",
-                  color: "#374151",
-                  "&:hover": {
-                    backgroundColor: "#f3f4f6",
-                  },
-                }}>
+                  borderColor: '#d1d5db',
+                  color: '#374151',
+                  '&:hover': {
+                    backgroundColor: '#f3f4f6'
+                  }
+                }}
+              >
                 Columns
               </Button>
 
@@ -844,14 +908,15 @@ const ParticipantTable = () => {
                 variant="contained"
                 onClick={exportToExcel}
                 sx={{
-                  textTransform: "none",
+                  textTransform: 'none',
                   borderRadius: 2,
                   fontWeight: 600,
-                  backgroundColor: "#111827",
-                  "&:hover": {
-                    backgroundColor: "#000000",
-                  },
-                }}>
+                  backgroundColor: '#111827',
+                  '&:hover': {
+                    backgroundColor: '#000000'
+                  }
+                }}
+              >
                 Export
               </Button>
             </Stack>
@@ -867,7 +932,8 @@ const ParticipantTable = () => {
               label="Attendance"
               value={attendanceFilter}
               onChange={(e) => setAttendanceFilter(e.target.value)}
-              sx={{ minWidth: 180 }}>
+              sx={{ minWidth: 180 }}
+            >
               <MenuItem value="All">All</MenuItem>
               <MenuItem value="Attended">Attended</MenuItem>
               <MenuItem value="Not Attended">Not Attended</MenuItem>
@@ -879,7 +945,8 @@ const ParticipantTable = () => {
               label="Hours Participated"
               value={hoursFilter}
               onChange={(e) => setHoursFilter(e.target.value)}
-              sx={{ minWidth: 200 }}>
+              sx={{ minWidth: 200 }}
+            >
               <MenuItem value="All">All</MenuItem>
               <MenuItem value="15 min">15 Min</MenuItem>
               <MenuItem value="30 min">30 Min</MenuItem>
@@ -898,12 +965,13 @@ const ParticipantTable = () => {
           sx={{
             px: 4,
             pb: 4,
-            "& .rdt_Table": {
+            '& .rdt_Table': {
               borderRadius: 3,
-              overflow: "hidden",
-              border: "1px solid #eef1f5",
-            },
-          }}>
+              overflow: 'hidden',
+              border: '1px solid #eef1f5'
+            }
+          }}
+        >
           <DataTable
             columns={filteredColumns}
             data={rows}
@@ -922,17 +990,18 @@ const ParticipantTable = () => {
           anchorEl={anchorEl}
           open={open}
           onClose={handleColumnClose}
-          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-          transformOrigin={{ vertical: "top", horizontal: "right" }}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+          transformOrigin={{ vertical: 'top', horizontal: 'right' }}
           PaperProps={{
             sx: {
               width: 260,
               mt: 1,
               p: 2,
               borderRadius: 3,
-              boxShadow: "0 12px 30px rgba(0,0,0,0.12)",
-            },
-          }}>
+              boxShadow: '0 12px 30px rgba(0,0,0,0.12)'
+            }
+          }}
+        >
           <Typography fontWeight={600} sx={{ mb: 1 }}>
             Select Columns
           </Typography>
@@ -949,13 +1018,13 @@ const ParticipantTable = () => {
                   onChange={(e) =>
                     setVisibleColumns((prev) => ({
                       ...prev,
-                      [col.id]: e.target.checked,
+                      [col.id]: e.target.checked
                     }))
                   }
                 />
               }
               label={col.name}
-              sx={{ display: "block" }}
+              sx={{ display: 'block' }}
             />
           ))}
         </Menu>
@@ -968,25 +1037,28 @@ const ParticipantTable = () => {
         PaperProps={{
           sx: {
             borderRadius: 4,
-            overflow: "hidden",
-            boxShadow: "0 20px 50px rgba(15, 23, 42, 0.18)",
-          },
-        }}>
+            overflow: 'hidden',
+            boxShadow: '0 20px 50px rgba(15, 23, 42, 0.18)'
+          }
+        }}
+      >
         {/* Header */}
         <Box
           sx={{
             px: 4,
             py: 3,
-            borderBottom: "1px solid #eef1f5",
-            background: "linear-gradient(180deg, #ffffff 0%, #f9fafb 100%)",
-          }}>
+            borderBottom: '1px solid #eef1f5',
+            background: 'linear-gradient(180deg, #ffffff 0%, #f9fafb 100%)'
+          }}
+        >
           <Typography
             variant="h6"
             sx={{
               fontWeight: 700,
               letterSpacing: 0.5,
-              color: "#111827",
-            }}>
+              color: '#111827'
+            }}
+          >
             Participant Details
           </Typography>
         </Box>
@@ -997,14 +1069,10 @@ const ParticipantTable = () => {
             <Stack spacing={3}>
               {/* Name */}
               <Box>
-                <Typography
-                  variant="caption"
-                  sx={{ color: "#6b7280", fontWeight: 600 }}>
+                <Typography variant="caption" sx={{ color: '#6b7280', fontWeight: 600 }}>
                   FULL NAME
                 </Typography>
-                <Typography
-                  variant="h6"
-                  sx={{ fontWeight: 600, color: "#111827" }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, color: '#111827' }}>
                   {selectedParticipant.name}
                 </Typography>
               </Box>
@@ -1014,23 +1082,19 @@ const ParticipantTable = () => {
               {/* Contact Info */}
               <Stack direction="row" spacing={4}>
                 <Box>
-                  <Typography
-                    variant="caption"
-                    sx={{ color: "#6b7280", fontWeight: 600 }}>
+                  <Typography variant="caption" sx={{ color: '#6b7280', fontWeight: 600 }}>
                     PHONE
                   </Typography>
-                  <Typography variant="body1" sx={{ color: "#1f2937" }}>
+                  <Typography variant="body1" sx={{ color: '#1f2937' }}>
                     {selectedParticipant.phone}
                   </Typography>
                 </Box>
 
                 <Box>
-                  <Typography
-                    variant="caption"
-                    sx={{ color: "#6b7280", fontWeight: 600 }}>
+                  <Typography variant="caption" sx={{ color: '#6b7280', fontWeight: 600 }}>
                     EMAIL
                   </Typography>
-                  <Typography variant="body1" sx={{ color: "#1f2937" }}>
+                  <Typography variant="body1" sx={{ color: '#1f2937' }}>
                     {selectedParticipant.email}
                   </Typography>
                 </Box>
@@ -1041,9 +1105,7 @@ const ParticipantTable = () => {
               {/* Status Section */}
               <Stack direction="row" spacing={4}>
                 <Box>
-                  <Typography
-                    variant="caption"
-                    sx={{ color: "#6b7280", fontWeight: 600 }}>
+                  <Typography variant="caption" sx={{ color: '#6b7280', fontWeight: 600 }}>
                     PAYMENT STATUS
                   </Typography>
                   <Chip
@@ -1053,33 +1115,25 @@ const ParticipantTable = () => {
                       mt: 1,
                       ml: 1,
                       fontWeight: 600,
-                      backgroundColor: "#eef2ff",
-                      color: "#3730a3",
+                      backgroundColor: '#eef2ff',
+                      color: '#3730a3'
                     }}
                   />
                 </Box>
 
                 <Box>
-                  <Typography
-                    variant="caption"
-                    sx={{ color: "#6b7280", fontWeight: 600 }}>
+                  <Typography variant="caption" sx={{ color: '#6b7280', fontWeight: 600 }}>
                     ATTENDANCE
                   </Typography>
                   <Chip
-                    label={
-                      selectedParticipant.attended ? "Attended" : "Not Attended"
-                    }
+                    label={selectedParticipant.attended ? 'Attended' : 'Not Attended'}
                     size="small"
                     sx={{
                       mt: 1,
                       ml: 1,
                       fontWeight: 600,
-                      backgroundColor: selectedParticipant.attended
-                        ? "#ecfdf5"
-                        : "#fef2f2",
-                      color: selectedParticipant.attended
-                        ? "#065f46"
-                        : "#991b1b",
+                      backgroundColor: selectedParticipant.attended ? '#ecfdf5' : '#fef2f2',
+                      color: selectedParticipant.attended ? '#065f46' : '#991b1b'
                     }}
                   />
                 </Box>
@@ -1090,28 +1144,19 @@ const ParticipantTable = () => {
               {/* Participation */}
               <Stack direction="row" spacing={4}>
                 <Box>
-                  <Typography
-                    variant="caption"
-                    sx={{ color: "#6b7280", fontWeight: 600 }}>
+                  <Typography variant="caption" sx={{ color: '#6b7280', fontWeight: 600 }}>
                     HOURS PARTICIPATED
                   </Typography>
                   <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                    {formatHoursFixed(
-                      selectedParticipant.total_hours_participated,
-                    )}{" "}
-                    hrs
+                    {formatHoursFixed(selectedParticipant.total_hours_participated)} hrs
                   </Typography>
                 </Box>
 
                 <Box>
-                  <Typography
-                    variant="caption"
-                    sx={{ color: "#6b7280", fontWeight: 600 }}>
+                  <Typography variant="caption" sx={{ color: '#6b7280', fontWeight: 600 }}>
                     REGISTERED AT
                   </Typography>
-                  <Typography variant="body1">
-                    {formatDateTime(selectedParticipant.registered_at)}
-                  </Typography>
+                  <Typography variant="body1">{formatDateTime(selectedParticipant.registered_at)}</Typography>
                 </Box>
               </Stack>
             </Stack>
@@ -1123,18 +1168,20 @@ const ParticipantTable = () => {
           sx={{
             px: 4,
             py: 2,
-            borderTop: "1px solid #eef1f5",
-          }}>
+            borderTop: '1px solid #eef1f5'
+          }}
+        >
           <Button
             onClick={handleCloseView}
             variant="contained"
             sx={{
-              textTransform: "none",
+              textTransform: 'none',
               fontWeight: 600,
               borderRadius: 2,
-              backgroundColor: "#111827",
-              "&:hover": { backgroundColor: "#000000" },
-            }}>
+              backgroundColor: '#111827',
+              '&:hover': { backgroundColor: '#000000' }
+            }}
+          >
             Close
           </Button>
         </DialogActions>
@@ -1148,30 +1195,27 @@ const ParticipantTable = () => {
         PaperProps={{
           sx: {
             borderRadius: 4,
-            overflow: "hidden",
-            boxShadow: "0 22px 55px rgba(15, 23, 42, 0.18)",
-          },
-        }}>
+            overflow: 'hidden',
+            boxShadow: '0 22px 55px rgba(15, 23, 42, 0.18)'
+          }
+        }}
+      >
         {/* Header */}
         <Box
           sx={{
             px: 4,
             py: 3,
-            borderBottom: "1px solid #eef1f5",
-            background: "linear-gradient(180deg, #ffffff 0%, #f9fafb 100%)",
-          }}>
+            borderBottom: '1px solid #eef1f5',
+            background: 'linear-gradient(180deg, #ffffff 0%, #f9fafb 100%)'
+          }}
+        >
           <Stack spacing={1}>
-            <Typography variant="h6" sx={{ fontWeight: 700, color: "#111827" }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, color: '#111827' }}>
               Attendance Logs
             </Typography>
 
-            <Typography
-              variant="body2"
-              sx={{ color: "#6b7280", fontWeight: 500 }}>
-              Participant:{" "}
-              <span style={{ color: "#111827", fontWeight: 600 }}>
-                {selectedLogsUser}
-              </span>
+            <Typography variant="body2" sx={{ color: '#6b7280', fontWeight: 500 }}>
+              Participant: <span style={{ color: '#111827', fontWeight: 600 }}>{selectedLogsUser}</span>
             </Typography>
           </Stack>
         </Box>
@@ -1182,14 +1226,13 @@ const ParticipantTable = () => {
             <Box
               sx={{
                 py: 6,
-                textAlign: "center",
+                textAlign: 'center',
                 borderRadius: 3,
-                backgroundColor: "#f9fafb",
-                border: "1px dashed #e5e7eb",
-              }}>
-              <Typography
-                variant="body1"
-                sx={{ color: "#6b7280", fontWeight: 500 }}>
+                backgroundColor: '#f9fafb',
+                border: '1px dashed #e5e7eb'
+              }}
+            >
+              <Typography variant="body1" sx={{ color: '#6b7280', fontWeight: 500 }}>
                 No attendance logs available
               </Typography>
             </Box>
@@ -1197,31 +1240,32 @@ const ParticipantTable = () => {
             <Box
               sx={{
                 borderRadius: 3,
-                border: "1px solid #eef1f5",
-                overflow: "hidden",
-                "& .rdt_TableHead": {
-                  backgroundColor: "#f9fafb",
-                },
-              }}>
+                border: '1px solid #eef1f5',
+                overflow: 'hidden',
+                '& .rdt_TableHead': {
+                  backgroundColor: '#f9fafb'
+                }
+              }}
+            >
               <DataTable
                 columns={[
                   {
-                    name: "S.No",
+                    name: 'S.No',
                     selector: (row, i) => i + 1,
-                    width: "80px",
+                    width: '80px'
                   },
                   {
-                    name: "Join Time",
-                    selector: (row) => formatTimeOnly(row.join_time),
+                    name: 'Join Time',
+                    selector: (row) => formatTimeOnly(row.join_time)
                   },
                   {
-                    name: "Leave Time",
-                    selector: (row) => formatTimeOnly(row.leave_time),
+                    name: 'Leave Time',
+                    selector: (row) => formatTimeOnly(row.leave_time)
                   },
                   {
-                    name: "Duration (min)",
-                    selector: (row) => row.duration_minutes,
-                  },
+                    name: 'Duration (min)',
+                    selector: (row) => row.duration_minutes
+                  }
                 ]}
                 data={selectedLogs}
                 pagination
@@ -1238,28 +1282,26 @@ const ParticipantTable = () => {
           sx={{
             px: 4,
             py: 2,
-            borderTop: "1px solid #eef1f5",
-          }}>
+            borderTop: '1px solid #eef1f5'
+          }}
+        >
           <Button
             onClick={handleCloseLogs}
             variant="contained"
             sx={{
-              textTransform: "none",
+              textTransform: 'none',
               fontWeight: 600,
               borderRadius: 2,
-              backgroundColor: "#111827",
-              "&:hover": { backgroundColor: "#000000" },
-            }}>
+              backgroundColor: '#111827',
+              '&:hover': { backgroundColor: '#000000' }
+            }}
+          >
             Close
           </Button>
         </DialogActions>
       </Dialog>
 
-      <Dialog
-        open={openCertificate}
-        onClose={handleCloseCertificate}
-        maxWidth="md"
-        fullWidth>
+      <Dialog open={openCertificate} onClose={handleCloseCertificate} maxWidth="md" fullWidth>
         <DialogTitle>Certificate Preview</DialogTitle>
 
         <DialogContent dividers>
@@ -1269,9 +1311,9 @@ const ParticipantTable = () => {
               src={selectedCertificate}
               alt="Certificate"
               sx={{
-                width: "100%",
+                width: '100%',
                 borderRadius: 2,
-                border: "1px solid #ddd",
+                border: '1px solid #ddd'
               }}
             />
           ) : (
@@ -1287,7 +1329,7 @@ const ParticipantTable = () => {
         open={feedbackOpen}
         onClose={() => setFeedbackOpen(false)}
         webinarUuid={selectedWebinarUuid}
-      // feedback=[]
+        // feedback=[]
       />
     </Container>
   );
