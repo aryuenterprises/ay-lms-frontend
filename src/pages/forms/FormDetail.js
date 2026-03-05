@@ -64,11 +64,9 @@ const getAnswer = (submission, questionId) => {
   );
 };
 
-const formatDate = (iso) =>
-  new Date(iso).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+const formatDate = (iso) => new Date(iso).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
 
-const formatTime = (iso) =>
-  new Date(iso).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+const formatTime = (iso) => new Date(iso).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
 
 /* ─────────────────────────────────────────
    STAT BADGE
@@ -86,7 +84,9 @@ const StatBadge = ({ label, value, color = '#b30000' }) => (
     }}
   >
     <Typography sx={{ fontSize: { xs: 16, sm: 20 }, fontWeight: 800, color, lineHeight: 1 }}>{value}</Typography>
-    <Typography sx={{ fontSize: { xs: 9, sm: 10 }, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', letterSpacing: 1, mt: 0.3 }}>
+    <Typography
+      sx={{ fontSize: { xs: 9, sm: 10 }, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', letterSpacing: 1, mt: 0.3 }}
+    >
       {label}
     </Typography>
   </Box>
@@ -98,7 +98,7 @@ const StatBadge = ({ label, value, color = '#b30000' }) => (
 const SubmissionCard = ({ submission, index, questions, onView, onDelete }) => {
   const [expanded, setExpanded] = useState(false);
   const previewQs = questions.slice(0, 2);
-  const restQs    = questions.slice(2);
+  const restQs = questions.slice(2);
 
   return (
     <Card
@@ -120,10 +120,14 @@ const SubmissionCard = ({ submission, index, questions, onView, onDelete }) => {
           <Stack direction="row" spacing={1.5} alignItems="center">
             <Box
               sx={{
-                width: 32, height: 32, borderRadius: '9px', flexShrink: 0,
+                width: 32,
+                height: 32,
+                borderRadius: '9px',
+                flexShrink: 0,
                 background: 'linear-gradient(135deg,#ff2e2e18,#b3000012)',
                 border: '1px solid #ff2e2e22',
-                display: 'grid', placeItems: 'center'
+                display: 'grid',
+                placeItems: 'center'
               }}
             >
               <Typography sx={{ fontSize: 11, fontWeight: 800, color: '#b30000' }}>{index}</Typography>
@@ -131,15 +135,11 @@ const SubmissionCard = ({ submission, index, questions, onView, onDelete }) => {
             <Box>
               <Stack direction="row" spacing={0.5} alignItems="center">
                 <CalendarTodayIcon sx={{ fontSize: 11, color: '#9ca3af' }} />
-                <Typography sx={{ fontSize: 12, fontWeight: 600, color: '#0f172a' }}>
-                  {formatDate(submission.submitted_at)}
-                </Typography>
+                <Typography sx={{ fontSize: 12, fontWeight: 600, color: '#0f172a' }}>{formatDate(submission.submitted_at)}</Typography>
               </Stack>
               <Stack direction="row" spacing={0.5} alignItems="center" mt={0.2}>
                 <AccessTimeIcon sx={{ fontSize: 11, color: '#9ca3af' }} />
-                <Typography sx={{ fontSize: 11, color: '#6b7280' }}>
-                  {formatTime(submission.submitted_at)}
-                </Typography>
+                <Typography sx={{ fontSize: 11, color: '#6b7280' }}>{formatTime(submission.submitted_at)}</Typography>
               </Stack>
             </Box>
           </Stack>
@@ -149,14 +149,28 @@ const SubmissionCard = ({ submission, index, questions, onView, onDelete }) => {
             <IconButton
               size="small"
               onClick={() => onView(submission)}
-              sx={{ width: 32, height: 32, borderRadius: 1.5, background: '#eff6ff', color: '#2563eb', '&:hover': { background: '#dbeafe' } }}
+              sx={{
+                width: 32,
+                height: 32,
+                borderRadius: 1.5,
+                background: '#eff6ff',
+                color: '#2563eb',
+                '&:hover': { background: '#dbeafe' }
+              }}
             >
               <VisibilityIcon sx={{ fontSize: 15 }} />
             </IconButton>
             <IconButton
               size="small"
               onClick={() => onDelete(submission.uuid)}
-              sx={{ width: 32, height: 32, borderRadius: 1.5, background: '#fff1f2', color: '#e11d48', '&:hover': { background: '#ffe4e6' } }}
+              sx={{
+                width: 32,
+                height: 32,
+                borderRadius: 1.5,
+                background: '#fff1f2',
+                color: '#e11d48',
+                '&:hover': { background: '#ffe4e6' }
+              }}
             >
               <DeleteOutlineIcon sx={{ fontSize: 15 }} />
             </IconButton>
@@ -195,9 +209,7 @@ const SubmissionCard = ({ submission, index, questions, onView, onDelete }) => {
                     <Typography sx={{ fontSize: 10, fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: 0.8 }}>
                       {q.label}
                     </Typography>
-                    <Typography
-                      sx={{ fontSize: 13, color: ans ? '#0f172a' : '#d1d5db', fontStyle: ans ? 'normal' : 'italic', mt: 0.2 }}
-                    >
+                    <Typography sx={{ fontSize: 13, color: ans ? '#0f172a' : '#d1d5db', fontStyle: ans ? 'normal' : 'italic', mt: 0.2 }}>
                       {ans || 'No answer'}
                     </Typography>
                   </Box>
@@ -248,16 +260,16 @@ const LoadingSkeleton = ({ isMobile }) =>
 ───────────────────────────────────────── */
 const FormDetail = () => {
   const { slug } = useParams();
-  const theme    = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));           // < 900px → card view
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md')); // < 900px → card view
   const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md')); // 600–900px → 2-col cards
 
-  const [form, setForm]                     = useState(null);
-  const [loading, setLoading]               = useState(true);
-  const [openColumns, setOpenColumns]       = useState(false);
+  const [form, setForm] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [openColumns, setOpenColumns] = useState(false);
   const [visibleColumns, setVisibleColumns] = useState([]);
-  const [page, setPage]                     = useState(0);
-  const [rowsPerPage, setRowsPerPage]       = useState(10);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [viewSubmission, setViewSubmission] = useState(null);
 
   /* ── fetch ── */
@@ -266,7 +278,7 @@ const FormDetail = () => {
       setLoading(true);
       try {
         if (!slug) return;
-        const res  = await axiosInstance.get(`${APP_PATH_BASE_URL}/api/webinar/forms/${slug}/`);
+        const res = await axiosInstance.get(`${APP_PATH_BASE_URL}/api/webinar/forms/${slug}/`);
         const data = res?.data?.data;
         if (!data) throw new Error('Invalid form response');
         setForm(data);
@@ -287,8 +299,7 @@ const FormDetail = () => {
   };
 
   /* ── toggle column ── */
-  const toggleColumn = (id) =>
-    setVisibleColumns((prev) => (prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]));
+  const toggleColumn = (id) => setVisibleColumns((prev) => (prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]));
 
   /* ── delete ── */
   const handleDelete = async (uuid) => {
@@ -318,19 +329,21 @@ const FormDetail = () => {
 
   /* ── derived ── */
   const submissions = form?.submissions || [];
-  const totalCount  = submissions.length;
-  const pageRows    = submissions.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
-  const visibleQs   = (form?.questions || []).filter((q) => visibleColumns.includes(q.id));
+  const totalCount = submissions.length;
+  const pageRows = submissions.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  const visibleQs = (form?.questions || []).filter((q) => visibleColumns.includes(q.id));
 
   /* ── shared pagination bar ── */
   const PaginationFooter = () => (
     <Box
       sx={{
-        display: 'flex', alignItems: 'center',
+        display: 'flex',
+        alignItems: 'center',
         justifyContent: { xs: 'center', sm: 'space-between' },
         flexDirection: { xs: 'column', sm: 'row' },
         gap: 1,
-        px: { xs: 1, sm: 3 }, py: 1.5,
+        px: { xs: 1, sm: 3 },
+        py: 1.5,
         borderTop: '1px solid #f0f0f0',
         background: 'linear-gradient(180deg,#fafafa,#f5f5f5)',
         borderRadius: '0 0 12px 12px'
@@ -351,13 +364,18 @@ const FormDetail = () => {
         rowsPerPage={rowsPerPage}
         rowsPerPageOptions={ROWS_PER_PAGE_OPTIONS}
         onPageChange={(_, newPage) => setPage(newPage)}
-        onRowsPerPageChange={(e) => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
+        onRowsPerPageChange={(e) => {
+          setRowsPerPage(parseInt(e.target.value, 10));
+          setPage(0);
+        }}
         sx={{
           border: 'none',
           '& .MuiTablePagination-toolbar': { minHeight: 0, p: 0 },
           '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': { fontSize: 12, color: '#6b7280' },
           '& .MuiTablePagination-actions button': {
-            border: '1px solid #e5e7eb', borderRadius: 1.5, mx: 0.3,
+            border: '1px solid #e5e7eb',
+            borderRadius: 1.5,
+            mx: 0.3,
             '&:hover': { background: '#fff5f5', borderColor: '#b30000' }
           }
         }}
@@ -381,31 +399,25 @@ const FormDetail = () => {
           HEADER
       ════════════════════ */}
       <Box pb={3}>
-        <Stack
-          direction={{ xs: 'column', sm: 'row' }}
-          justifyContent="space-between"
-          alignItems={{ sm: 'flex-start' }}
-          spacing={2}
-        >
+        <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ sm: 'flex-start' }} spacing={2}>
           {/* Title */}
           <Stack direction="row" spacing={1.5} alignItems="center">
             <Box
               sx={{
-                width: { xs: 42, sm: 52 }, height: { xs: 42, sm: 52 },
-                borderRadius: 2.5, flexShrink: 0,
+                width: { xs: 42, sm: 52 },
+                height: { xs: 42, sm: 52 },
+                borderRadius: 2.5,
+                flexShrink: 0,
                 background: 'linear-gradient(135deg,#ff2e2e,#b30000)',
-                display: 'grid', placeItems: 'center',
+                display: 'grid',
+                placeItems: 'center',
                 boxShadow: '0 8px 24px rgba(255,46,46,0.28)'
               }}
             >
               <AssignmentIcon sx={{ color: '#fff', fontSize: { xs: 20, sm: 24 } }} />
             </Box>
             <Box>
-              <Typography
-                variant="h5"
-                fontWeight={800}
-                sx={{ color: '#0f172a', letterSpacing: '-0.3px', fontSize: { xs: 17, sm: 22 } }}
-              >
+              <Typography variant="h5" fontWeight={800} sx={{ color: '#0f172a', letterSpacing: '-0.3px', fontSize: { xs: 17, sm: 22 } }}>
                 {form?.title || '—'}
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mt: 0.3, fontSize: { xs: 12, sm: 13 } }}>
@@ -419,7 +431,7 @@ const FormDetail = () => {
             {form && (
               <>
                 <StatBadge label="Submissions" value={form.submissions_count ?? totalCount} color="#b30000" />
-                <StatBadge label="Questions"   value={form.questions.length}                color="#0369a1" />
+                <StatBadge label="Questions" value={form.questions.length} color="#0369a1" />
                 <StatBadge
                   label={form.is_active ? 'Active' : 'Inactive'}
                   value={form.is_active ? '●' : '○'}
@@ -459,7 +471,6 @@ const FormDetail = () => {
       {loading ? (
         <LoadingSkeleton isMobile={isMobile} />
       ) : isMobile ? (
-
         /* ──────────────────────────────────
            MOBILE / TABLET  →  CARD GRID
         ────────────────────────────────── */
@@ -469,7 +480,9 @@ const FormDetail = () => {
               <Box sx={{ width: 48, height: 48, borderRadius: '50%', background: '#f3f4f6', display: 'grid', placeItems: 'center' }}>
                 <AssignmentIcon sx={{ color: '#9ca3af', fontSize: 24 }} />
               </Box>
-              <Typography color="text.secondary" fontWeight={500} fontSize={14}>No submissions yet</Typography>
+              <Typography color="text.secondary" fontWeight={500} fontSize={14}>
+                No submissions yet
+              </Typography>
             </Stack>
           ) : (
             <>
@@ -493,34 +506,83 @@ const FormDetail = () => {
             </>
           )}
         </Box>
-
       ) : (
-
         /* ──────────────────────────────────
            DESKTOP / LAPTOP  →  TABLE VIEW
         ────────────────────────────────── */
-        <Paper elevation={0} sx={{ borderRadius: 3, border: '1px solid #f0f0f0', overflow: 'hidden', boxShadow: '0 4px 24px rgba(85,10,10,0.04)' }}>
+        <Paper
+          elevation={0}
+          sx={{ borderRadius: 3, border: '1px solid #f0f0f0', overflow: 'hidden', boxShadow: '0 4px 24px rgba(85,10,10,0.04)' }}
+        >
           <TableContainer sx={{ maxHeight: 560 }}>
             <Table stickyHeader size="small">
               <TableHead>
                 <TableRow>
                   {/* S.No */}
-                  <TableCell sx={{ width: 60, fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, background: '#000000', color: '#ebebeb', borderBottom: '2px solid #b30000', py: 1.8 }}>
+                  <TableCell
+                    sx={{
+                      width: 60,
+                      fontWeight: 700,
+                      fontSize: 11,
+                      textTransform: 'uppercase',
+                      letterSpacing: 1,
+                      background: '#000000',
+                      color: '#ebebeb',
+                      borderBottom: '2px solid #b30000',
+                      py: 1.8
+                    }}
+                  >
                     S.No
                   </TableCell>
-                  
+
                   {/* Dynamic columns */}
                   {visibleQs.map((q) => (
-                    <TableCell key={q.id} sx={{ fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, whiteSpace: 'nowrap', background: '#000000', color: '#ebebeb', borderBottom: '2px solid #b30000', minWidth: 160 }}>
+                    <TableCell
+                      key={q.id}
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: 11,
+                        textTransform: 'uppercase',
+                        letterSpacing: 1,
+                        whiteSpace: 'nowrap',
+                        background: '#000000',
+                        color: '#ebebeb',
+                        borderBottom: '2px solid #b30000',
+                        minWidth: 160
+                      }}
+                    >
                       {q.label}
                     </TableCell>
                   ))}
                   {/* Submitted At */}
-                  <TableCell sx={{ fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, background: '#000000', color: '#ebebeb', borderBottom: '2px solid #b30000', minWidth: 150 }}>
+                  <TableCell
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: 11,
+                      textTransform: 'uppercase',
+                      letterSpacing: 1,
+                      background: '#000000',
+                      color: '#ebebeb',
+                      borderBottom: '2px solid #b30000',
+                      minWidth: 150
+                    }}
+                  >
                     Submitted At
                   </TableCell>
                   {/* Actions */}
-                  <TableCell align="center" sx={{ width: 110, fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, background: '#000000', color: '#ebebeb', borderBottom: '2px solid #b30000' }}>
+                  <TableCell
+                    align="center"
+                    sx={{
+                      width: 110,
+                      fontWeight: 700,
+                      fontSize: 11,
+                      textTransform: 'uppercase',
+                      letterSpacing: 1,
+                      background: '#000000',
+                      color: '#ebebeb',
+                      borderBottom: '2px solid #b30000'
+                    }}
+                  >
                     Actions
                   </TableCell>
                 </TableRow>
@@ -531,10 +593,14 @@ const FormDetail = () => {
                   <TableRow>
                     <TableCell colSpan={visibleQs.length + 3} align="center" sx={{ py: 8 }}>
                       <Stack alignItems="center" spacing={1.5}>
-                        <Box sx={{ width: 40, height: 40, borderRadius: '50%', background: '#f3f4f6', display: 'grid', placeItems: 'center' }}>
+                        <Box
+                          sx={{ width: 40, height: 40, borderRadius: '50%', background: '#f3f4f6', display: 'grid', placeItems: 'center' }}
+                        >
                           <AssignmentIcon sx={{ color: '#9ca3af', fontSize: 20 }} />
                         </Box>
-                        <Typography color="text.secondary" fontWeight={500}>No submissions yet</Typography>
+                        <Typography color="text.secondary" fontWeight={500}>
+                          No submissions yet
+                        </Typography>
                       </Stack>
                     </TableCell>
                   </TableRow>
@@ -542,7 +608,7 @@ const FormDetail = () => {
 
                 {pageRows.map((submission, rowIndex) => {
                   const globalIndex = page * rowsPerPage + rowIndex + 1;
-                  const isEven      = rowIndex % 2 === 0;
+                  const isEven = rowIndex % 2 === 0;
 
                   return (
                     <TableRow
@@ -557,17 +623,19 @@ const FormDetail = () => {
                     >
                       {/* S.No pill */}
                       <TableCell sx={{ py: 1.5 }}>
-                        <Box sx={{ width: 28, height: 28, borderRadius: '8px', background: 'linear-gradient(135deg,#ff2e2e18,#b3000012)', border: '1px solid #ff2e2e22', display: 'grid', placeItems: 'center' }}>
+                        <Box
+                          sx={{
+                            width: 28,
+                            height: 28,
+                            borderRadius: '8px',
+                            background: 'linear-gradient(135deg,#ff2e2e18,#b3000012)',
+                            border: '1px solid #ff2e2e22',
+                            display: 'grid',
+                            placeItems: 'center'
+                          }}
+                        >
                           <Typography sx={{ fontSize: 11, fontWeight: 700, color: '#b30000' }}>{globalIndex}</Typography>
                         </Box>
-                      </TableCell>
-
-                      {/* Date + Time */}
-                      <TableCell sx={{ py: 1.5 }}>
-                        <Stack spacing={0.2}>
-                          <Typography sx={{ fontSize: 12, fontWeight: 600, color: '#0f172a' }}>{formatDate(submission.submitted_at)}</Typography>
-                          <Typography sx={{ fontSize: 11, color: '#6b7280' }}>{formatTime(submission.submitted_at)}</Typography>
-                        </Stack>
                       </TableCell>
 
                       {/* Answers */}
@@ -576,7 +644,17 @@ const FormDetail = () => {
                         return (
                           <TableCell key={q.id} sx={{ py: 1.5, maxWidth: 220 }}>
                             {ans ? (
-                              <Typography sx={{ fontSize: 13, color: '#374151', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 200 }} title={ans}>
+                              <Typography
+                                sx={{
+                                  fontSize: 13,
+                                  color: '#374151',
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  whiteSpace: 'nowrap',
+                                  maxWidth: 200
+                                }}
+                                title={ans}
+                              >
                                 {ans}
                               </Typography>
                             ) : (
@@ -586,16 +664,54 @@ const FormDetail = () => {
                         );
                       })}
 
+                      {/* Date + Time */}
+                      <TableCell sx={{ py: 1.5 }}>
+                        <Stack spacing={0.2}>
+                          <Typography sx={{ fontSize: 12, fontWeight: 600, color: '#0f172a' }}>
+                            {formatDate(submission.submitted_at)}
+                          </Typography>
+                          <Typography sx={{ fontSize: 11, color: '#6b7280' }}>{formatTime(submission.submitted_at)}</Typography>
+                        </Stack>
+                      </TableCell>
+                      
                       {/* Actions */}
                       <TableCell align="center" sx={{ py: 1.5 }}>
-                        <Stack direction="row" spacing={0.5} justifyContent="center" className="row-actions" sx={{ opacity: 0.75, transition: 'opacity 0.2s' }}>
+                        <Stack
+                          direction="row"
+                          spacing={0.5}
+                          justifyContent="center"
+                          className="row-actions"
+                          sx={{ opacity: 0.75, transition: 'opacity 0.2s' }}
+                        >
                           <Tooltip title="View Details">
-                            <IconButton size="small" onClick={() => setViewSubmission(submission)} sx={{ width: 30, height: 30, borderRadius: 1.5, background: '#eff6ff', color: '#2563eb', '&:hover': { background: '#dbeafe' } }}>
+                            <IconButton
+                              size="small"
+                              onClick={() => setViewSubmission(submission)}
+                              sx={{
+                                width: 30,
+                                height: 30,
+                                borderRadius: 1.5,
+                                background: '#eff6ff',
+                                color: '#2563eb',
+                                '&:hover': { background: '#dbeafe' }
+                              }}
+                            >
                               <VisibilityIcon sx={{ fontSize: 15 }} />
                             </IconButton>
                           </Tooltip>
                           <Tooltip title="Delete">
-                            <IconButton size="small" onClick={() => handleDelete(submission.uuid)} sx={{ width: 30, height: 30, borderRadius: 1.5, background: '#fff1f2', color: '#e11d48', '&:hover': { background: '#ffe4e6' } }}>
+                            <IconButton
+                              size="small"
+                              onClick={() => handleDelete(submission.uuid)}
+                              sx={{
+                                width: 30,
+                                height: 30,
+                                borderRadius: 1.5,
+                                background: '#fff1f2',
+                                color: '#e11d48',
+                                '&:hover': { background: '#ffe4e6' }
+                              }}
+                            >
                               <DeleteOutlineIcon sx={{ fontSize: 15 }} />
                             </IconButton>
                           </Tooltip>
@@ -634,7 +750,12 @@ const FormDetail = () => {
               <FormControlLabel
                 key={q.id}
                 control={
-                  <Checkbox checked={visibleColumns.includes(q.id)} onChange={() => toggleColumn(q.id)} size="small" sx={{ color: '#b30000', '&.Mui-checked': { color: '#b30000' } }} />
+                  <Checkbox
+                    checked={visibleColumns.includes(q.id)}
+                    onChange={() => toggleColumn(q.id)}
+                    size="small"
+                    sx={{ color: '#b30000', '&.Mui-checked': { color: '#b30000' } }}
+                  />
                 }
                 label={<Typography sx={{ fontSize: 13, fontWeight: 500 }}>{q.label}</Typography>}
                 sx={{ px: 1, py: 0.5, borderRadius: 1.5, '&:hover': { background: '#fff7f7' } }}
@@ -643,10 +764,20 @@ const FormDetail = () => {
           </Stack>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button size="small" variant="outlined" onClick={() => setVisibleColumns((form?.questions || []).map((q) => q.id))} sx={{ borderColor: '#e5e7eb', color: '#374151', fontSize: 12 }}>
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={() => setVisibleColumns((form?.questions || []).map((q) => q.id))}
+            sx={{ borderColor: '#e5e7eb', color: '#374151', fontSize: 12 }}
+          >
             Select All
           </Button>
-          <Button size="small" variant="contained" onClick={() => setOpenColumns(false)} sx={{ background: 'linear-gradient(90deg,#ff2e2e,#b30000)', fontSize: 12 }}>
+          <Button
+            size="small"
+            variant="contained"
+            onClick={() => setOpenColumns(false)}
+            sx={{ background: 'linear-gradient(90deg,#ff2e2e,#b30000)', fontSize: 12 }}
+          >
             Apply
           </Button>
         </DialogActions>
@@ -668,7 +799,9 @@ const FormDetail = () => {
         <Box sx={{ background: 'linear-gradient(90deg,#1a1a2e,#16213e)', px: 3, py: 2.5 }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center">
             <Stack spacing={0.3}>
-              <Typography fontWeight={700} sx={{ color: '#fff', fontSize: 15 }}>Submission Detail</Typography>
+              <Typography fontWeight={700} sx={{ color: '#fff', fontSize: 15 }}>
+                Submission Detail
+              </Typography>
               {viewSubmission && (
                 <Typography sx={{ fontSize: 11, color: '#94a3b8' }}>
                   {new Date(viewSubmission.submitted_at).toLocaleString('en-IN')}
@@ -689,7 +822,19 @@ const FormDetail = () => {
                 return (
                   <Box key={q.id} sx={{ px: 3, py: 2, '&:hover': { background: '#fafafa' } }}>
                     <Stack direction="row" spacing={1.5} alignItems="flex-start">
-                      <Box sx={{ mt: 0.2, width: 22, height: 22, borderRadius: '6px', flexShrink: 0, background: 'linear-gradient(135deg,#ff2e2e18,#b3000012)', border: '1px solid #ff2e2e22', display: 'grid', placeItems: 'center' }}>
+                      <Box
+                        sx={{
+                          mt: 0.2,
+                          width: 22,
+                          height: 22,
+                          borderRadius: '6px',
+                          flexShrink: 0,
+                          background: 'linear-gradient(135deg,#ff2e2e18,#b3000012)',
+                          border: '1px solid #ff2e2e22',
+                          display: 'grid',
+                          placeItems: 'center'
+                        }}
+                      >
                         <Typography sx={{ fontSize: 10, fontWeight: 700, color: '#b30000' }}>{index + 1}</Typography>
                       </Box>
                       <Box flex={1}>
@@ -700,7 +845,11 @@ const FormDetail = () => {
                           <Typography sx={{ fontSize: 12, color: '#9ca3af', fontStyle: 'italic' }}>No answer provided</Typography>
                         )}
                       </Box>
-                      <Chip label={q.type} size="small" sx={{ fontSize: 10, height: 20, background: '#f3f4f6', color: '#6b7280', fontWeight: 600 }} />
+                      <Chip
+                        label={q.type}
+                        size="small"
+                        sx={{ fontSize: 10, height: 20, background: '#f3f4f6', color: '#6b7280', fontWeight: 600 }}
+                      />
                     </Stack>
                   </Box>
                 );
@@ -715,12 +864,21 @@ const FormDetail = () => {
             size="small"
             color="error"
             startIcon={<DeleteOutlineIcon />}
-            onClick={() => { const s = viewSubmission; setViewSubmission(null); handleDelete(s.uuid); }}
+            onClick={() => {
+              const s = viewSubmission;
+              setViewSubmission(null);
+              handleDelete(s.uuid);
+            }}
             sx={{ fontSize: 12 }}
           >
             Delete
           </Button>
-          <Button size="small" variant="contained" onClick={() => setViewSubmission(null)} sx={{ background: 'linear-gradient(90deg,#ff2e2e,#b30000)', fontSize: 12 }}>
+          <Button
+            size="small"
+            variant="contained"
+            onClick={() => setViewSubmission(null)}
+            sx={{ background: 'linear-gradient(90deg,#ff2e2e,#b30000)', fontSize: 12 }}
+          >
             Close
           </Button>
         </DialogActions>
