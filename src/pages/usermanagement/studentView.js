@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import MainCard from 'components/MainCard';
-import { Grid, Box, Tabs, Tab, Typography, Stack, IconButton } from '@mui/material';
+import { Grid, Box, Tabs, Tab, Typography, Stack, Button } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Note, Profile, Document, RecordCircle } from 'iconsax-react';
 import { ArrowBack, QuestionAnswerOutlined } from '@mui/icons-material';
@@ -18,6 +18,7 @@ import axiosInstance from 'utils/axios';
 import TutorAssessmentTab from './studentViewTabs/TutorAssessmentTab';
 import PropTypes from 'prop-types';
 import AdminAssessmentTab from './studentViewTabs/AdminAssesmentTab';
+
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -90,7 +91,7 @@ const StudentView = () => {
       return true;
     }
 
-    
+
 
     return true;
   });
@@ -134,35 +135,35 @@ const StudentView = () => {
       let response;
       if (isTutorView) {
         response = await axiosInstance.get(`${APP_PATH_BASE_URL}api/trainers/${student_id}`);
-        
+
         setProfileData(response.data.data);
 
-        const batch=response.data.data.batch
+        const batch = response.data.data.batch
 
         // console.log(batch,"success")
 
-        
-    
-      
+
+
+
         // batch.map((batch)=>{setCourse(batch.batch_name);
         //   console.log(batch.batch_name)})
 
-          console.log("data success")
-          setCourse(batch)
+        console.log("data success")
+        setCourse(batch)
       } else if (isAdminView) {
         response = await axiosInstance.get(`${APP_PATH_BASE_URL}api/ad_employee/${student_id}`);
         setProfileData(response.data.data);
       } else {
         if (userType === 'tutor') {
           response = await axiosInstance.get(`${APP_PATH_BASE_URL}api/trainer/${regId}/student_list/${student_id}`);
-         
+
         } else {
           response = await axiosInstance.get(`${APP_PATH_BASE_URL}api/student_profile/${student_id}`);
         }
         const result = response.data;
         setProfileData(result.data);
       }
-  
+
     } catch (err) {
       setError(err.message);
     } finally {
@@ -177,6 +178,25 @@ const StudentView = () => {
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
+
+  const handleEdit = () => {
+    navigate('/admins', {
+      state: {
+        openEdit: true,
+        admin: profileData
+      }
+    });
+  };
+
+  const handleResetPassword = () => {
+    navigate('/admins', {
+      state: {
+        openReset: true,
+        admin: profileData
+      }
+    });
+  };
+ 
 
 
   if (loading) {
@@ -195,7 +215,7 @@ const StudentView = () => {
     );
 
   }
-  
+
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -217,13 +237,32 @@ const StudentView = () => {
                 {isTutorView ? 'Tutor' : 'Student'} Name: {Capitalise(name)}
               </Typography>
             </Stack>
-            <Stack sx={{ mb: { xs: -0.5, sm: 0.5 } }} spacing={1}  direction="row"
-  justifyContent="flex-end">
-            <IconButton variant="contained" color="white" size="medium" onClick={() => navigate(-1)} sx={{ width: 100, gap: 1,backgroundColor:"red",ml:{xs:2,sm:5} ,color:"white"}}>
-              <ArrowBack />
-              Back
-            </IconButton>
-          </Stack>
+            <Stack direction="row" justifyContent="flex-end" spacing={2}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleEdit}
+              >
+                Edit
+              </Button>
+
+              <Button
+                variant="contained"
+                color="warning"
+                onClick={handleResetPassword}
+              >
+                Reset Password
+              </Button>
+
+              <Button
+                variant="contained"
+                color="error"
+                startIcon={<ArrowBack />}
+                onClick={() => navigate(-1)}
+              >
+                Back
+              </Button>
+            </Stack>
           </Grid>
           <Grid item xs={12}>
             <Box sx={{ width: '100%' }}>
@@ -247,7 +286,7 @@ const StudentView = () => {
                       batch={profileData?.batch || []}
                       user_type={user_type}
                     />
-                    
+
                   )}
                   {tab.id === 'syllabus' && <SyllablesTab courses={profileData?.course_detail} />}
                   {tab.id === 'topics' && (

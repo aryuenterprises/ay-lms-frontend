@@ -22,9 +22,11 @@ import * as Yup from 'yup';
 import axiosInstance from 'utils/axios';
 import 'assets/css/DataTable.css';
 import { APP_PATH_BASE_URL } from 'config';
-import { CloseSquare, Edit, Lock, Trash } from 'iconsax-react';
+// import { CloseSquare, Edit, Lock, Trash } from 'iconsax-react';
+import { CloseSquare} from 'iconsax-react';
 import Swal from 'sweetalert2';
 import { usePermission } from 'hooks/usePermission';
+// import { Link } from '@react-pdf/renderer';
 
 // Lazy load the permissions form component
 const PermissionsForm = lazy(() => import('./PermissionsForm'));
@@ -43,8 +45,8 @@ const RolesTable = () => {
   const { checkPermission } = usePermission();
 
   const canCreate = checkPermission('Roles', 'create');
-  const canUpdate = checkPermission('Roles', 'update');
-  const canDelete = checkPermission('Roles', 'delete');
+  // const canUpdate = checkPermission('Roles', 'update');
+  // const canDelete = checkPermission('Roles', 'delete');
 
   const [data, setData] = useState([]);
   const [showForm, setShowForm] = useState(false);
@@ -131,46 +133,87 @@ const RolesTable = () => {
       name: 'S.No',
       selector: (row) => row.sno,
       sortable: true,
-      width: '80px'
+      // width: '80px'
     },
     {
       name: 'Name',
       selector: (row) => row.name,
       sortable: true
     },
-    ...(canUpdate || canDelete
-      ? [
-          {
-            name: 'Actions',
-            cell: (row) => (
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                {canUpdate && (
-                  <Tooltip title="Set Permissions">
-                    <IconButton color="primary" onClick={() => handleSetPermissions(row)}>
-                      <Lock />
-                    </IconButton>
-                  </Tooltip>
-                )}
-                {canUpdate && (
-                  <Tooltip title="Edit Role">
-                    <IconButton color="info" onClick={() => handleRoleEdit(row)}>
-                      <Edit />
-                    </IconButton>
-                  </Tooltip>
-                )}
-                {canDelete && (
-                  <Tooltip title="Delete Role">
-                    <IconButton color="error" onClick={() => handleDelete(row.role_id)}>
-                      <Trash />
-                    </IconButton>
-                  </Tooltip>
-                )}
-              </Box>
-            ),
-            width: '500px'
-          }
-        ]
-      : [])
+    {
+      name: 'Permissions',
+      cell: (row) => (
+        <Tooltip title="Set Permissions">
+                  <Button color="success" onClick={() => handleSetPermissions(row)}>
+                    {/* <Lock /> */}
+                    Click 
+                  </Button>
+                </Tooltip>
+      ),
+      sortable: true,
+      // width: '150px'
+    },
+    {
+      name: 'Edit',
+      cell: (row) => (
+        <Tooltip title="Edit Role">
+                  <Typography variant="body1" color="#d7e76e" onClick={() => handleRoleEdit(row)} style={{ cursor: 'pointer' }}>
+                    {/* <Edit /> */}
+                   Edit
+                  </Typography>
+                </Tooltip>
+      ),
+      sortable: true,
+      // width: '150px'
+    },
+    {
+      name: 'Delete',
+      cell: (row) => (
+        <Tooltip title="Delete Role">
+                  <Typography variant="body1" color="#ff5252" onClick={() => handleDelete(row.role_id)} style={{ cursor: 'pointer' }}>
+
+                    {/* <Trash /> */}
+                    Delete
+                  </Typography>
+                </Tooltip>
+      ),
+      sortable: true,
+      // width: '150px'
+    },
+    // ...(canUpdate || canDelete
+    //   ? [
+    //     {
+    //       name: 'Actions',
+    //       cell: (row) => (
+    //         <Box sx={{ display: 'flex', gap: 1 }}>
+    //           {canUpdate && (
+    //             <Tooltip title="Set Permissions">
+    //               <IconButton color="primary" onClick={() => handleSetPermissions(row)}>
+    //                 <Lock />
+                  
+    //               </IconButton>
+    //             </Tooltip>
+    //           )}
+    //           {canUpdate && (
+    //             <Tooltip title="Edit Role">
+    //               <IconButton color="info" onClick={() => handleRoleEdit(row)}>
+    //                 <Edit />
+    //               </IconButton>
+    //             </Tooltip>
+    //           )}
+    //           {canDelete && (
+    //             <Tooltip title="Delete Role">
+    //               <IconButton color="error" onClick={() => handleDelete(row.role_id)}>
+    //                 <Trash />
+    //               </IconButton>
+    //             </Tooltip>
+    //           )}
+    //         </Box>
+    //       ),
+    //       width: '500px'
+    //     }
+    //   ]
+    //   : [])
   ];
 
   const filteredData = useMemo(() => {
@@ -246,8 +289,12 @@ const RolesTable = () => {
     <Box>
       {!showForm && (
         <Paper variant="outlined" sx={{ p: 3 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Box sx={{ display: 'flex', width: '200px' }}>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Box sx={{
+              display: 'flex',
+              width: { sm: '100%', md: '200px', },
+
+            }}>
               <TextField
                 placeholder="Search..."
                 variant="outlined"
@@ -273,7 +320,7 @@ const RolesTable = () => {
                 }}
               />
             </Box>
-            <Box sx={{ display: 'flex' }}>
+            <Box sx={{ display: 'flex', width: { xs: '100%', sm: '100%', md: 'auto' }, justifyContent: 'flex-end', pt: { xs: 2, sm: 5, md: 0 } }}>
               {canCreate && (
                 <Button color="success" variant="contained" startIcon={<Add />} onClick={handleRoleAdd}>
                   Add Role

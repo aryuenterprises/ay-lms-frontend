@@ -25,7 +25,7 @@ import {
   // Select
 } 
 from '@mui/material';
-import { UserAdd, UserEdit, Eye, EyeSlash, CloseSquare, SearchNormal1, Book, Calendar, UserTag } from 'iconsax-react';
+import { UserAdd,  Eye, EyeSlash, CloseSquare, SearchNormal1, } from 'iconsax-react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { PopupTransition } from 'components/@extended/Transitions';
@@ -47,7 +47,7 @@ import { formatDate } from 'utils/formatDate';
 import { Capitalise } from 'utils/capitalise';
 import axiosInstance from 'utils/axios';
 import { formatDateTime } from 'utils/dateUtils';
-import { Notes } from '@mui/icons-material';
+// import { Notes } from '@mui/icons-material';
 import { usePermission } from 'hooks/usePermission';
 
 const StudentTable = () => {
@@ -232,10 +232,10 @@ const StudentTable = () => {
     [navigate]
   );
 
-  const handleNotes = async (data) => {
-    setNotesPopup(true);
-    setNotes(data.notes);
-  };
+  // const handleNotes = async (data) => {
+  //   setNotesPopup(true);
+  //   setNotes(data.notes);
+  // };
 
   const handleAttendance = useCallback(
     (data) => {
@@ -339,13 +339,13 @@ const StudentTable = () => {
       name: 'S.No',
       selector: (row) => row.sno,
       sortable: true,
-      width: '100px'
+      // width: '100px'
     },
     {
       name: 'Name',
       selector: (row) => `${Capitalise(row.first_name)} ${row.last_name}`,
       sortable: true,
-      width: '180px'
+      // width: '180px'
     },
     {
       name: 'Status',
@@ -361,53 +361,108 @@ const StudentTable = () => {
         </Box>
       ),
       sortable: true,
-      width: '120px'
+      // width: '120px'
     },
     {
       name: 'Joining Date',
       selector: (row) => formatDateTime(row.joining_date, { includeTime: false }),
       sortable: true,
-      width: '200px'
+      // width: '200px'
+    },
+    {
+      name:'View',
+      cell: (row) => (
+        <Tooltip title="View">
+          <Typography variant="body1" color="#6aa9e9" onClick={() => handleView(row)} style={{ cursor: 'pointer' }}>
+            View
+          </Typography>
+          </Tooltip>
+      ),
+      sortable: true,
+    },
+    {
+      name:'Edit',
+      cell: (row) => (
+        <Tooltip title="Edit">
+          <Typography variant="body1" color="#5cc4a5" onClick={() => handleEdit(row)} style={{ cursor: 'pointer' }}>
+            Edit
+          </Typography>
+        </Tooltip>
+      ),
+      sortable: true,
+    },
+    {
+      name:'Batches',
+      cell: (row) => (
+        <Tooltip title="View Batches">
+          <Typography variant="body1" color="#e06eed" onClick={() => handleViewBatch(row)} style={{ cursor: 'pointer' }}>
+            Batches
+          </Typography>
+        </Tooltip>
+      ),
+      sortable: true,
+    },
+    {
+      name:'Courses',
+      cell: (row) => (
+        <Tooltip title="View Course">
+          <Typography variant="body1" color="#a9cf73" onClick={() => handleCourse(row)} style={{ cursor: 'pointer' }}>
+            Courses
+          </Typography>
+        </Tooltip>
+      ),
+      sortable: true,
+    },
+    {
+      name:'Attendance',
+      cell: (row) => (
+        <Tooltip title="View Attendance">
+          <Typography variant="body1" color="#62d3c4" onClick={() => handleAttendance(row)} style={{ cursor: 'pointer' }}>
+              Attendance
+          </Typography>
+        </Tooltip>
+      ),
+      sortable: true,
     },
     {
       name: 'Actions',
       cell: (row) => (
         <Box sx={{ display: 'flex', gap: 1 }}>
-          <Tooltip title="View">
+          {/* <Tooltip title="View">
             <IconButton variant="contained" color="secondary" onClick={() => handleView(row)}>
               <Eye />
             </IconButton>
-          </Tooltip>
-          <Tooltip title="Batch">
+          </Tooltip> */}
+          {/* <Tooltip title="Batch">
             <IconButton variant="contained" color="secondary" onClick={() => handleViewBatch(row)}>
               <UserTag />
             </IconButton>
-          </Tooltip>
+          </Tooltip> */}
 
           {(userType === 'admin' || userType === 'super_admin') && (
             <>
-              <Tooltip title="Course">
+              {/* <Tooltip title="Course">
                 <IconButton color="success" variant="contained" onClick={() => handleCourse(row)}>
                   <Book />
                 </IconButton>
-              </Tooltip>
-              <Tooltip title="Notes">
+              </Tooltip> */}
+              {/* <Tooltip title="Notes">
                 <IconButton color="success" variant="contained" onClick={() => handleNotes(row)}>
                   <Notes />
                 </IconButton>
-              </Tooltip>
-              <Tooltip title="Attendance">
+              </Tooltip> */}
+              {/* <Tooltip title="Attendance">
                 <IconButton color="warning" variant="contained" onClick={() => handleAttendance(row)}>
                   <Calendar />
                 </IconButton>
-              </Tooltip>
-              {canUpdate && (
+              </Tooltip> */}
+              {/* {canUpdate && (
                 <Tooltip title="Edit">
                   <IconButton color="info" variant="contained" onClick={() => handleEdit(row)}>
                     <UserEdit />
                   </IconButton>
                 </Tooltip>
-              )}
+              )} */}
               {canUpdate || canDelete ? (
                 <Select
                   value={rowActions[row.registration_id] || 'action'}

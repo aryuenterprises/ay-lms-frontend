@@ -35,7 +35,7 @@ const events = {
     },
     {
       id: 'forms',
-      title: 'Data Forms',
+      title: 'Form Builder',
       type: 'item',
       url: '/forms',
       icon: icons.forms

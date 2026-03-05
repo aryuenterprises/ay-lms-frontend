@@ -25,7 +25,7 @@ import {
   Autocomplete,
   FormHelperText
 } from '@mui/material';
-import { UserAdd, UserEdit, Eye, EyeSlash, CloseSquare, SearchNormal1, UserTag } from 'iconsax-react';
+import { UserAdd, Eye, EyeSlash, CloseSquare, SearchNormal1,  } from 'iconsax-react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { PopupTransition } from 'components/@extended/Transitions';
@@ -39,7 +39,7 @@ import 'assets/css/DataTable.css';
 import MainCard from 'components/MainCard';
 import { Capitalise } from 'utils/capitalise';
 import axiosInstance from 'utils/axios';
-import { Notes } from '@mui/icons-material';
+// import { Notes } from '@mui/icons-material';
 import { useNavigate } from 'react-router';
 import { formatDateTime } from 'utils/dateUtils';
 
@@ -376,19 +376,19 @@ const TutorTable = () => {
       name: 'S.No',
       selector: (row) => row.sno,
       sortable: true,
-      width: '80px'
+      // width: '80px'
     },
     {
       name: 'Employee Id',
       selector: (row) => row.employee_id,
       sortable: true,
-      width: '150px'
+      // width: '150px'
     },
     {
       name: 'Name',
       selector: (row) => Capitalise(row.full_name),
       sortable: true,
-      width: '150px'
+      // width: '150px'
     },
     // {
     //   name: 'User Type',
@@ -399,13 +399,13 @@ const TutorTable = () => {
       name: 'Mobile',
       selector: (row) => row.contact_no,
       sortable: true,
-      width: '150px'
+      // width: '150px'
     },
     {
       name: 'Email',
       selector: (row) => row.email,
       sortable: true,
-      width: '300px'
+      // width: '300px'
     },
     {
       name: 'Status',
@@ -424,31 +424,76 @@ const TutorTable = () => {
       width: '120px'
     },
     {
+      name:'view',
+      cell: (row) => (
+        <Tooltip title="View">
+          <Typography variant="body1" color="#1976d2" onClick={() => handleView(row)} style={{ cursor: 'pointer' }}>
+            View
+          </Typography>
+        </Tooltip>
+      ),
+      sortable: true,
+      // width: '100px'
+    },
+    {
+      name:'Batch',
+      cell: (row) => (
+        <Tooltip title="Batch">
+          <Typography variant="body1" color="#9c27b0" onClick={() => handleViewBatch(row)} style={{ cursor: 'pointer' }}>
+            Batches
+          </Typography>
+        </Tooltip>
+      ),
+      sortable: true,
+    },
+    {
+      name:'Edit',
+      cell: (row) => (
+        <Tooltip title="Edit">
+          <Typography variant="body1" color="#0288d1" onClick={() => handleEdit(row)} style={{ cursor: 'pointer' }}>
+            Edit
+          </Typography>
+          </Tooltip>
+        ),
+      sortable: true,
+    },
+    {
+      name:'Notes',
+      cell: (row) => (
+        <Tooltip title="Notes">
+          <Typography variant="body1" color="#2e7d32" onClick={() => handleNotes(row)} style={{ cursor: 'pointer' }}>
+            Notes
+          </Typography>
+          </Tooltip>
+      ),
+      sortable: true,
+    },
+    {
       name: 'Actions',
       cell: (row) => (
         <Box sx={{ display: 'flex', gap: 1 }}>
-          <Tooltip title="View">
+          {/* <Tooltip title="View">
             <IconButton variant="contained" color="secondary" onClick={() => handleView(row)}>
               <Eye />
             </IconButton>
-          </Tooltip>
-          <Tooltip title="Batch">
+          </Tooltip> */}
+          {/* <Tooltip title="Batch">
             <IconButton variant="contained" color="secondary" onClick={() => handleViewBatch(row)}>
               <UserTag />
             </IconButton>
-          </Tooltip>
-          {canUpdate && (
+          </Tooltip> */}
+          {/* {canUpdate && (
             <Tooltip title="Edit">
               <IconButton color="info" variant="contained" onClick={() => handleEdit(row)}>
                 <UserEdit />
               </IconButton>
             </Tooltip>
-          )}
-          <Tooltip title="Notes">
+          )} */}
+          {/* <Tooltip title="Notes">
             <IconButton color="success" variant="contained" onClick={() => handleNotes(row)}>
               <Notes />
             </IconButton>
-          </Tooltip>
+          </Tooltip> */}
           {canUpdate || canDelete ? (
             <Select
               value={rowActions[row.employee_id] || 'action'}

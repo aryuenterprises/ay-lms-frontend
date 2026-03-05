@@ -389,6 +389,7 @@ const PermissionsForm = ({ onCancel, currentRole }) => {
         sx={{
           mb: 3,
           p: 2,
+          pr: 2,
           borderRadius: 2,
           backgroundColor: '#f8fafc',
           border: '1px solid #e2e8f0'
@@ -398,26 +399,39 @@ const PermissionsForm = ({ onCancel, currentRole }) => {
           Set Permissions for {currentRole?.name}
         </Typography>
 
-        <Button
-          variant="contained"
-          onClick={() => setShowAddForm(true)}
-          sx={{
-            textTransform: 'none',
-            fontWeight: 600,
-            px: 3,
-            borderRadius: 2
-          }}
-        >
-          + Add Module
-        </Button>
+        {/* Buttons container */}
+        <Stack direction="row" spacing={2}>
+          <Button
+            variant="contained"
+            onClick={() => setShowAddForm(true)}
+            sx={{
+              textTransform: 'none',
+              fontWeight: 600,
+              px: 2,
+              borderRadius: 2
+            }}
+          >
+            + Add Module
+          </Button>
+
+          <Button
+            onClick={onCancel}
+            variant="outlined"
+            color="secondary"
+            startIcon={<ArrowBack />}
+          >
+            Back
+          </Button>
+        </Stack>
       </Stack>
       <Divider sx={{ mb: 3 }} />
 
-      <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
+      {/* <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
         <Button onClick={onCancel} variant="outlined" color="secondary" startIcon={<ArrowBack />}>
           Back
         </Button>
       </Stack>
+      {/* </Stack> */}
 
       {/* MAIN PERMISSIONS FORM - FIXED */}
       <Formik initialValues={formValues} onSubmit={handlePermissionsSubmit} enableReinitialize>

@@ -25,7 +25,7 @@ import {
   Autocomplete,
   FormHelperText
 } from '@mui/material';
-import { UserAdd, UserEdit, Eye, EyeSlash, CloseSquare, SearchNormal1 } from 'iconsax-react';
+import { UserAdd,  Eye, EyeSlash, CloseSquare, SearchNormal1 } from 'iconsax-react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { PopupTransition } from 'components/@extended/Transitions';
@@ -39,13 +39,15 @@ import 'assets/css/DataTable.css';
 import MainCard from 'components/MainCard';
 import { Capitalise } from 'utils/capitalise';
 import axiosInstance from 'utils/axios';
-import { Notes } from '@mui/icons-material';
+// import { Notes } from '@mui/icons-material';
 import { useNavigate } from 'react-router';
 import { formatDateTime } from 'utils/dateUtils';
+import { useLocation } from 'react-router-dom';
 
 const AdminTable = () => {
   const navigate = useNavigate();
   const { checkPermission } = usePermission();
+  const location = useLocation();
 
   const canCreate = checkPermission('Admins', 'create');
   const canUpdate = checkPermission('Admins', 'update');
@@ -150,6 +152,17 @@ const AdminTable = () => {
     setNotesPopup(true);
     setNotes(data.notes);
   };
+  useEffect(() => {
+  if (location.state?.openEdit && location.state?.admin) {
+    setCurrentAdmin(location.state.admin);
+    setOpen(true);
+  }
+
+  if (location.state?.openReset && location.state?.admin) {
+    setSelectedUser(location.state.admin);
+    setResetDialogOpen(true);
+  }
+}, [location.state]);
 
   // Validation schema
   const validationSchema = Yup.object().shape({
@@ -308,19 +321,19 @@ const AdminTable = () => {
       name: 'S.No',
       selector: (row) => row.sno,
       sortable: true,
-      width: '80px'
+      // width: '80px'
     },
     {
       name: 'Employee Id',
       selector: (row) => row.employee_id,
       sortable: true,
-      width: '150px'
+      // width: '150px'
     },
     {
       name: 'Name',
       selector: (row) => Capitalise(row.full_name),
       sortable: true,
-      width: '150px'
+      // width: '150px'
     },
     // {
     //   name: 'User Type',
@@ -331,19 +344,19 @@ const AdminTable = () => {
       name: 'Mobile',
       selector: (row) => row.contact_no,
       sortable: true,
-      width: '150px'
+      // width: '150px'
     },
     {
       name: 'Email',
       selector: (row) => row.email,
       sortable: true,
-      width: '300px'
+      // width: '300px'
     },
     {
       name: 'Role',
       selector: (row) => row.role_name,
       sortable: true,
-      width: '150px'
+      // width: '150px'
     },
     {
       name: 'Status',
@@ -359,29 +372,67 @@ const AdminTable = () => {
         </Box>
       ),
       sortable: true,
-      width: '120px'
+      // width: '120px'
+    },
+    {
+      name:'View',
+      cell: (row) => (
+         <Tooltip title="View">
+            <Typography variant="body1" color="skyblue" onClick={() => handleView(row)} style={{ cursor: 'pointer' }}>
+              {/* <Eye /> */}
+              View
+            </Typography>
+          </Tooltip>
+      ),
+      sortable: true,
+      // width: '100px'
+    },
+    // {
+    //   name: 'Edit',
+    //   cell: (row) => (
+    //     <Tooltip title="Edit">
+    //       <Typography variant="body1" color=" red" onClick={() => handleEdit(row)} style={{ cursor: 'pointer' }}>
+    //         {/* <UserEdit /> */}
+    //         Edit
+    //       </Typography>
+    //     </Tooltip>
+    //   ),
+    //   sortable: true,
+    //   // width: '100px'
+    // },
+    {
+      name: 'Notes',
+      cell: (row) => (
+        <Tooltip title="Notes">
+          <Typography variant="body1" color="green" onClick={() => handleNotes(row)} style={{ cursor: 'pointer' }}>
+            {/* <Notes /> */}
+            Notes
+          </Typography>
+          </Tooltip>
+      ),
+      sortable: true,
     },
     {
       name: 'Actions',
       cell: (row) => (
         <Box sx={{ display: 'flex', gap: 1 }}>
-          <Tooltip title="View">
+          {/* <Tooltip title="View">
             <IconButton variant="contained" color="secondary" onClick={() => handleView(row)}>
               <Eye />
             </IconButton>
-          </Tooltip>
-          {canUpdate && (
+          </Tooltip> */}
+          {/* {canUpdate && (
             <Tooltip title="Edit">
               <IconButton color="info" variant="contained" onClick={() => handleEdit(row)}>
                 <UserEdit />
               </IconButton>
             </Tooltip>
-          )}
-          <Tooltip title="Notes">
+          )} */}
+          {/* <Tooltip title="Notes">
             <IconButton color="success" variant="contained" onClick={() => handleNotes(row)}>
               <Notes />
             </IconButton>
-          </Tooltip>
+          </Tooltip> */}
           {canUpdate || canDelete ? (
             <Select
               value={rowActions[row.employee_id] || 'action'}
@@ -395,14 +446,14 @@ const AdminTable = () => {
           ) : null}
         </Box>
       ),
-      width: '280px'
+      // width: '280px'
     }
   ];
 
-  const handleEdit = (trainer) => {
-    setCurrentAdmin(trainer);
-    setOpen(true);
-  };
+  // const handleEdit = (trainer) => {
+  //   setCurrentAdmin(trainer);
+  //   setOpen(true);
+  // };
 
   const handleDelete = async (id) => {
     const result = await Swal.fire({
@@ -496,8 +547,8 @@ const AdminTable = () => {
 
     return (
       <Grid container justifyContent="space-between" alignItems="center" my={3}>
-        <Grid item xs={12} md={8} display="flex" flexDirection={{ xs: 'column', sm: 'row' }}>
-          <Stack direction="row" spacing={2}>
+        <Grid item xs={12} md={8} display="flex" flexDirection={{ xs: 'column', sm: 'row' }} width={{ xs: '100%', sm: 'auto', md: 'auto' }}>
+          <Stack direction="row" spacing={2} >
             <TextField
               placeholder="Search..."
               variant="outlined"
