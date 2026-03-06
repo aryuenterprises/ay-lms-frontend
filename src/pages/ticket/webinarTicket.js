@@ -27,15 +27,28 @@ const getTicket = async (mobile) => {
   const res = await fetch(
     `${APP_PATH_BASE_URL}/api/webinar/tickets/?mobile=${mobile}`,
   );
+
+  if (res.status === 404) {
+    return { data: null }; // no ticket found
+  }
+
   return handleResponse(res);
 };
 
 const createTicket = async (data) => {
+  const payload = {
+    phone: data.mobile,
+    name: data.name,
+    subject: data.subject,
+    message: data.message,
+  };
+
   const res = await fetch(`${APP_PATH_BASE_URL}/api/webinar/tickets/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
+    body: JSON.stringify(payload),
   });
+
   return handleResponse(res);
 };
 
@@ -90,30 +103,41 @@ const WebinarTicketPage = () => {
       chatRef.current.scrollTop = chatRef.current.scrollHeight;
   };
   const [form, setForm] = useState({
+    name: "",
+    phone: "",
     subject: "",
     message: "",
-    priority: "Low",
   });
   /* ---------- MOBILE CHECK ---------- */
 
   const handleMobile = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await getTicket(mobile);
-      if (res.data) {
-        setTicket(res.data);
-        setStep("chat");
-        setTimeout(scrollToBottom, 200);
+  setLoading(true);
+  setError(null);
+
+  try {
+    const res = await getTicket(mobile);
+
+    if (res.data) {
+      setTicket(res.data);
+
+      if (res.data.status === "closed") {
+        setStep("closed");
       } else {
-        setStep("create");
+        setStep("chat");
       }
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+
+      setTimeout(scrollToBottom, 200);
+    } else {
+      // no ticket exists → show create ticket
+      setStep("create");
     }
-  };
+
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
   /* ---------- CREATE ---------- */
 
@@ -121,6 +145,7 @@ const WebinarTicketPage = () => {
     setLoading(true);
     try {
       await createTicket({
+        name: form.name,
         mobile,
         subject: form.subject,
         message: form.message,
@@ -266,6 +291,29 @@ const WebinarTicketPage = () => {
                   <Stack spacing={2}>
                     <TextField
                       fullWidth
+                      label="Name"
+                      value={form.name}
+                      onChange={(e) =>
+                        setForm((prev) => ({
+                          ...prev,
+                          name: e.target.value,
+                        }))
+                      }
+                    />
+
+                    <TextField
+                      fullWidth
+                      label="Phone"
+                      value={form.mobile}
+                      onChange={(e) =>
+                        setForm((prev) => ({
+                          ...prev,
+                          mobile: e.target.value,
+                        }))
+                      }
+                    />
+                    <TextField
+                      fullWidth
                       label="Subject"
                       value={form.subject}
                       onChange={(e) =>
@@ -314,6 +362,125 @@ const WebinarTicketPage = () => {
                       {loading ? "Creating..." : "Create Ticket"}
                     </Button>
                   </Stack>
+                </motion.div>
+              )}
+
+              {step === "closed" && ticket && (
+                <motion.div
+                  key="closed"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}>
+                  <Stack direction="row" justifyContent="space-between">
+                    <Typography fontWeight={700}>{ticket.subject}</Typography>
+
+                    <Chip
+                      label="Closed"
+                      sx={{
+                        bgcolor: "#e8f5e9",
+                        color: "#2e7d32",
+                        fontWeight: 600,
+                      }}
+                    />
+                  </Stack>
+
+                  <Divider sx={{ my: 2 }} />
+
+                  <Box
+                    ref={chatRef}
+                    sx={{
+                      height: { xs: 250, md: 300 },
+                      overflowY: "auto",
+                      mb: 2,
+                    }}>
+                    {/* Initial Message */}
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "flex-end",
+                        mb: 1,
+                      }}>
+                      <Box
+                        sx={{
+                          bgcolor: "#b71c1c",
+                          color: "#fff",
+                          px: 2,
+                          py: 1.2,
+                          borderRadius: 2,
+                          maxWidth: "70%",
+                        }}>
+                        <Typography variant="body2">
+                          {ticket.message}
+                        </Typography>
+
+                        <Typography
+                          variant="caption"
+                          sx={{ opacity: 0.7, display: "block", mt: 0.5 }}>
+                          {ticket.created_at}
+                        </Typography>
+                      </Box>
+                    </Box>
+
+                    {ticket.replies?.map((r) => {
+                      const isUser = r.sender_type === "webinar";
+
+                      return (
+                        <Box
+                          key={r.reply_id}
+                          sx={{
+                            display: "flex",
+                            justifyContent: isUser ? "flex-end" : "flex-start",
+                            mb: 1,
+                          }}>
+                          <Box
+                            sx={{
+                              bgcolor: isUser ? "#b71c1c" : "#f1f1f1",
+                              color: isUser ? "#fff" : "#000",
+                              px: 2,
+                              py: 1.2,
+                              borderRadius: 2,
+                              maxWidth: "70%",
+                            }}>
+                            <Typography variant="body2">{r.message}</Typography>
+
+                            <Typography
+                              variant="caption"
+                              sx={{
+                                opacity: 0.7,
+                                display: "block",
+                                mt: 0.5,
+                                textAlign: isUser ? "right" : "left",
+                              }}>
+                              {r.created_at}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      );
+                    })}
+                  </Box>
+
+                  <Divider sx={{ my: 2 }} />
+
+                  <Typography
+                    sx={{
+                      mb: 2,
+                      fontSize: 14,
+                      color: "#777",
+                      textAlign: "center",
+                    }}>
+                    This ticket is closed. If you still need help, you can
+                    create a new ticket.
+                  </Typography>
+
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    onClick={() => setStep("create")}
+                    sx={{
+                      background: "#b71c1c",
+                      "&:hover": { background: "#8e0000" },
+                    }}>
+                    Create New Ticket
+                  </Button>
                 </motion.div>
               )}
 
@@ -371,22 +538,20 @@ const WebinarTicketPage = () => {
                     </Box>
 
                     {ticket.replies?.map((r) => {
-                      const isStudent = r.sender_type === "student";
+                      const isUser = r.sender_type === "webinar";
 
                       return (
                         <Box
                           key={r.reply_id}
                           sx={{
                             display: "flex",
-                            justifyContent: isStudent
-                              ? "flex-end"
-                              : "flex-start",
+                            justifyContent: isUser ? "flex-end" : "flex-start",
                             mb: 1,
                           }}>
                           <Box
                             sx={{
-                              bgcolor: isStudent ? "#b71c1c" : "#f1f1f1",
-                              color: isStudent ? "#fff" : "#000",
+                              bgcolor: isUser ? "#b71c1c" : "#f1f1f1",
+                              color: isUser ? "#fff" : "#000",
                               px: 2,
                               py: 1.2,
                               borderRadius: 2,
@@ -401,7 +566,7 @@ const WebinarTicketPage = () => {
                                 opacity: 0.7,
                                 display: "block",
                                 mt: 0.5,
-                                textAlign: "right",
+                                textAlign: isUser ? "right" : "left",
                               }}>
                               {r.created_at}
                             </Typography>

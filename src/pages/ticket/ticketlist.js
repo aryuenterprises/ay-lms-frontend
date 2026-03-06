@@ -116,6 +116,22 @@ const TicketTable = () => {
     }
   };
 
+  const getUserName = (t) => {
+  if (t.student_name && t.student_name !== "Unknown") return t.student_name;
+  if (t.name) return t.name;
+  return "Unknown";
+};
+
+const getUserPhone = (t) => {
+  if (t.contact_no) return t.contact_no;
+  if (t.phone) return t.phone;
+  return "-";
+};
+
+const getUserEmail = (t) => {
+  return t.email || "-";
+};
+
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
@@ -259,19 +275,19 @@ const TicketTable = () => {
     },
     {
       name: 'Name',
-      selector: (row) => Capitalise(row.student_name),
+      selector: (row) => Capitalise(getUserName(row)),
       sortable: true,
       width: '180px'
     },
     {
       name: 'Email',
-      selector: (row) => row.email,
+      selector: (row) => getUserEmail(row),
       sortable: true,
       width: '220px'
     },
     {
       name: 'Mobile',
-      selector: (row) => row.contact_no,
+      selector: (row) => getUserPhone(row),
       sortable: true,
       width: '150px'
     },
@@ -488,19 +504,37 @@ const TicketTable = () => {
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Typography variant="h6">{selectedTicket ? `Ticket Details - ${selectedTicket.ticketId}` : 'Loading...'}</Typography>
-            {selectedTicket && (
-              <Chip
-                label={getLables(selectedTicket.status)}
-                sx={{
-                  backgroundColor: getStatusBgColor(selectedTicket.status),
-                  color: getStatusColor(selectedTicket.status),
-                  fontWeight: 'bold',
-                  width: '100px'
-                }}
-              />
-            )}
-          </Box>
+  <Typography variant="h6">
+    {selectedTicket ? `Ticket Details - ${selectedTicket.ticket_id}` : 'Loading...'}
+  </Typography>
+
+  {selectedTicket && (
+    <>
+      <Chip
+        label={getLables(selectedTicket.status)}
+        sx={{
+          backgroundColor: getStatusBgColor(selectedTicket.status),
+          color: getStatusColor(selectedTicket.status),
+          fontWeight: 'bold'
+        }}
+      />
+
+      <Chip
+        label={selectedTicket.student_name === "Unknown" ? "Public Ticket" : "Student Ticket"}
+        size="small"
+        sx={{
+          bgcolor: selectedTicket.student_name === "Unknown"
+            ? "info.lighter"
+            : "success.lighter",
+          color: selectedTicket.student_name === "Unknown"
+            ? "info.main"
+            : "success.main",
+          fontWeight: 600
+        }}
+      />
+    </>
+  )}
+</Box>
           <Box>
             <IconButton onClick={handleCloseDialog}>
               <CloseSquare size="20" />
@@ -539,7 +573,7 @@ const TicketTable = () => {
                     <Stack direction="row" alignItems="center" spacing={1}>
                       <User size="18" />
                       <Typography noWrap>
-                        <strong>Name:</strong> {Capitalise(selectedTicket.student_name)}
+                        <strong>Name:</strong> {Capitalise(getUserName(selectedTicket))}
                       </Typography>
                     </Stack>
                   </Grid>
@@ -547,7 +581,7 @@ const TicketTable = () => {
                     <Stack direction="row" alignItems="center" spacing={1}>
                       <Email size="18" />
                       <Typography noWrap>
-                        <strong>Email:</strong> {selectedTicket.email}
+                        <strong>Email:</strong> {getUserEmail(selectedTicket)}
                       </Typography>
                     </Stack>
                   </Grid>
@@ -555,7 +589,7 @@ const TicketTable = () => {
                     <Stack direction="row" alignItems="center" spacing={1}>
                       <Mobile size="18" />
                       <Typography noWrap>
-                        <strong>Mobile:</strong> {selectedTicket.contact_no}
+                        <strong>Mobile:</strong> {getUserPhone(selectedTicket)}
                       </Typography>
                     </Stack>
                   </Grid>
