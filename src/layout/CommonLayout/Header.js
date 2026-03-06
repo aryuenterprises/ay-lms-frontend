@@ -60,10 +60,10 @@ const Header = ({ layout = 'landing', ...others }) => {
       label: 'Support',
       to: '/webinar-ticket'
     },
-    {
-      label: 'Become a Trainer',
-      to: '/tutor-signup'
-    }
+    // {
+    //   label: 'Become a Trainer',
+    //   to: '/tutor-signup'
+    // }
   ];
 
   return (

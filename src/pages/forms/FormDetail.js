@@ -47,6 +47,9 @@ import { useParams } from 'react-router';
 import axiosInstance from 'utils/axios';
 import MainCard from 'components/MainCard';
 import Swal from 'sweetalert2';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+import DownloadIcon from '@mui/icons-material/Download';
 
 /* ─────────────────────────────────────────
    CONSTANTS & HELPERS
@@ -298,6 +301,48 @@ const FormDetail = () => {
     Swal.fire({ icon: 'success', title: 'Link copied!', timer: 1200, showConfirmButton: false, toast: true, position: 'top-end' });
   };
 
+  // excel export
+
+  const handleExportExcel = () => {
+    if (!form?.submissions?.length) {
+      Swal.fire('No Data', 'No submissions available to export', 'info');
+      return;
+    }
+
+    const rows = form.submissions.map((submission, index) => {
+      const row = {
+        'S.No': index + 1
+      };
+
+      // Export only visible question columns
+      visibleQs.forEach((q) => {
+        const ans = getAnswer(submission, q.id);
+        row[q.label] = ans || '';
+      });
+
+      // Add submitted at only once
+      row['Submitted At'] = `${formatDate(submission.submitted_at)} ${formatTime(submission.submitted_at)}`;
+
+      return row;
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(rows);
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Responses');
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: 'xlsx',
+      type: 'array'
+    });
+
+    const file = new Blob([excelBuffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    });
+
+    saveAs(file, `${form.title || 'form'}-responses.xlsx`);
+  };
+
   /* ── toggle column ── */
   const toggleColumn = (id) => setVisibleColumns((prev) => (prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]));
 
@@ -451,6 +496,23 @@ const FormDetail = () => {
               </IconButton>
             </Tooltip>
 
+            <Tooltip title="Export Excel">
+              <IconButton
+                onClick={handleExportExcel}
+                sx={{
+                  border: '1px solid #e5e7eb',
+                  borderRadius: 2,
+                  background: '#fff',
+                  '&:hover': {
+                    background: '#fff7f7',
+                    borderColor: '#b30000'
+                  }
+                }}
+              >
+                <DownloadIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+
             <Tooltip title="Copy Public Link">
               <IconButton
                 onClick={handleCopyLink}
@@ -510,10 +572,7 @@ const FormDetail = () => {
         /* ──────────────────────────────────
            DESKTOP / LAPTOP  →  TABLE VIEW
         ────────────────────────────────── */
-        <Paper
-          elevation={0}
-          sx={{ borderRadius: 3, border: '1px solid #f0f0f0', overflow: 'hidden', boxShadow: '0 4px 24px rgba(85,10,10,0.04)' }}
-        >
+        <Paper elevation={0} sx={{ borderRadius: 3, border: '1px solid #f0f0f0', overflow: 'hidden', boxShadow: '0 4px 24px rgba(85,10,10,0.04)' }}>
           <TableContainer sx={{ maxHeight: 560 }}>
             <Table stickyHeader size="small">
               <TableHead>
@@ -526,8 +585,8 @@ const FormDetail = () => {
                       fontSize: 11,
                       textTransform: 'uppercase',
                       letterSpacing: 1,
-                      background: '#000000',
-                      color: '#ebebeb',
+                      background: '#ffffff',
+                      color: '#000000',
                       borderBottom: '2px solid #b30000',
                       py: 1.8
                     }}
@@ -545,8 +604,8 @@ const FormDetail = () => {
                         textTransform: 'uppercase',
                         letterSpacing: 1,
                         whiteSpace: 'nowrap',
-                        background: '#000000',
-                        color: '#ebebeb',
+                        background: '#ffffff',
+                        color: '#000000',
                         borderBottom: '2px solid #b30000',
                         minWidth: 160
                       }}
@@ -561,8 +620,8 @@ const FormDetail = () => {
                       fontSize: 11,
                       textTransform: 'uppercase',
                       letterSpacing: 1,
-                      background: '#000000',
-                      color: '#ebebeb',
+                      background: '#ffffff',
+                      color: '#000000',
                       borderBottom: '2px solid #b30000',
                       minWidth: 150
                     }}
@@ -578,8 +637,8 @@ const FormDetail = () => {
                       fontSize: 11,
                       textTransform: 'uppercase',
                       letterSpacing: 1,
-                      background: '#000000',
-                      color: '#ebebeb',
+                      background: '#ffffff',
+                      color: '#000000',
                       borderBottom: '2px solid #b30000'
                     }}
                   >
@@ -673,7 +732,7 @@ const FormDetail = () => {
                           <Typography sx={{ fontSize: 11, color: '#6b7280' }}>{formatTime(submission.submitted_at)}</Typography>
                         </Stack>
                       </TableCell>
-                      
+
                       {/* Actions */}
                       <TableCell align="center" sx={{ py: 1.5 }}>
                         <Stack

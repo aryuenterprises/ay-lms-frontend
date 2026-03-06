@@ -416,7 +416,7 @@ const StudentEmployerTable = () => {
         if (currentStudent) {
           response = await axiosInstance.patch(`${APP_PATH_BASE_URL}api/subadmin/${currentStudent.employer_id}`, formData, config);
         } else {
-          response = await axiosInstance.post(`${APP_PATH_BASE_URL}api/subadmin`, formData, config);
+          response = await axiosInstance.post(`${APP_PATH_BASE_URL}api/subadmin/`, formData, config);
         }
 
         if (response.data.success === true) {
