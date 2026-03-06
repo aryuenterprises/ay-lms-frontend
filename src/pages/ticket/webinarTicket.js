@@ -15,6 +15,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { APP_PATH_BASE_URL } from "config";
 import Header from "layout/CommonLayout/Header";
 import FooterBlock from "layout/CommonLayout/FooterBlock";
+import PhoneInput from "react-phone-input-2";
+import "react-phone-input-2/lib/style.css";
 /* ---------------- API ---------------- */
 
 const handleResponse = async (response) => {
@@ -111,33 +113,32 @@ const WebinarTicketPage = () => {
   /* ---------- MOBILE CHECK ---------- */
 
   const handleMobile = async () => {
-  setLoading(true);
-  setError(null);
+    setLoading(true);
+    setError(null);
 
-  try {
-    const res = await getTicket(mobile);
+    try {
+      const res = await getTicket(mobile);
 
-    if (res.data) {
-      setTicket(res.data);
+      if (res.data) {
+        setTicket(res.data);
 
-      if (res.data.status === "closed") {
-        setStep("closed");
+        if (res.data.status === "closed") {
+          setStep("closed");
+        } else {
+          setStep("chat");
+        }
+
+        setTimeout(scrollToBottom, 200);
       } else {
-        setStep("chat");
+        // no ticket exists → show create ticket
+        setStep("create");
       }
-
-      setTimeout(scrollToBottom, 200);
-    } else {
-      // no ticket exists → show create ticket
-      setStep("create");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
-
-  } catch (err) {
-    setError(err.message);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   /* ---------- CREATE ---------- */
 
@@ -262,12 +263,48 @@ const WebinarTicketPage = () => {
                   <Typography variant="h6" fontWeight={700} mb={2}>
                     Enter Mobile Number
                   </Typography>
-                  <TextField
-                    fullWidth
-                    label="Registered Mobile"
-                    value={mobile}
-                    onChange={(e) => setMobile(e.target.value)}
-                  />
+                  <Box sx={{ mt: 2 }}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        border: "1px solid #ddd",
+                        borderRadius: "12px",
+                        px: 1.5,
+                        py: 1,
+                        background: "#fff",
+                        boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
+                      }}>
+                      <PhoneInput
+                        country={"in"}
+                        value={mobile}
+                        onChange={(phone) => {
+                          setMobile(phone);
+                          setForm((prev) => ({
+                            ...prev,
+                            phone: phone,
+                          }));
+                        }}
+                        containerStyle={{
+                          width: "100%",
+                        }}
+                        inputStyle={{
+                          width: "100%",
+                          height: "44px",
+                          border: "none",
+                          fontSize: "16px",
+                          outline: "none",
+                        }}
+                        buttonStyle={{
+                          border: "none",
+                          background: "transparent",
+                        }}
+                        dropdownStyle={{
+                          borderRadius: "10px",
+                        }}
+                      />
+                    </Box>
+                  </Box>
                   <Button
                     variant="contained"
                     sx={{ mt: 3 }}
@@ -301,16 +338,20 @@ const WebinarTicketPage = () => {
                       }
                     />
 
-                    <TextField
-                      fullWidth
-                      label="Phone"
-                      value={form.mobile}
-                      onChange={(e) =>
+                    <PhoneInput
+                      country={"in"}
+                      value={form.phone}
+                      onChange={(phone) =>
                         setForm((prev) => ({
                           ...prev,
-                          mobile: e.target.value,
+                          phone: phone,
                         }))
                       }
+                      inputStyle={{
+                        width: "100%",
+                        height: "56px",
+                        fontSize: "16px",
+                      }}
                     />
                     <TextField
                       fullWidth
