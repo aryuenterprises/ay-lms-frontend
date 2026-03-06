@@ -10,10 +10,14 @@ const Login = () => {
   return (
     <Container
       disableGutters
+      // sx={{
+      //   width: '100%',
+      //   maxWidth: 600,
+      //   mx: 'auto',
+      // }}
       sx={{
-        width: '100%',
-        maxWidth: 390,
-        mx: 'auto',
+        minWidth: 500,
+        
       }}
     >
       <motion.div
@@ -31,7 +35,7 @@ const Login = () => {
             border: '1px solid rgba(0,0,0,0.06)'
           }}
         >
-          <Grid container spacing={2.5}>
+          <Grid container spacing={2.5} sx={{minWidth: 400}}>
             {/* ---------- Header ---------- */}
             <Grid item xs={12} textAlign="center">
               <Typography
@@ -60,7 +64,7 @@ const Login = () => {
             </Grid>
 
             {/* ---------- Form ---------- */}
-            <Grid item xs={12}>
+            <Grid item xs={12} sx={{width: '100%', maxWidth: 600, mx: 'auto'}}>
               <AuthLogin />
             </Grid>
 
