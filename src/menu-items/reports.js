@@ -4,10 +4,11 @@ import { FormattedMessage } from 'react-intl';
 // assets
 import { KyberNetwork, Messages2, Calendar1, Kanban, Profile2User, Bill, UserSquare, ShoppingBag, Ticket } from 'iconsax-react';
 
+// icons
 
 import FeedbackIcon from '@mui/icons-material/Feedback';
 
-// icons
+
 const icons = {
   applications: KyberNetwork,
   chat: Messages2,
@@ -19,7 +20,6 @@ const icons = {
   ecommerce: ShoppingBag,
   icon: Ticket
 };
-
 // Get login type from session storage
 const auth = JSON.parse(localStorage.getItem('auth'));
 const loginType = auth?.loginType;
@@ -103,25 +103,23 @@ const baseMenuItems = {
       icon: icons.tiket,
       show: true
     },
-
     {
       id: 'ticket-create',
       title: <FormattedMessage id="support" defaultMessage="Support" />,
       type: 'item',
       icon: icons.tiket,
       url: '/ticket',
-      show: (loginType === 'student' || loginType === 'tutor') && hasReadPermission('Ticket')
+      show: loginType === 'student' || loginType === 'tutor'
     },
-
     {
       id: 'webinar-feedback',
       title: <FormattedMessage id="webinar-feedback" defaultMessage="Feedback" />,
       type: 'item',
       url: '/webinar/feedback',
-      icon: FeedbackIcon
-    },
-
-  ]
+      icon: FeedbackIcon,
+      show: true
+    }
+  ].filter((item) => item.show)
 };
 
 // Only show the reports group if user has access to at least one report type

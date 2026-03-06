@@ -119,6 +119,7 @@ if (auth?.user?.user_type === 'super_admin') {
     Schedule: course,
     Roles: roles,
     Settings: settings,
+ 
     Support: support
   };
 
