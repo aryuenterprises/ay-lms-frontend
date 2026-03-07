@@ -10,6 +10,7 @@ import { PermissionGuard } from 'utils/route-guard/PermissionGuard';
 import Login from 'pages/auth/auth1/login';
 import WebinarFeedbackForm from 'pages/webinar/Feedback/feedbackform';
 
+import Feedbackvalues from 'pages/webinar/Feedback/feebackvalues';
 // 🔹 Pages
 // import CompanyListPage from '../pages/organizations/CompanyListPage';
 // import coorprate from '../menu-items/coorprate';
@@ -544,6 +545,11 @@ const MainRoutes = {
         {
           path: '/webinar/feedback',
           element: <Feedback />
+        },
+            {
+          path:'/webinar/feedback/:id',
+          element:<Feedbackvalues/>
+
         },
         {
           title: 'Forms',

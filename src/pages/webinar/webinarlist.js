@@ -1,5 +1,11 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import DataTable from 'react-data-table-component';
+
+// import * as XLSX from "xlsx";
+
+// import { Menu} from "@mui/material";
+
+// import { Checkbox } from "@mui/material";
 import {
   TextField,
   Button,
@@ -43,6 +49,9 @@ import { formatDateTime } from 'utils/dateUtils';
 import { DateTimePicker } from '@mui/x-date-pickers';
 import AddIcon from '@mui/icons-material/Add';
 import { v4 as uuidv4 } from 'uuid';
+// import {useState} from 'react';
+// import { useState } from 'react';
+import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 
 // =============================================================================
 // MODULE-LEVEL HELPER COMPONENTS
@@ -62,6 +71,8 @@ import { v4 as uuidv4 } from 'uuid';
  * Wrapping related fields in named sections turns a wall of 20+ flat
  * fields into scannable groups the user can skip through quickly.
  */
+
+
 const SectionCard = ({ label, children, sx = {} }) => (
   <Box sx={{ bgcolor: '#fff', border: '1px solid #e5e7eb', borderRadius: 2.5, overflow: 'hidden', ...sx }}>
     <Box sx={{ px: 2.5, py: 1.2, borderBottom: '1px solid #f0f0f0', bgcolor: '#fafafa' }}>
@@ -126,6 +137,10 @@ const WebinarList = () => {
     return match ? match[1] : null;
   };
 
+  // const [feedbackData, setFeedbackData] = useState(null);
+// const [feedbackLoading, setFeedbackLoading] = useState(false);
+
+
   const [openVideoDialog, setOpenVideoDialog] = useState(false);
   const [videoUrl, setVideoUrl]               = useState('');
   const [title, setTitle]                     = useState('');
@@ -155,6 +170,19 @@ const WebinarList = () => {
   const [loading, setLoading]                 = useState(false);
   const [items, setItems]                     = useState([{ title: '', file: null, preview: null }]);
   const [faqs, setFaqs]                       = useState([{ question: '', answer: '', preview: null }]);
+
+  // const [feedbackOpen,setFeedbackOpen]=useState('');
+
+  // const [columnAnchorEl, setColumnAnchorEl] = useState(null);
+
+// const openColumnMenu = (event) => {
+//   setColumnAnchorEl(event.currentTarget);
+// };
+
+// const closeColumnMenu = () => {
+//   setColumnAnchorEl(null);
+// };
+  // const [selectedRow,setSelectedRow]=useState('')
 
   // CopyFBLink is kept inside WebinarList (not at module level) because it
   // closes over the row prop and its own local copied-state is trivial.
@@ -354,6 +382,107 @@ const WebinarList = () => {
     }
   };
 
+
+
+// const feedbackColumns = [
+// {
+//   name:"Webinar ID",
+//   selector:row=>row.webinarId,
+//   key:"webinarId"
+// },
+// {
+//   name:"Name",
+//   selector:row=>row.name,
+//   key:"name"
+// },
+// {
+//   name:"Phone",
+//   selector:row=>row.phone,
+//   key:"phone"
+// },
+// {
+//   name:"Content Quality",
+//   selector:row=>row.content_quality,
+//   key:"content_quality"
+// },
+// {
+//   name:"Interaction",
+//   selector:row=>row.interaction,
+//   key:"interaction"
+// },
+// {
+//   name:"Pace",
+//   selector:row=>row.pace,
+//   key:"pace"
+// },
+// {
+//   name:"Speaker",
+//   selector:row=>row.speaker,
+//   key:"speaker"
+// },
+// {
+//   name:"Overall",
+//   selector:row=>row.overall,
+//   key:"overall"
+// },
+// {
+//   name:"Future Webinar",
+//   selector:row=>row.Future_Webinars,
+//   key:"Future_Webinars"
+// },
+// {
+//   name:"Paid Course",
+//   selector:row=>row.paid_course,
+//   key:"paid_course"
+// },
+// {
+//   name:"Learned",
+//   selector:row=>row.learned,
+//   key:"learned"
+// },
+// {
+//   name:"Recommend",
+//   selector:row=>row.recommend,
+//   key:"recommend"
+// },
+// {
+//   name:"Suggestion",
+//   selector:row=>row.imporove,
+//   key:"imporove"
+// }
+// ];
+
+// const visibleColumns = feedbackColumns.filter(col =>
+//  selectedColumns.includes(col.key)
+// );
+// const exportToExcel = () => {
+// 
+// const exportData =  feedbackRows.map(row=>{
+
+//  let obj={}
+
+//  selectedColumns.forEach(col=>{
+//    obj[col] = row[col]
+//  })
+
+//  return obj
+
+// })
+
+// const worksheet = XLSX.utils.json_to_sheet(exportData)
+// const workbook = XLSX.utils.book_new()
+
+// XLSX.utils.book_append_sheet(workbook,worksheet,"Feedback")
+
+// XLSX.writeFile(workbook,"feedback.xlsx")
+
+// }
+
+
+// const columnOptions = feedbackColumns.map(col => ({
+//   label: col.name,
+//   value: col.key
+// }));
   // ── Formik submit ──────────────────────────────────────────────────────────
   const formik = useFormik({
     enableReinitialize: true,
@@ -477,6 +606,32 @@ const WebinarList = () => {
       )
     },
     {
+      name:"feedback",sortable:true,
+      cell:(row)=>(
+        <Tooltip title="view Feedback">
+          <IconButton  onClick={() => {
+
+            navigate(`/webinar/feedback/${row.slug}`,{
+              state:{
+                feedbackId:row.slug
+
+              }
+            })
+          
+         
+          // console.log(e.target.value,row.slug,"welcome")// 👈 send row id
+        }}>
+             <QuestionAnswerIcon/>
+
+          </IconButton>
+         
+
+        </Tooltip>
+      )
+
+
+    },
+    {
       name: 'Start', sortable: true,
       cell: (row) => (
         <Box sx={{ display: 'flex', gap: 1 }}>
@@ -507,6 +662,9 @@ const WebinarList = () => {
     return (<MainCard sx={{ borderRadius: 2 }}><Box p={3} color="error.main">Error: {error}</Box></MainCard>);
   }
 
+
+
+  
   // ===========================================================================
   // RENDER
   // ===========================================================================
@@ -757,6 +915,13 @@ const WebinarList = () => {
           </DialogTitle>
         </Dialog>
 
+
+
+
+
+ 
+
+
         {/* ==============================================================
             VIEW WEBINAR DIALOG  — redesigned with section-card layout
             ==============================================================
@@ -771,6 +936,25 @@ const WebinarList = () => {
             4. 16:9 paddingTop trick on the YouTube iframe: forces a
                widescreen container that scales to any width correctly.
         ============================================================== */}
+
+{/* 
+        <Dialog open={feedbackOpen} onClose={() => setFeedbackOpen(false)} maxWidth="sm" fullWidth>
+  <DialogTitle>Participant Feedback</DialogTitle>
+
+  <DialogContent>
+    {selectedRow && (
+      <Box>
+        <Typography><b>Name:</b> {selectedRow.name}</Typography>
+        <Typography><b>Email:</b> {selectedRow.email}</Typography>
+        <Typography><b>Feedback:</b> {selectedRow.feedback}</Typography>
+      </Box>
+    )}
+  </DialogContent>
+
+  <DialogActions>
+    <Button onClick={() => setFeedbackOpen(false)}>Close</Button>
+  </DialogActions>
+</Dialog> */}
         <Dialog
           maxWidth="md"
           fullWidth
