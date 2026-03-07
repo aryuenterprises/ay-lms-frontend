@@ -448,16 +448,20 @@ const ParticipantTable = () => {
   }, [webinarDetail]); // dependency is now webinarDetail, not webinarData
 
   // Filter rows based on attendance
+
   const rows = useMemo(() => {
   return allRows.filter((r) => {
+
     // Attendance filter
     if (attendanceFilter === "Attended" && !r.attended) return false;
     if (attendanceFilter === "Not Attended" && r.attended) return false;
 
-    // Start date filter
-     const rowDate = r.registered_at?.split(" ")[0]; 
+    if (!r.registered_at) return true;
 
-    console.log("newdata is here",r)
+    // Extract only date from registered_at
+    const rowDate = r.registered_at.split("T")[0];
+
+    // Start date filter
     if (startDate && rowDate < startDate) return false;
 
     // End date filter
@@ -466,6 +470,7 @@ const ParticipantTable = () => {
     return true;
   });
 }, [allRows, attendanceFilter, startDate, endDate]);
+
 
   const exportToExcel = useCallback(() => {
     if (!rows || rows.length === 0) {
