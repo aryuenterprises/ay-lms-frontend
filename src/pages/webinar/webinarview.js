@@ -1,4 +1,5 @@
 import React, { useCallback, useState, useMemo, useEffect } from 'react';
+// import { DatePicker} from "@mui/x-date-pickers";
 import {
   Box,
   Stack,
@@ -49,7 +50,11 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 
 const ParticipantTable = () => {
+
+  const today = new Date().toISOString().split("T")[0];
   const navigate = useNavigate();
+  const [startDate,setStartDate]=useState(today);
+  const [endDate,setEndDate]=useState(today);
   const location = useLocation();
   const [attendanceFilter, setAttendanceFilter] = useState('All');
   const [hoursFilter, setHoursFilter] = useState('All');
@@ -68,6 +73,8 @@ const ParticipantTable = () => {
   const [openLogs, setOpenLogs] = useState(false);
   const [selectedLogs, setSelectedLogs] = useState([]);
   const [selectedLogsUser, setSelectedLogsUser] = useState(null);
+
+  console.log(webinarDetail,"Detail is give to it")
 
   useEffect(() => {
     // We use the slug from location.state to call the retrieve endpoint.
@@ -103,6 +110,12 @@ const ParticipantTable = () => {
     setSelectedParticipant(participant);
     setOpenView(true);
   };
+
+
+
+   
+
+  
 
   const handleCloseView = () => {
     setOpenView(false);
@@ -436,15 +449,32 @@ const ParticipantTable = () => {
 
   // Filter rows based on attendance
   const rows = useMemo(() => {
-    if (attendanceFilter === 'Attended') return allRows.filter((r) => r.attended);
-    if (attendanceFilter === 'Not Attended') return allRows.filter((r) => !r.attended);
-    return allRows;
-  }, [allRows, attendanceFilter]);
+  return allRows.filter((r) => {
+    // Attendance filter
+    if (attendanceFilter === "Attended" && !r.attended) return false;
+    if (attendanceFilter === "Not Attended" && r.attended) return false;
+
+    // Start date filter
+     const rowDate = r.registered_at?.split(" ")[0]; 
+
+    console.log("newdata is here",r)
+    if (startDate && rowDate < startDate) return false;
+
+    // End date filter
+    if (endDate && rowDate > endDate) return false;
+
+    return true;
+  });
+}, [allRows, attendanceFilter, startDate, endDate]);
+
   const exportToExcel = useCallback(() => {
     if (!rows || rows.length === 0) {
       alert('No data to export');
       return;
     }
+
+
+  // const rows
 
     const worksheetData = rows.map((row) => ({
       'S.No': row.index,
@@ -957,6 +987,33 @@ const ParticipantTable = () => {
               <MenuItem value="1:45 min">1:45 Min</MenuItem>
               <MenuItem value="2 hour">2 Hour</MenuItem>
             </TextField>
+
+            <TextField
+      label="Start Date"
+      type="date"
+      size="small"
+      value={startDate}
+      onChange={(e) => setStartDate(e.target.value)}
+      InputLabelProps={{ shrink: true }}
+      sx={{ minWidth: 180 }}
+    />
+
+    {/* End Date */}
+    <TextField
+      label="End Date"
+      type="date"
+      size="small"
+      value={endDate}
+      onChange={(e) => setEndDate(e.target.value)}
+      InputLabelProps={{ shrink: true }}
+      sx={{ minWidth: 180 }}
+    />
+
+
+
+
+
+
           </Stack>
         </Box>
 
