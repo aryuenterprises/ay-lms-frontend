@@ -23,9 +23,9 @@ import {
   FormControl,
   Select
   // Select
-} 
-from '@mui/material';
-import { UserAdd,  Eye, EyeSlash, CloseSquare, SearchNormal1, } from 'iconsax-react';
+}
+  from '@mui/material';
+import { UserAdd, Eye, EyeSlash, CloseSquare, SearchNormal1, } from 'iconsax-react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { PopupTransition } from 'components/@extended/Transitions';
@@ -36,6 +36,8 @@ import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import MainCard from 'components/MainCard';
 import { useNavigate } from 'react-router-dom';
 import useDate from '../../config';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { useLocation } from 'react-router-dom';
 
 //css import
 import 'assets/css/commonStyle.css';
@@ -55,8 +57,8 @@ const StudentTable = () => {
   const { checkPermission } = usePermission();
 
   const canCreate = checkPermission('Students', 'create');
-  const canUpdate = checkPermission('Students', 'update');
-  const canDelete = checkPermission('Students', 'delete');
+  // const canUpdate = checkPermission('Students', 'update');
+  // const canDelete = checkPermission('Students', 'delete');
 
   const [loading, setIsLoading] = useState(false);
 
@@ -85,7 +87,7 @@ const StudentTable = () => {
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [password, setPassword] = useState('');
-  const [rowActions, setRowActions] = useState({});
+  // const [rowActions, setRowActions] = useState({});
   const [notespopup, setNotesPopup] = useState(false);
   const [notes, setNotes] = useState('');
 
@@ -117,7 +119,7 @@ const StudentTable = () => {
       const dataWithSerial = data?.map((item) => ({
         ...item
       }));
-    
+
       setData(dataWithSerial || []);
       setCompanies(result?.companies || []);
       setCourses(result?.courses || []);
@@ -164,30 +166,30 @@ const StudentTable = () => {
     setPassword('');
     setNotesPopup(false);
     setNotes('');
-    setRowActions({});
+    // setRowActions({});
   };
 
-  const handleAction = (e, row) => {
-    const selectedValue = e.target.value;
-    setRowActions((prev) => ({
-      ...prev,
-      [row.registration_id]: selectedValue
-    }));
+  // const handleAction = (e, row) => {
+  //   const selectedValue = e.target.value;
+  //   setRowActions((prev) => ({
+  //     ...prev,
+  //     [row.registration_id]: selectedValue
+  //   }));
 
-    switch (selectedValue) {
-      case 'Reset Password':
-        handleResetPassword(row);
-        break;
-      case 'Delete':
-        handleDelete(row.student_id);
-        break;
-      case 'action':
-        // Do nothing or default behavior
-        break;
-      default:
-        break;
-    }
-  };
+  //   switch (selectedValue) {
+  //     case 'Reset Password':
+  //       handleResetPassword(row);
+  //       break;
+  //     case 'Delete':
+  //       handleDelete(row.student_id);
+  //       break;
+  //     case 'action':
+  //       // Do nothing or default behavior
+  //       break;
+  //     default:
+  //       break;
+  //   }
+  // };
 
   const handleView = useCallback(
     (data) => {
@@ -195,7 +197,8 @@ const StudentTable = () => {
         navigate(`/students/${data.registration_id}`, {
           state: {
             name: data.first_name,
-            student_id: data.student_id
+            student_id: data.student_id,
+            user_type:'student'
           }
         });
       }
@@ -224,7 +227,8 @@ const StudentTable = () => {
           state: {
             name: data.first_name,
             student_id: data.student_id,
-            notification: 'topics'
+            notification: 'topics',
+            user_type:'student'
           }
         });
       }
@@ -252,12 +256,13 @@ const StudentTable = () => {
     [navigate]
   );
 
-  const handleEdit = useCallback((student) => {
-    setCurrentStudent(student);
-    setInitialStatus(student.status);
-    setOpen(true);
-  }, []);
+  // const handleEdit = useCallback((student) => {
+  //   setCurrentStudent(student);
+  //   setInitialStatus(student.status);
+  //   setOpen(true);
+  // }, []);
 
+ 
   const handleDelete = useCallback(
     async (id) => {
       const result = await Swal.fire({
@@ -303,10 +308,10 @@ const StudentTable = () => {
   );
 
 
-  const handleResetPassword = (user) => {
-    setSelectedUser(user);
-    setResetDialogOpen(true);
-  };
+  // const handleResetPassword = (user) => {
+  //   setSelectedUser(user);
+  //   setResetDialogOpen(true);
+  // };
 
   const handleResetSubmit = async () => {
     // Example API call:
@@ -333,6 +338,24 @@ const StudentTable = () => {
     setResetDialogOpen(false);
     handleClose();
   };
+  const location = useLocation();
+  console.log("location state:", location.state);
+
+  useEffect(() => {
+    if (location.state?.openEdit && location.state?.student) {
+      setCurrentStudent(location.state.student);
+      setInitialStatus(location.state.student);
+      setOpen(true);
+      navigate(location.pathname, { replace: true });
+    }
+
+    if (location.state?.openReset && location.state?.student) {
+      setSelectedUser(location.state.student);
+      setResetDialogOpen(true);
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location.state, navigate, location.pathname]);
+
 
   const columns = [
     {
@@ -369,30 +392,31 @@ const StudentTable = () => {
       sortable: true,
       // width: '200px'
     },
+    // {
+    //   name:'View',
+    //   cell: (row) => (
+    //     <Tooltip title="View">
+    //       <Typography variant="body1" color="#6aa9e9" onClick={() => handleView(row)} style={{ cursor: 'pointer' }}>
+    //         View
+    //       </Typography>
+    //       </Tooltip>
+    //   ),
+    //   sortable: true,
+    // },
+    // {
+    //   name: 'Edit',
+    //   cell: (row) => (
+    //     <Tooltip title="Edit">
+    //       <Typography variant="body1" color="#5cc4a5" onClick={() => handleEdit(row)} style={{ cursor: 'pointer' }}>
+    //         Edit
+    //       </Typography>
+    //     </Tooltip>
+    //   ),
+    //   sortable: true,
+    // },
+
     {
-      name:'View',
-      cell: (row) => (
-        <Tooltip title="View">
-          <Typography variant="body1" color="#6aa9e9" onClick={() => handleView(row)} style={{ cursor: 'pointer' }}>
-            View
-          </Typography>
-          </Tooltip>
-      ),
-      sortable: true,
-    },
-    {
-      name:'Edit',
-      cell: (row) => (
-        <Tooltip title="Edit">
-          <Typography variant="body1" color="#5cc4a5" onClick={() => handleEdit(row)} style={{ cursor: 'pointer' }}>
-            Edit
-          </Typography>
-        </Tooltip>
-      ),
-      sortable: true,
-    },
-    {
-      name:'Batches',
+      name: 'Batches',
       cell: (row) => (
         <Tooltip title="View Batches">
           <Typography variant="body1" color="#e06eed" onClick={() => handleViewBatch(row)} style={{ cursor: 'pointer' }}>
@@ -403,10 +427,10 @@ const StudentTable = () => {
       sortable: true,
     },
     {
-      name:'Courses',
+      name: 'Courses',
       cell: (row) => (
         <Tooltip title="View Course">
-          <Typography variant="body1" color="#a9cf73" onClick={() => handleCourse(row)} style={{ cursor: 'pointer' }}>
+          <Typography variant="body1" color="#b9ea75" onClick={() => handleCourse(row)} style={{ cursor: 'pointer' }}>
             Courses
           </Typography>
         </Tooltip>
@@ -414,11 +438,11 @@ const StudentTable = () => {
       sortable: true,
     },
     {
-      name:'Attendance',
+      name: 'Attendance',
       cell: (row) => (
         <Tooltip title="View Attendance">
           <Typography variant="body1" color="#62d3c4" onClick={() => handleAttendance(row)} style={{ cursor: 'pointer' }}>
-              Attendance
+            Attendance
           </Typography>
         </Tooltip>
       ),
@@ -428,11 +452,16 @@ const StudentTable = () => {
       name: 'Actions',
       cell: (row) => (
         <Box sx={{ display: 'flex', gap: 1 }}>
-          {/* <Tooltip title="View">
+          <Tooltip title="View">
             <IconButton variant="contained" color="secondary" onClick={() => handleView(row)}>
               <Eye />
             </IconButton>
-          </Tooltip> */}
+          </Tooltip>
+          <Tooltip title="Delete">
+            <IconButton variant="contained" color="error" onClick={() => handleDelete(row.student_id)}>
+              <DeleteIcon />
+            </IconButton>
+          </Tooltip>
           {/* <Tooltip title="Batch">
             <IconButton variant="contained" color="secondary" onClick={() => handleViewBatch(row)}>
               <UserTag />
@@ -463,7 +492,7 @@ const StudentTable = () => {
                   </IconButton>
                 </Tooltip>
               )} */}
-              {canUpdate || canDelete ? (
+              {/* {canUpdate || canDelete ? (
                 <Select
                   value={rowActions[row.registration_id] || 'action'}
                   onChange={(e) => handleAction(e, row)}
@@ -473,7 +502,7 @@ const StudentTable = () => {
                   {canUpdate && <MenuItem value="Reset Password">Reset Password</MenuItem>}
                   {canDelete && <MenuItem value="Delete">Delete</MenuItem>}
                 </Select>
-              ) : null}
+              ) : null} */}
             </>
           )}
         </Box>
@@ -2027,7 +2056,7 @@ const StudentTable = () => {
               )}
 
               {/*Designation*/}
-            { formik.values.student_type === "employee" &&   <Grid item xs={12} md={6}>
+              {formik.values.student_type === "employee" && <Grid item xs={12} md={6}>
                 <Stack sx={{ mt: 2, gap: 1 }}>
                   <FormLabel>Designation*</FormLabel>
                   <TextField
@@ -2077,336 +2106,336 @@ const StudentTable = () => {
                   />
                 </Stack>
               </Grid>}
-  
-            {/* Organization Dropdown */}
-            {formik.values.student_type && formik.values.student_type === "employee" && (
+
+              {/* Organization Dropdown */}
+              {formik.values.student_type && formik.values.student_type === "employee" && (
+                <Grid item xs={12} md={6}>
+                  <Stack sx={{ mt: 2, gap: 1 }}>
+                    <FormLabel>Organization</FormLabel>
+                    <Autocomplete
+                      id="company_id"
+                      options={companies || []}
+                      getOptionLabel={(option) => option.company_name}
+                      value={companies?.find((company) => company.company_id === formik.values.company_id) || null}
+                      onChange={(event, newValue) => {
+                        formik.setFieldValue('company_id', newValue ? newValue.company_id : '');
+                      }}
+                      onBlur={formik.handleBlur}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          placeholder="Select organization..."
+                          error={formik.touched.company_id && Boolean(formik.errors.company_id)}
+                          helperText={formik.touched.company_id && formik.errors.company_id}
+                        />
+                      )}
+                      filterOptions={(options = [], state) => {
+                        return options.filter((option) => option.company_name?.toLowerCase().includes(state.inputValue.toLowerCase()));
+                      }}
+                      isOptionEqualToValue={(option, value) => option.company_id === value.company_id}
+                      renderOption={(props, option) => (
+                        <li {...props} key={option.company_id}>
+                          {option.company_name}
+                        </li>
+                      )}
+                    />
+                  </Stack>
+                </Grid>
+              )}
+              {/*Status*/}
               <Grid item xs={12} md={6}>
                 <Stack sx={{ mt: 2, gap: 1 }}>
-                  <FormLabel>Organization</FormLabel>
-                  <Autocomplete
-                    id="company_id"
-                    options={companies || []}
-                    getOptionLabel={(option) => option.company_name}
-                    value={companies?.find((company) => company.company_id === formik.values.company_id) || null}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('company_id', newValue ? newValue.company_id : '');
-                    }}
+                  <FormLabel>Status*</FormLabel>
+                  <TextField
+                    select
+                    fullWidth
+                    id="status"
+                    name="status"
+                    value={formik.values.status} // This should be boolean
+                    onChange={formik.handleChange} // Use formik's handleChange directly
                     onBlur={formik.handleBlur}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        placeholder="Select organization..."
-                        error={formik.touched.company_id && Boolean(formik.errors.company_id)}
-                        helperText={formik.touched.company_id && formik.errors.company_id}
-                      />
-                    )}
-                    filterOptions={(options = [], state) => {
-                      return options.filter((option) => option.company_name?.toLowerCase().includes(state.inputValue.toLowerCase()));
-                    }}
-                    isOptionEqualToValue={(option, value) => option.company_id === value.company_id}
-                    renderOption={(props, option) => (
-                      <li {...props} key={option.company_id}>
-                        {option.company_name}
-                      </li>
-                    )}
-                  />
+                    error={formik.touched.status && Boolean(formik.errors.status)}
+                    helperText={formik.touched.status && formik.errors.status}
+                  >
+                    <MenuItem value={true}>Active</MenuItem>
+                    <MenuItem value={false}>Inactive</MenuItem>
+                  </TextField>
                 </Stack>
               </Grid>
-            )}
-            {/*Status*/}
-            <Grid item xs={12} md={6}>
-              <Stack sx={{ mt: 2, gap: 1 }}>
-                <FormLabel>Status*</FormLabel>
+              {/*Notes*/}
+              {/* Notes - Show only when status is changed */}
+              {shouldShowNotesField && (
+                <Grid item xs={12}>
+                  <Stack sx={{ mt: 2, gap: 1 }}>
+                    <FormLabel>Notes*</FormLabel>
+                    <TextField
+                      fullWidth
+                      id="notes"
+                      placeholder="Notes"
+                      name="notes"
+                      multiline
+                      rows={4}
+                      value={formik.values.notes}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      error={formik.touched.notes && Boolean(formik.errors.notes)}
+                      helperText={formik.touched.notes && formik.errors.notes}
+                    />
+                  </Stack>
+                </Grid>
+              )}
+            </Grid>
+            <DialogActions>
+              <Button onClick={handleClose}>Cancel</Button>
+              <Button
+                type="submit"
+                variant="contained"
+                disabled={formik.isSubmitting} // Disable when submitting
+              >
+                {formik.isSubmitting ? 'Processing...' : currentStudent ? 'Update' : 'Add'}
+              </Button>
+            </DialogActions>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reset Password Tutor Dialog */}
+      <Dialog
+        maxWidth="xs"
+        TransitionComponent={PopupTransition}
+        keepMounted
+        fullWidth
+        open={resetDialogOpen}
+        onClose={(event, reason) => {
+          if (reason !== 'backdropClick') handleClose();
+        }}
+        BackdropProps={{
+          onClick: (event) => event.stopPropagation()
+        }}
+        sx={{ '& .MuiDialog-paper': { p: 0 }, transition: 'transform 225ms' }}
+        aria-describedby="alert-dialog-slide-description"
+      >
+        <DialogTitle className="dialogTitle" sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          Reset Password
+          <IconButton color="dark" onClick={handleClose} edge="end" size="big" aria-label="close" title="close">
+            <CloseSquare height={30} />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <Stack spacing={2} sx={{ mt: 2 }}>
+                <FormLabel>Reset Password</FormLabel>
                 <TextField
-                  select
+                  autoFocus
+                  margin="dense"
+                  placeholder="New Password"
+                  type={showPassword ? 'text' : 'password'}
                   fullWidth
-                  id="status"
-                  name="status"
-                  value={formik.values.status} // This should be boolean
-                  onChange={formik.handleChange} // Use formik's handleChange directly
-                  onBlur={formik.handleBlur}
-                  error={formik.touched.status && Boolean(formik.errors.status)}
-                  helperText={formik.touched.status && formik.errors.status}
-                >
-                  <MenuItem value={true}>Active</MenuItem>
-                  <MenuItem value={false}>Inactive</MenuItem>
-                </TextField>
+                  variant="outlined"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton aria-label="toggle password visibility" onClick={() => setShowPassword(!showPassword)} edge="end">
+                          {showPassword ? <Eye /> : <EyeSlash />}
+                        </IconButton>
+                      </InputAdornment>
+                    )
+                  }}
+                  sx={{ mt: 2 }}
+                />
               </Stack>
             </Grid>
-            {/*Notes*/}
-            {/* Notes - Show only when status is changed */}
-            {shouldShowNotesField && (
-              <Grid item xs={12}>
-                <Stack sx={{ mt: 2, gap: 1 }}>
-                  <FormLabel>Notes*</FormLabel>
-                  <TextField
-                    fullWidth
-                    id="notes"
-                    placeholder="Notes"
-                    name="notes"
-                    multiline
-                    rows={4}
-                    value={formik.values.notes}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    error={formik.touched.notes && Boolean(formik.errors.notes)}
-                    helperText={formik.touched.notes && formik.errors.notes}
-                  />
-                </Stack>
-              </Grid>
-            )}
           </Grid>
-          <DialogActions>
-            <Button onClick={handleClose}>Cancel</Button>
-            <Button
-              type="submit"
-              variant="contained"
-              disabled={formik.isSubmitting} // Disable when submitting
-            >
-              {formik.isSubmitting ? 'Processing...' : currentStudent ? 'Update' : 'Add'}
-            </Button>
-          </DialogActions>
-        </form>
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>Cancel</Button>
+          <Button onClick={handleResetSubmit} variant="contained" color="primary">
+            Reset Password
+          </Button>
+        </DialogActions>
+      </Dialog>
 
-      {/* Reset Password Tutor Dialog */ }
-  <Dialog
-    maxWidth="xs"
-    TransitionComponent={PopupTransition}
-    keepMounted
-    fullWidth
-    open={resetDialogOpen}
-    onClose={(event, reason) => {
-      if (reason !== 'backdropClick') handleClose();
-    }}
-    BackdropProps={{
-      onClick: (event) => event.stopPropagation()
-    }}
-    sx={{ '& .MuiDialog-paper': { p: 0 }, transition: 'transform 225ms' }}
-    aria-describedby="alert-dialog-slide-description"
-  >
-    <DialogTitle className="dialogTitle" sx={{ borderBottom: 1, borderColor: 'divider' }}>
-      Reset Password
-      <IconButton color="dark" onClick={handleClose} edge="end" size="big" aria-label="close" title="close">
-        <CloseSquare height={30} />
-      </IconButton>
-    </DialogTitle>
-    <DialogContent sx={{ borderBottom: 1, borderColor: 'divider' }}>
-      <Grid container spacing={2}>
-        <Grid item xs={12}>
-          <Stack spacing={2} sx={{ mt: 2 }}>
-            <FormLabel>Reset Password</FormLabel>
-            <TextField
-              autoFocus
-              margin="dense"
-              placeholder="New Password"
-              type={showPassword ? 'text' : 'password'}
-              fullWidth
-              variant="outlined"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton aria-label="toggle password visibility" onClick={() => setShowPassword(!showPassword)} edge="end">
-                      {showPassword ? <Eye /> : <EyeSlash />}
-                    </IconButton>
-                  </InputAdornment>
-                )
-              }}
-              sx={{ mt: 2 }}
-            />
-          </Stack>
-        </Grid>
-      </Grid>
-    </DialogContent>
-    <DialogActions>
-      <Button onClick={handleClose}>Cancel</Button>
-      <Button onClick={handleResetSubmit} variant="contained" color="primary">
-        Reset Password
-      </Button>
-    </DialogActions>
-  </Dialog>
+      {/* Notes Dialog */}
+      <Dialog
+        maxWidth="md"
+        TransitionComponent={PopupTransition}
+        keepMounted
+        fullWidth
+        open={notespopup}
+        onClose={(event, reason) => {
+          if (reason !== 'backdropClick') handleClose();
+        }}
+        BackdropProps={{
+          onClick: (event) => event.stopPropagation()
+        }}
+        sx={{ '& .MuiDialog-paper': { p: 0 }, transition: 'transform 225ms' }}
+        aria-describedby="alert-dialog-slide-description"
+      >
+        <DialogTitle className="dialogTitle" sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          Notes
+          <IconButton color="dark" onClick={handleClose} edge="end" size="big" aria-label="close" title="close">
+            <CloseSquare height={30} />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent sx={{ borderBottom: 1, borderColor: 'divider', py: 3 }}>
+          <Grid container spacing={3}>
+            <Grid item xs={12}>
+              <Stack spacing={3} sx={{ mt: 1 }}>
+                {notes && notes.length > 0 ? (
+                  notes.map((note) => (
+                    <Box
+                      key={note.id}
+                      sx={{
+                        p: 3,
+                        border: 1,
+                        borderColor: 'divider',
+                        borderRadius: 2,
+                        backgroundColor: 'background.paper',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                        transition: 'all 0.2s ease-in-out',
+                        '&:hover': {
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                          transform: 'translateY(-1px)'
+                        }
+                      }}
+                    >
+                      <Grid container spacing={3} alignItems="flex-start">
+                        {/* Created By with enhanced styling */}
+                        <Grid item xs={12} sm={3}>
+                          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                            <Typography variant="caption" color="text.secondary" fontWeight="bold">
+                              CREATED BY
+                            </Typography>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Box
+                                sx={{
+                                  width: 8,
+                                  height: 8,
+                                  borderRadius: '50%',
+                                  backgroundColor: note.status === 'True' ? 'success.main' : 'error.main'
+                                }}
+                              />
+                              <Typography variant="body1" fontWeight="medium" fontSize="1.1rem">
+                                {note.created_by || '-'}
+                              </Typography>
+                            </Box>
+                          </Box>
+                        </Grid>
 
-  {/* Notes Dialog */ }
-  <Dialog
-    maxWidth="md"
-    TransitionComponent={PopupTransition}
-    keepMounted
-    fullWidth
-    open={notespopup}
-    onClose={(event, reason) => {
-      if (reason !== 'backdropClick') handleClose();
-    }}
-    BackdropProps={{
-      onClick: (event) => event.stopPropagation()
-    }}
-    sx={{ '& .MuiDialog-paper': { p: 0 }, transition: 'transform 225ms' }}
-    aria-describedby="alert-dialog-slide-description"
-  >
-    <DialogTitle className="dialogTitle" sx={{ borderBottom: 1, borderColor: 'divider' }}>
-      Notes
-      <IconButton color="dark" onClick={handleClose} edge="end" size="big" aria-label="close" title="close">
-        <CloseSquare height={30} />
-      </IconButton>
-    </DialogTitle>
-    <DialogContent sx={{ borderBottom: 1, borderColor: 'divider', py: 3 }}>
-      <Grid container spacing={3}>
-        <Grid item xs={12}>
-          <Stack spacing={3} sx={{ mt: 1 }}>
-            {notes && notes.length > 0 ? (
-              notes.map((note) => (
-                <Box
-                  key={note.id}
-                  sx={{
-                    p: 3,
-                    border: 1,
-                    borderColor: 'divider',
-                    borderRadius: 2,
-                    backgroundColor: 'background.paper',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                    transition: 'all 0.2s ease-in-out',
-                    '&:hover': {
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                      transform: 'translateY(-1px)'
-                    }
-                  }}
-                >
-                  <Grid container spacing={3} alignItems="flex-start">
-                    {/* Created By with enhanced styling */}
-                    <Grid item xs={12} sm={3}>
-                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                        <Typography variant="caption" color="text.secondary" fontWeight="bold">
-                          CREATED BY
-                        </Typography>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <Box
-                            sx={{
-                              width: 8,
-                              height: 8,
-                              borderRadius: '50%',
-                              backgroundColor: note.status === 'True' ? 'success.main' : 'error.main'
-                            }}
-                          />
-                          <Typography variant="body1" fontWeight="medium" fontSize="1.1rem">
-                            {note.created_by || '-'}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </Grid>
+                        {/* Reason with enhanced text wrapping */}
+                        <Grid item xs={12} sm={4}>
+                          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                            <Typography variant="caption" color="text.secondary" fontWeight="bold">
+                              REASON
+                            </Typography>
+                            <Box
+                              sx={{
+                                p: 1.5,
+                                border: 1,
+                                borderColor: 'divider',
+                                borderRadius: 1,
+                                backgroundColor: 'grey.50',
+                                minHeight: '60px',
+                                display: 'flex',
+                                alignItems: 'flex-start'
+                              }}
+                            >
+                              <Typography
+                                variant="body1"
+                                sx={{
+                                  lineHeight: 1.5,
+                                  wordWrap: 'break-word',
+                                  overflowWrap: 'break-word',
+                                  whiteSpace: 'normal',
+                                  wordBreak: 'break-word',
+                                  width: '100%'
+                                }}
+                              >
+                                {note.reason || '-'}
+                              </Typography>
+                            </Box>
+                          </Box>
+                        </Grid>
 
-                    {/* Reason with enhanced text wrapping */}
-                    <Grid item xs={12} sm={4}>
-                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                        <Typography variant="caption" color="text.secondary" fontWeight="bold">
-                          REASON
-                        </Typography>
-                        <Box
-                          sx={{
-                            p: 1.5,
-                            border: 1,
-                            borderColor: 'divider',
-                            borderRadius: 1,
-                            backgroundColor: 'grey.50',
-                            minHeight: '60px',
-                            display: 'flex',
-                            alignItems: 'flex-start'
-                          }}
-                        >
-                          <Typography
-                            variant="body1"
-                            sx={{
-                              lineHeight: 1.5,
-                              wordWrap: 'break-word',
-                              overflowWrap: 'break-word',
-                              whiteSpace: 'normal',
-                              wordBreak: 'break-word',
-                              width: '100%'
-                            }}
-                          >
-                            {note.reason || '-'}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </Grid>
+                        {/* Date with improved formatting */}
+                        <Grid item xs={12} sm={3}>
+                          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                            <Typography variant="caption" color="text.secondary" fontWeight="bold">
+                              DATE
+                            </Typography>
+                            <Typography
+                              variant="body1"
+                              sx={{
+                                backgroundColor: 'action.hover',
+                                px: 1.5,
+                                py: 0.5,
+                                borderRadius: 1,
+                                display: 'inline-block',
+                                width: 'fit-content'
+                              }}
+                            >
+                              {formatDateTime(note.created_at, { includeTime: false }) || '-'}
+                            </Typography>
+                          </Box>
+                        </Grid>
 
-                    {/* Date with improved formatting */}
-                    <Grid item xs={12} sm={3}>
-                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                        <Typography variant="caption" color="text.secondary" fontWeight="bold">
-                          DATE
-                        </Typography>
-                        <Typography
-                          variant="body1"
-                          sx={{
-                            backgroundColor: 'action.hover',
-                            px: 1.5,
-                            py: 0.5,
-                            borderRadius: 1,
-                            display: 'inline-block',
-                            width: 'fit-content'
-                          }}
-                        >
-                          {formatDateTime(note.created_at, { includeTime: false }) || '-'}
-                        </Typography>
-                      </Box>
-                    </Grid>
-
-                    {/* Status with badge styling */}
-                    <Grid item xs={12} sm={2}>
-                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                        <Typography variant="caption" color="text.secondary" fontWeight="bold">
-                          STATUS
-                        </Typography>
-                        <Box
-                          sx={{
-                            borderRadius: 2,
-                            width: 'fit-content'
-                          }}
-                        >
-                          <Chip
-                            label={note.status === 'True' ? 'Active' : 'Inactive'}
-                            sx={{
-                              color: note.status === 'True' ? 'success.dark' : 'error.dark',
-                              fontWeight: 600
-                            }}
-                          />
-                        </Box>
-                      </Box>
-                    </Grid>
-                  </Grid>
-                </Box>
-              ))
-            ) : (
-              <Box
-                sx={{
-                  p: 6,
-                  textAlign: 'center',
-                  border: 2,
-                  borderColor: 'divider',
-                  borderStyle: 'dashed',
-                  borderRadius: 3,
-                  backgroundColor: 'action.hover',
-                  my: 2
-                }}
-              >
-                <Typography variant="h6" color="text.secondary" gutterBottom>
-                  No Notes Available
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  There are no notes to display at the moment.
-                </Typography>
-              </Box>
-            )}
-          </Stack>
-        </Grid>
-      </Grid>
-    </DialogContent>
-    <DialogActions>
-      <Button onClick={handleClose}>Cancel</Button>
-    </DialogActions>
-  </Dialog>
+                        {/* Status with badge styling */}
+                        <Grid item xs={12} sm={2}>
+                          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                            <Typography variant="caption" color="text.secondary" fontWeight="bold">
+                              STATUS
+                            </Typography>
+                            <Box
+                              sx={{
+                                borderRadius: 2,
+                                width: 'fit-content'
+                              }}
+                            >
+                              <Chip
+                                label={note.status === 'True' ? 'Active' : 'Inactive'}
+                                sx={{
+                                  color: note.status === 'True' ? 'success.dark' : 'error.dark',
+                                  fontWeight: 600
+                                }}
+                              />
+                            </Box>
+                          </Box>
+                        </Grid>
+                      </Grid>
+                    </Box>
+                  ))
+                ) : (
+                  <Box
+                    sx={{
+                      p: 6,
+                      textAlign: 'center',
+                      border: 2,
+                      borderColor: 'divider',
+                      borderStyle: 'dashed',
+                      borderRadius: 3,
+                      backgroundColor: 'action.hover',
+                      my: 2
+                    }}
+                  >
+                    <Typography variant="h6" color="text.secondary" gutterBottom>
+                      No Notes Available
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      There are no notes to display at the moment.
+                    </Typography>
+                  </Box>
+                )}
+              </Stack>
+            </Grid>
+          </Grid>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>Cancel</Button>
+        </DialogActions>
+      </Dialog>
     </MainCard >
   );
 };

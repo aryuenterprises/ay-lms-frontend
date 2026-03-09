@@ -18,6 +18,7 @@ import axiosInstance from 'utils/axios';
 import TutorAssessmentTab from './studentViewTabs/TutorAssessmentTab';
 import PropTypes from 'prop-types';
 import AdminAssessmentTab from './studentViewTabs/AdminAssesmentTab';
+import StudentAssessmentTab from 'pages/course/StudentAssessmentTab';
 
 
 function TabPanel(props) {
@@ -49,6 +50,8 @@ const StudentView = () => {
   const { name, student_id, notification, user_type } = location.state || {};
   const auth = JSON.parse(localStorage.getItem('auth'));
   const userType = auth?.loginType;
+  console.log("user type is ", userType)
+
   const regId = auth?.user?.employee_id || auth?.user?.user_id;
 
   // Show profile tab for admin and student, but not for tutor
@@ -57,6 +60,7 @@ const StudentView = () => {
   // Check if this is a tutor view (includes both tutor and admin)
   const isTutorView = user_type === 'tutor';
   const isAdminView = user_type === 'admin';
+  const isStudentView = user_type === 'student';
 
   // Define all possible tabs in order
   const ALL_TABS = [
@@ -169,7 +173,7 @@ const StudentView = () => {
     } finally {
       setLoading(false);
     }
-  }, [student_id, regId, userType, isTutorView, isAdminView]);
+  }, [student_id, regId, userType, isTutorView, isAdminView, isStudentView]);
 
   useEffect(() => {
     fetchData();
@@ -179,24 +183,77 @@ const StudentView = () => {
     setValue(newValue);
   };
 
+
   const handleEdit = () => {
-    navigate('/admins', {
+    console.log("student edit")
+    const routeMap = {
+      admin: '/admins',
+      tutor: '/tutors',
+      student: '/students'
+    };
+
+    const stateKeyMap = {
+      admin: 'admin',
+      tutor: 'trainer',
+      student: 'student'
+    };
+
+    const path = routeMap[user_type];
+    console.log("user_tupe", user_type);
+    const stateKey = stateKeyMap[user_type];
+
+    if (!path) return;
+    if (!profileData) {
+      console.log("profileData is null - not navigating");
+      return;
+    }
+
+    console.log("Navigating to:", path, "with state key:", stateKey);
+
+
+
+    // if (!path) {
+    //   console.log("Invalid type:", type);
+    //   return;
+    // }
+
+
+    navigate(path, {
       state: {
         openEdit: true,
-        admin: profileData
+        [stateKey]: profileData
       }
     });
   };
 
   const handleResetPassword = () => {
-    navigate('/admins', {
+    const routeMap = {
+      admin: '/admins',
+      tutor: '/tutors',
+      student: '/students'
+    };
+
+    const stateKeyMap = {
+      admin: 'admin',
+      tutor: 'trainer',
+      student: 'student'
+    };
+
+    const path = routeMap[user_type];
+    const stateKey = stateKeyMap[user_type];
+
+    if (!path) return;
+
+    navigate(path, {
       state: {
         openReset: true,
-        admin: profileData
+        [stateKey]: profileData
       }
     });
   };
- 
+
+
+
 
 
   if (loading) {
@@ -249,19 +306,38 @@ const StudentView = () => {
               <Button
                 variant="contained"
                 color="warning"
+                sx={{ color: "white" }}
                 onClick={handleResetPassword}
               >
                 Reset Password
               </Button>
-
+              {/* 
               <Button
-                variant="contained"
-                color="error"
+                // variant="contained"
+                // color="grey"
+                sx={{backgroundColor:"#8a8a8a" }}
+                startIcon={<ArrowBack />}
+                onClick={() => navigate(-1)}
+              >
+                Back
+              </Button> */}
+              <Button
+                sx={{
+                  backgroundColor: "#8a8a8a",
+                  color: "#ffffff",
+                  "&:hover": {
+                    backgroundColor: "#8a8a8a",
+                    color: "#ffffff"
+                  },
+                  
+                }}
                 startIcon={<ArrowBack />}
                 onClick={() => navigate(-1)}
               >
                 Back
               </Button>
+
+
             </Stack>
           </Grid>
           <Grid item xs={12}>
@@ -295,11 +371,22 @@ const StudentView = () => {
                   {tab.id === 'exercise' && <ExercisesTab data={profileData?.assignment || []} />}
                   {tab.id === 'recording' && <RecordingTab StuId={profileData?.student_id} />}
                   {tab.id === 'assessments' &&
-                    (userType === 'tutor' || userType === 'admin' ? (
-                      <TutorAssessmentTab course={profileData?.course_detail} student_id={student_id} />
-                    ) : (
-                      <AdminAssessmentTab course={profileData?.course_detail} student_id={student_id} />
-                    ))}
+                    userType === 'tutor' || userType === 'admin' ? (
+                    <TutorAssessmentTab
+                      course={profileData?.course_detail}
+                      student_id={student_id}
+                    />
+                  ) : userType === 'student' ? (
+                    <StudentAssessmentTab
+                      course={profileData?.course_detail}
+                      student_id={student_id}
+                    />
+                  ) : (
+                    <AdminAssessmentTab
+                      course={profileData?.course_detail}
+                      student_id={student_id}
+                    />
+                  )}
                 </TabPanel>
               ))}
             </Box>

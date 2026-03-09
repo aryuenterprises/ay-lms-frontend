@@ -25,13 +25,14 @@ import {
   Autocomplete,
   FormHelperText
 } from '@mui/material';
-import { UserAdd,  Eye, EyeSlash, CloseSquare, SearchNormal1 } from 'iconsax-react';
+import { UserAdd, Eye, EyeSlash, CloseSquare, SearchNormal1 } from 'iconsax-react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { PopupTransition } from 'components/@extended/Transitions';
 import { APP_PATH_BASE_URL } from 'config';
 import Swal from 'sweetalert2';
 import { usePermission } from '../../hooks/usePermission';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 //css import
 import 'assets/css/commonStyle.css';
@@ -39,7 +40,7 @@ import 'assets/css/DataTable.css';
 import MainCard from 'components/MainCard';
 import { Capitalise } from 'utils/capitalise';
 import axiosInstance from 'utils/axios';
-// import { Notes } from '@mui/icons-material';
+import { Notes } from '@mui/icons-material';
 import { useNavigate } from 'react-router';
 import { formatDateTime } from 'utils/dateUtils';
 import { useLocation } from 'react-router-dom';
@@ -50,8 +51,8 @@ const AdminTable = () => {
   const location = useLocation();
 
   const canCreate = checkPermission('Admins', 'create');
-  const canUpdate = checkPermission('Admins', 'update');
-  const canDelete = checkPermission('Admins', 'delete');
+  // const canUpdate = checkPermission('Admins', 'update');
+  // const canDelete = checkPermission('Admins', 'delete');
 
   const [loading, setIsLoading] = useState(false);
   const [data, setData] = useState([]);
@@ -66,7 +67,7 @@ const AdminTable = () => {
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [password, setPassword] = useState('');
-  const [rowActions, setRowActions] = useState({});
+  // const [rowActions, setRowActions] = useState({});
   const [notespopup, setNotesPopup] = useState(false);
   const [notes, setNotes] = useState('');
 
@@ -99,28 +100,28 @@ const AdminTable = () => {
     setOpen(true);
   };
 
-  const handleAction = (e, row) => {
-    const selectedValue = e.target.value;
+  // const handleAction = (e, row) => {
+  //   const selectedValue = e.target.value;
 
-    setRowActions((prev) => ({
-      ...prev,
-      [row.employee_id]: selectedValue
-    }));
+  //   setRowActions((prev) => ({
+  //     ...prev,
+  //     [row.employee_id]: selectedValue
+  //   }));
 
-    switch (selectedValue) {
-      case 'Reset Password':
-        handleResetPassword(row);
-        break;
-      case 'Delete':
-        handleDelete(row.employee_id);
-        break;
-      case 'action':
-        // Do nothing or default behavior
-        break;
-      default:
-        break;
-    }
-  };
+  //   switch (selectedValue) {
+  //     case 'Reset Password':
+  //       handleResetPassword(row);
+  //       break;
+  //     case 'Delete':
+  //       handleDelete(row.employee_id);
+  //       break;
+  //     case 'action':
+  //       // Do nothing or default behavior
+  //       break;
+  //     default:
+  //       break;
+  //   }
+  // };
 
   const handleClose = () => {
     formik.resetForm();
@@ -130,7 +131,7 @@ const AdminTable = () => {
     setPassword('');
     setNotesPopup(false);
     setNotes('');
-    setRowActions({});
+    // setRowActions({});
   };
 
   const handleView = useCallback(
@@ -153,16 +154,16 @@ const AdminTable = () => {
     setNotes(data.notes);
   };
   useEffect(() => {
-  if (location.state?.openEdit && location.state?.admin) {
-    setCurrentAdmin(location.state.admin);
-    setOpen(true);
-  }
+    if (location.state?.openEdit && location.state?.admin) {
+      setCurrentAdmin(location.state.admin);
+      setOpen(true);
+    }
 
-  if (location.state?.openReset && location.state?.admin) {
-    setSelectedUser(location.state.admin);
-    setResetDialogOpen(true);
-  }
-}, [location.state]);
+    if (location.state?.openReset && location.state?.admin) {
+      setSelectedUser(location.state.admin);
+      setResetDialogOpen(true);
+    }
+  }, [location.state]);
 
   // Validation schema
   const validationSchema = Yup.object().shape({
@@ -189,12 +190,12 @@ const AdminTable = () => {
     password: currentAdmin
       ? Yup.string()
       : Yup.string()
-          .required('Password is required')
-          .min(8, 'Password must be at least 8 characters')
-          .matches(
-            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/,
-            "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
-          ),
+        .required('Password is required')
+        .min(8, 'Password must be at least 8 characters')
+        .matches(
+          /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/,
+          "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
+        ),
 
     email: Yup.string().required('Email is required').email('Email is invalid'),
 
@@ -359,6 +360,18 @@ const AdminTable = () => {
       // width: '150px'
     },
     {
+      name: 'Notes',
+      cell: (row) => (
+        <Tooltip title="Notes">
+          <Typography variant="body1" color="green" onClick={() => handleNotes(row)} style={{ cursor: 'pointer' }}>
+            <Notes />
+
+          </Typography>
+        </Tooltip>
+      ),
+      sortable: true,
+    },
+    {
       name: 'Status',
       cell: (row) => (
         <Box sx={{ display: 'flex', gap: 1 }}>
@@ -374,19 +387,20 @@ const AdminTable = () => {
       sortable: true,
       // width: '120px'
     },
-    {
-      name:'View',
-      cell: (row) => (
-         <Tooltip title="View">
-            <Typography variant="body1" color="skyblue" onClick={() => handleView(row)} style={{ cursor: 'pointer' }}>
-              {/* <Eye /> */}
-              View
-            </Typography>
-          </Tooltip>
-      ),
-      sortable: true,
-      // width: '100px'
-    },
+
+    // {
+    //   name: 'View',
+    //   cell: (row) => (
+    //     <Tooltip title="View">
+    //       <Typography variant="body1" color="skyblue" onClick={() => handleView(row)} style={{ cursor: 'pointer' }}>
+    //         {/* <Eye /> */}
+    //         View
+    //       </Typography>
+    //     </Tooltip>
+    //   ),
+    //   sortable: true,
+    //   // width: '100px'
+    // },
     // {
     //   name: 'Edit',
     //   cell: (row) => (
@@ -400,27 +414,22 @@ const AdminTable = () => {
     //   sortable: true,
     //   // width: '100px'
     // },
-    {
-      name: 'Notes',
-      cell: (row) => (
-        <Tooltip title="Notes">
-          <Typography variant="body1" color="green" onClick={() => handleNotes(row)} style={{ cursor: 'pointer' }}>
-            {/* <Notes /> */}
-            Notes
-          </Typography>
-          </Tooltip>
-      ),
-      sortable: true,
-    },
+
     {
       name: 'Actions',
       cell: (row) => (
         <Box sx={{ display: 'flex', gap: 1 }}>
-          {/* <Tooltip title="View">
+          <Tooltip title="View">
             <IconButton variant="contained" color="secondary" onClick={() => handleView(row)}>
               <Eye />
             </IconButton>
-          </Tooltip> */}
+          </Tooltip>
+          <Tooltip title="Delete">
+            <IconButton color="error" variant="contained" onClick={() => handleDelete(row.employee_id)}>
+              <DeleteIcon />
+            </IconButton>
+              
+          </Tooltip>
           {/* {canUpdate && (
             <Tooltip title="Edit">
               <IconButton color="info" variant="contained" onClick={() => handleEdit(row)}>
@@ -433,7 +442,7 @@ const AdminTable = () => {
               <Notes />
             </IconButton>
           </Tooltip> */}
-          {canUpdate || canDelete ? (
+          {/* {canUpdate || canDelete ? (
             <Select
               value={rowActions[row.employee_id] || 'action'}
               onChange={(e) => handleAction(e, row)}
@@ -443,7 +452,7 @@ const AdminTable = () => {
               {canUpdate && <MenuItem value="Reset Password">Reset Password</MenuItem>}
               {canDelete && <MenuItem value="Delete">Delete</MenuItem>}
             </Select>
-          ) : null}
+          ) : null} */}
         </Box>
       ),
       // width: '280px'
@@ -498,10 +507,10 @@ const AdminTable = () => {
     }
   };
 
-  const handleResetPassword = (user) => {
-    setSelectedUser(user);
-    setResetDialogOpen(true);
-  };
+  // const handleResetPassword = (user) => {
+  //   setSelectedUser(user);
+  //   setResetDialogOpen(true);
+  // };
 
   const handleResetSubmit = async () => {
     // Example API call:

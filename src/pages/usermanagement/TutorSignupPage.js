@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Box, Card, CardContent, TextField, Button, Typography, Stepper, Step, StepButton, MenuItem, Stack, Divider } from '@mui/material';
+import { Box, Card, Grid, TextField, Button, Typography, Stepper, Step, StepButton, MenuItem, Stack, } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
-import Header  from 'layout/CommonLayout/Header';
+import Header from 'layout/CommonLayout/Header';
 import FooterBlock from 'layout/CommonLayout/FooterBlock';
+import axios from 'axios';
 /* ------------------ CONSTANTS ------------------ */
 
-const steps = ['Personal Details', 'Professional Details', 'Bank Details'];
+const steps = ['Personal Details', 'Professional Details',];
 
 const indianStates = [
   'Andhra Pradesh',
@@ -74,10 +75,13 @@ const Bubble = ({ size, top, left, right, bottom, delay }) => (
 
 const TrainerSignupPage = () => {
   const [activeStep, setActiveStep] = useState(0);
+  const[loading,setLoading]=useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [form, setForm] = useState({
+  const [
+    form, setForm] = useState({
     full_name: '',
     username: '',
+    password:'',
     email: '',
     contact_no: '',
     gender: '',
@@ -100,16 +104,46 @@ const TrainerSignupPage = () => {
   const back = () => setActiveStep((s) => Math.max(s - 1, 0));
   const goToStep = (s) => setActiveStep(s);
 
-  const handleSubmit = () => {
-    console.log('FINAL PAYLOAD:', form);
+  const handleSubmit = async () => {
+  try {
+    setLoading(true)
+    const payload = {
+      full_name: form.full_name,
+      username: form.username,
+      password: form.password,
+      email: form.email,
+      contact_no: form.contact_no,
+      gender: form.gender,
+      city: form.city,
+      state: form.state,
+      specialization: form.specialization,
+      experience: form.experience,
+      working_hours: form.working_hours,
+      linkedin_profile: form.linkedin,
+      short_bio: form.bio,
+    };
 
-    // simulate success
-    setTimeout(() => {
+    console.log("PAYLOAD:", payload);
+
+    const response = await axios.post(
+      "http://127.0.0.1:8000/api/tutor-signup",
+      payload
+    );
+
+    console.log("API RESPONSE:", response.data);
+
+    if (response.data.success) {
       setSubmitted(true);
-    }, 400);
-  };
+    }
+
+  } catch (error) {
+    console.error("Signup error:", error);
+    setLoading(false);
+  }
+};
 
   return (
+    !loading?(
     <Box
       sx={{
         minHeight: '100vh',
@@ -260,118 +294,123 @@ const TrainerSignupPage = () => {
         </Box>
 
         {/* ================= RIGHT FORM CARD ================= */}
+        <Grid>
+          <Card
+            elevation={12}
+            sx={{
+              maxWidth: 500,
+              height: 550,
+              display: 'flex',
+              flexDirection: 'column'
+            }}
+          >
+            {/* HEADER */}
+            <Box sx={{ p: 4, pb: 2 }}>
+              <Stack spacing={1}>
+                <Typography variant="h6" fontWeight={700}>
+                  Trainer Registration
+                </Typography>
+                <Typography color="text.secondary">
+                  Complete the steps below to apply.
+                </Typography>
+              </Stack>
 
-        <Card
-          elevation={12}
-          sx={{
-            maxWidth: 600,
-            borderRadius: 4,
-            mx: 'auto',
-            backdropFilter: 'blur(6px)'
-          }}
-        >
-          <CardContent sx={{ p: 4 }}>
-            <Stack spacing={1} mb={3}>
-              <Typography variant="h6" fontWeight={700}>
-                Trainer Registration
-              </Typography>
-              <Typography color="text.secondary">Complete the steps below to apply.</Typography>
-            </Stack>
+              <Stepper activeStep={activeStep} alternativeLabel sx={{ mt: 3 }}>
+                {steps.map((label, index) => (
+                  <Step key={label}>
+                    <StepButton onClick={() => goToStep(index)}>
+                      {label}
+                    </StepButton>
+                  </Step>
+                ))}
+              </Stepper>
+            </Box>
 
-            {/* Stepper */}
-            <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
-              {steps.map((label, index) => (
-                <Step key={label}>
-                  <StepButton onClick={() => goToStep(index)}>{label}</StepButton>
-                </Step>
-              ))}
-            </Stepper>
+            {/* SCROLLABLE FORM */}
+            <Box
+              sx={{
+                flex: 1,
+                overflowY: 'auto',
+                px: 4
+              }}
+            >
+              <AnimatePresence mode="wait">
+                <MotionStack
+                  key={activeStep}
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -15 }}
+                  transition={{ duration: 0.25 }}
+                  spacing={2}
+                >
+                  {activeStep === 0 && (
+                    <>
+                      <TextField label="Full Name" name="full_name" fullWidth value={form.full_name} onChange={handleChange} />
+                      <TextField label="Username" name="username" fullWidth value={form.username} onChange={handleChange} />
+                      <TextField label="Password" name="password" fullWidth value={form.password} onChange={handleChange}/>
+                      <TextField label="Email" name="email" fullWidth value={form.email} onChange={handleChange} />
+                      <TextField label="Contact Number" name="contact_no" fullWidth value={form.contact_no} onChange={handleChange} />
 
-            <AnimatePresence mode="wait">
-              <MotionStack
-                key={activeStep}
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -15 }}
-                transition={{ duration: 0.25 }}
-                spacing={2}
-              >
-                {/* STEP 1 */}
-                {activeStep === 0 && (
-                  <>
-                    <TextField label="Full Name" name="full_name" fullWidth value={form.full_name} onChange={handleChange} />
-                    <TextField label="Username" name="username" fullWidth value={form.username} onChange={handleChange} />
-                    <TextField label="Email" name="email" fullWidth value={form.email} onChange={handleChange} />
-                    <TextField label="Contact Number" name="contact_no" fullWidth value={form.contact_no} onChange={handleChange} />
-                    <TextField select label="Gender" name="gender" fullWidth value={form.gender} onChange={handleChange}>
-                      <MenuItem value="Male">Male</MenuItem>
-                      <MenuItem value="Female">Female</MenuItem>
-                      <MenuItem value="Other">Other</MenuItem>
-                    </TextField>
-                    <TextField label="City" name="city" fullWidth value={form.city} onChange={handleChange} />
-                    <TextField select label="State" name="state" fullWidth value={form.state} onChange={handleChange}>
-                      {indianStates.map((state) => (
-                        <MenuItem key={state} value={state}>
-                          {state}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                  </>
-                )}
+                      <TextField select label="Gender" name="gender" fullWidth value={form.gender} onChange={handleChange}>
+                        <MenuItem value="Male">Male</MenuItem>
+                        <MenuItem value="Female">Female</MenuItem>
+                        <MenuItem value="Other">Other</MenuItem>
+                      </TextField>
 
-                {/* STEP 2 */}
-                {activeStep === 1 && (
-                  <>
-                    <TextField label="Specialization" name="specialization" fullWidth value={form.specialization} onChange={handleChange} />
-                    <TextField select label="Experience" name="experience" fullWidth value={form.experience} onChange={handleChange}>
-                      <MenuItem value="0-1">0–1 Years</MenuItem>
-                      <MenuItem value="1-3">1–3 Years</MenuItem>
-                      <MenuItem value="3-5">3–5 Years</MenuItem>
-                      <MenuItem value="5+">5+ Years</MenuItem>
-                    </TextField>
-                    <TextField label="Working Hours" name="working_hours" fullWidth value={form.working_hours} onChange={handleChange} />
-                    <TextField label="LinkedIn Profile" name="linkedin" fullWidth value={form.linkedin} onChange={handleChange} />
-                    <TextField label="Short Bio" name="bio" multiline rows={3} fullWidth value={form.bio} onChange={handleChange} />
-                  </>
-                )}
+                      <TextField label="City" name="city" fullWidth value={form.city} onChange={handleChange} />
 
-                {/* STEP 3 */}
-                {activeStep === 2 && (
-                  <>
-                    <TextField
-                      label="Account Holder Name"
-                      name="account_name"
-                      fullWidth
-                      value={form.account_name}
-                      onChange={handleChange}
-                    />
-                    <TextField label="Bank Name" name="bank_name" fullWidth value={form.bank_name} onChange={handleChange} />
-                    <TextField label="Account Number" name="account_no" fullWidth value={form.account_no} onChange={handleChange} />
-                    <TextField label="IFSC Code" name="ifsc" fullWidth value={form.ifsc} onChange={handleChange} />
-                  </>
-                )}
-              </MotionStack>
-            </AnimatePresence>
+                      <TextField select label="State" name="state" fullWidth value={form.state} onChange={handleChange}>
+                        {indianStates.map((state) => (
+                          <MenuItem key={state} value={state}>
+                            {state}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    </>
+                  )}
 
-            <Divider sx={{ my: 3 }} />
+                  {activeStep === 1 && (
+                    <>
+                      <TextField label="Specialization" name="specialization" fullWidth value={form.specialization} onChange={handleChange} />
 
-            <Stack direction="row" justifyContent="space-between">
-              <Button variant="outlined" disabled={activeStep === 0} onClick={back}>
-                Back
-              </Button>
+                      <TextField select label="Experience" name="experience" fullWidth value={form.experience} onChange={handleChange}>
+                        <MenuItem value="0-1">0–1 Years</MenuItem>
+                        <MenuItem value="1-3">1–3 Years</MenuItem>
+                        <MenuItem value="3-5">3–5 Years</MenuItem>
+                        <MenuItem value="5+">5+ Years</MenuItem>
+                      </TextField>
 
-              {activeStep < steps.length - 1 ? (
-                <Button variant="contained" onClick={next}>
-                  Continue
+                      <TextField label="Working Hours" name="working_hours" fullWidth value={form.working_hours} onChange={handleChange} />
+
+                      <TextField label="LinkedIn Profile" name="linkedin" fullWidth value={form.linkedin} onChange={handleChange} />
+
+                      <TextField label="Short Bio" name="bio" multiline rows={3} fullWidth value={form.bio} onChange={handleChange} />
+                    </>
+                  )}
+                </MotionStack>
+              </AnimatePresence>
+            </Box>
+
+            {/* FOOTER */}
+            <Box sx={{ p: 3, borderTop: '1px solid #eee' }}>
+              <Stack direction="row" justifyContent="space-between">
+                <Button variant="outlined"  sx ={{ color:"#8e8e8e"}}disabled={activeStep === 0} onClick={back}>
+                  Back
                 </Button>
-              ) : (
-                <Button variant="contained" onClick={handleSubmit}>
-                  Submit
-                </Button>
-              )}
-            </Stack>
-          </CardContent>
-        </Card>
+
+                {activeStep < steps.length - 1 ? (
+                  <Button variant="contained" onClick={next}>
+                    Continue
+                  </Button>
+                ) : (
+                  <Button variant="contained" onClick={handleSubmit}>
+                    Submit
+                  </Button>
+                )}
+              </Stack>
+            </Box>
+          </Card>
+        </Grid>
         <AnimatePresence>
           {submitted && (
             <Box
@@ -442,6 +481,7 @@ const TrainerSignupPage = () => {
       </Box>
       <FooterBlock />
     </Box>
+    ):nul
   );
 };
 

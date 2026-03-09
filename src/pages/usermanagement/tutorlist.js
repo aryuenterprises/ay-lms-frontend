@@ -25,13 +25,14 @@ import {
   Autocomplete,
   FormHelperText
 } from '@mui/material';
-import { UserAdd, Eye, EyeSlash, CloseSquare, SearchNormal1,  } from 'iconsax-react';
+import { UserAdd, Eye, EyeSlash, CloseSquare, SearchNormal1, } from 'iconsax-react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { PopupTransition } from 'components/@extended/Transitions';
 import { APP_PATH_BASE_URL } from 'config';
 import Swal from 'sweetalert2';
 import { usePermission } from '../../hooks/usePermission';
+import { useLocation } from 'react-router-dom';
 
 //css import
 import 'assets/css/commonStyle.css';
@@ -39,7 +40,8 @@ import 'assets/css/DataTable.css';
 import MainCard from 'components/MainCard';
 import { Capitalise } from 'utils/capitalise';
 import axiosInstance from 'utils/axios';
-// import { Notes } from '@mui/icons-material';
+import { Notes } from '@mui/icons-material';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { useNavigate } from 'react-router';
 import { formatDateTime } from 'utils/dateUtils';
 
@@ -48,8 +50,8 @@ const TutorTable = () => {
   const { checkPermission } = usePermission();
 
   const canCreate = checkPermission('Tutors', 'create');
-  const canUpdate = checkPermission('Tutors', 'update');
-  const canDelete = checkPermission('Tutors', 'delete');
+  // const canUpdate = checkPermission('Tutors', 'update');
+  // const canDelete = checkPermission('Tutors', 'delete');
 
   const [loading, setIsLoading] = useState(false);
   const [data, setData] = useState([]);
@@ -76,7 +78,7 @@ const TutorTable = () => {
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [password, setPassword] = useState('');
-  const [rowActions, setRowActions] = useState({});
+  // const [rowActions, setRowActions] = useState({});
   const [notespopup, setNotesPopup] = useState(false);
   const [notes, setNotes] = useState('');
 
@@ -128,28 +130,28 @@ const TutorTable = () => {
     setOpen(true);
   };
 
-  const handleAction = (e, row) => {
-    const selectedValue = e.target.value;
+  // const handleAction = (e, row) => {
+  //   const selectedValue = e.target.value;
 
-    setRowActions((prev) => ({
-      ...prev,
-      [row.employee_id]: selectedValue
-    }));
+  //   setRowActions((prev) => ({
+  //     ...prev,
+  //     [row.employee_id]: selectedValue
+  //   }));
 
-    switch (selectedValue) {
-      case 'Reset Password':
-        handleResetPassword(row);
-        break;
-      case 'Delete':
-        handleDelete(row.employee_id);
-        break;
-      case 'action':
-        // Do nothing or default behavior
-        break;
-      default:
-        break;
-    }
-  };
+  //   switch (selectedValue) {
+  //     case 'Reset Password':
+  //       handleResetPassword(row);
+  //       break;
+  //     case 'Delete':
+  //       handleDelete(row.employee_id);
+  //       break;
+  //     case 'action':
+  //       // Do nothing or default behavior
+  //       break;
+  //     default:
+  //       break;
+  //   }
+  // };
 
   const handleClose = () => {
     formik.resetForm();
@@ -159,7 +161,7 @@ const TutorTable = () => {
     setPassword('');
     setNotesPopup(false);
     setNotes('');
-    setRowActions({});
+    // setRowActions({});
   };
 
   const handleView = useCallback(
@@ -173,7 +175,7 @@ const TutorTable = () => {
           }
         });
 
-       
+
       }
 
 
@@ -200,6 +202,22 @@ const TutorTable = () => {
     setNotes(data.notes);
   };
 
+
+  const location = useLocation();
+  console.log("location state in tutor list:", location?.state);
+
+  useEffect(() => {
+    if (location.state?.openEdit && location.state?.trainer) {
+      setCurrentTrainer(location.state.trainer);
+      setOpen(true);
+    }
+
+    if (location.state?.openReset && location.state?.trainer) {
+      setSelectedUser(location.state.trainer);
+      setResetDialogOpen(true);
+    }
+  }, [location.state]);
+
   // Validation schema
   const validationSchema = Yup.object().shape({
     full_name: Yup.string()
@@ -225,12 +243,12 @@ const TutorTable = () => {
     password: currentTrainer
       ? Yup.string()
       : Yup.string()
-          .required('Password is required')
-          .min(8, 'Password must be at least 8 characters')
-          .matches(
-            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-            'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'
-          ),
+        .required('Password is required')
+        .min(8, 'Password must be at least 8 characters')
+        .matches(
+          /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+          'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'
+        ),
 
     email: Yup.string().required('Email is required').email('Email is invalid'),
 
@@ -287,7 +305,7 @@ const TutorTable = () => {
       gender: currentTrainer?.gender || '',
       specialization: currentTrainer?.specialization || '',
       working_hours: currentTrainer?.working_hours || '',
-      status: currentTrainer?.status || 'active',
+      status: currentTrainer?.status || 'pending',
       notes: '',
       role_id: currentTrainer?.role || ''
     },
@@ -408,35 +426,66 @@ const TutorTable = () => {
       // width: '300px'
     },
     {
-      name: 'Status',
+      name: 'Notes',
       cell: (row) => (
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Chip
-            label={row.status === 'active' ? 'Active' : 'In active'}
-            sx={{
-              backgroundColor: row.status === 'active' ? 'success.lighter' : 'error.lighter',
-              color: row.status === 'active' ? 'success.main' : 'error.main'
-            }}
-          />
-        </Box>
-      ),
-      sortable: true,
-      width: '120px'
-    },
-    {
-      name:'view',
-      cell: (row) => (
-        <Tooltip title="View">
-          <Typography variant="body1" color="#1976d2" onClick={() => handleView(row)} style={{ cursor: 'pointer' }}>
-            View
+        <Tooltip title="Notes">
+          <Typography variant="body1" color="#2e7d32" onClick={() => handleNotes(row)} style={{ cursor: 'pointer' }}>
+            <Notes />
           </Typography>
         </Tooltip>
       ),
       sortable: true,
-      // width: '100px'
     },
     {
-      name:'Batch',
+      name: 'Status',
+      cell: (row) => {
+        const status = row.status?.toLowerCase() || 'pending';
+
+        return (
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Chip
+              label={
+                status === 'active'
+                  ? 'Active'
+                  : status === 'inactive'
+                    ? 'Inactive'
+                    : 'Pending'
+              }
+              sx={{
+                backgroundColor:
+                  status === 'active'
+                    ? 'success.lighter'
+                    : status === 'inactive'
+                      ? 'error.lighter'
+                      : 'warning.lighter',
+                color:
+                  status === 'active'
+                    ? 'success.main'
+                    : status === 'inactive'
+                      ? 'error.main'
+                      : 'warning.main'
+              }}
+            />
+          </Box>
+        );
+      },
+      sortable: true,
+      // width: '120px'
+    },
+    // {
+    //   name:'view',
+    //   cell: (row) => (
+    //     <Tooltip title="View">
+    //       <Typography variant="body1" color="#1976d2" onClick={() => handleView(row)} style={{ cursor: 'pointer' }}>
+    //         View
+    //       </Typography>
+    //     </Tooltip>
+    //   ),
+    //   sortable: true,
+    //   // width: '100px'
+    // },
+    {
+      name: 'Batch',
       cell: (row) => (
         <Tooltip title="Batch">
           <Typography variant="body1" color="#9c27b0" onClick={() => handleViewBatch(row)} style={{ cursor: 'pointer' }}>
@@ -446,37 +495,32 @@ const TutorTable = () => {
       ),
       sortable: true,
     },
-    {
-      name:'Edit',
-      cell: (row) => (
-        <Tooltip title="Edit">
-          <Typography variant="body1" color="#0288d1" onClick={() => handleEdit(row)} style={{ cursor: 'pointer' }}>
-            Edit
-          </Typography>
-          </Tooltip>
-        ),
-      sortable: true,
-    },
-    {
-      name:'Notes',
-      cell: (row) => (
-        <Tooltip title="Notes">
-          <Typography variant="body1" color="#2e7d32" onClick={() => handleNotes(row)} style={{ cursor: 'pointer' }}>
-            Notes
-          </Typography>
-          </Tooltip>
-      ),
-      sortable: true,
-    },
+    // {
+    //   name:'Edit',
+    //   cell: (row) => (
+    //     <Tooltip title="Edit">
+    //       <Typography variant="body1" color="#0288d1" onClick={() => handleEdit(row)} style={{ cursor: 'pointer' }}>
+    //         Edit
+    //       </Typography>
+    //       </Tooltip>
+    //     ),
+    //   sortable: true,
+    // },
+
     {
       name: 'Actions',
       cell: (row) => (
         <Box sx={{ display: 'flex', gap: 1 }}>
-          {/* <Tooltip title="View">
+          <Tooltip title="View">
             <IconButton variant="contained" color="secondary" onClick={() => handleView(row)}>
               <Eye />
             </IconButton>
-          </Tooltip> */}
+          </Tooltip>
+          <Tooltip title="Delete">
+            <IconButton variant="contained" color="error" onClick={() => handleDelete(row.employee_id)}>
+              <DeleteIcon />
+            </IconButton>
+          </Tooltip>
           {/* <Tooltip title="Batch">
             <IconButton variant="contained" color="secondary" onClick={() => handleViewBatch(row)}>
               <UserTag />
@@ -494,7 +538,7 @@ const TutorTable = () => {
               <Notes />
             </IconButton>
           </Tooltip> */}
-          {canUpdate || canDelete ? (
+          {/* {canUpdate || canDelete ? (
             <Select
               value={rowActions[row.employee_id] || 'action'}
               onChange={(e) => handleAction(e, row)}
@@ -504,17 +548,17 @@ const TutorTable = () => {
               {canUpdate && <MenuItem value="Reset Password">Reset Password</MenuItem>}
               {canDelete && <MenuItem value="Delete">Delete</MenuItem>}
             </Select>
-          ) : null}
+          ) : null} */}
         </Box>
       ),
-      width: '300px'
+      // width: '300px'
     }
   ];
 
-  const handleEdit = (trainer) => {
-    setCurrentTrainer(trainer);
-    setOpen(true);
-  };
+  // const handleEdit = (trainer) => {
+  //   setCurrentTrainer(trainer);
+  //   setOpen(true);
+  // };
 
   const handleDelete = async (id) => {
     const result = await Swal.fire({
@@ -559,10 +603,10 @@ const TutorTable = () => {
     }
   };
 
-  const handleResetPassword = (user) => {
-    setSelectedUser(user);
-    setResetDialogOpen(true);
-  };
+  // const handleResetPassword = (user) => {
+  //   setSelectedUser(user);
+  //   setResetDialogOpen(true);
+  // };
 
   const handleResetSubmit = async () => {
     // Example API call:
@@ -1187,6 +1231,7 @@ const TutorTable = () => {
                     }}
                   >
                     <MenuItem value="">Select status</MenuItem>
+                    <MenuItem value="pending">Pending</MenuItem>
                     <MenuItem value="active">Active</MenuItem>
                     <MenuItem value="inactive">Inactive</MenuItem>
                   </TextField>
