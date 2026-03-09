@@ -481,7 +481,7 @@ const TrainerSignupPage = () => {
       </Box>
       <FooterBlock />
     </Box>
-    ):nul
+    ):null
   );
 };
 

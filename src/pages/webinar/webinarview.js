@@ -39,7 +39,7 @@ import * as XLSX from 'xlsx';
 // import { jsPDF } from 'jspdf';
 // import autoTable from 'jspdf-autotable';
 // import LinkIcon from "@mui/icons-material/Link";
-import CertificateSample from '../../assets/certificate/4016369-ai.png';
+// import CertificateSample from '../../assets/certificate/4016369-ai.png';
 import FeedbackIcon from '@mui/icons-material/Feedback';
 import WebinarFeedbackDialog from 'components/webinarfeedbackpop';
 import Swal from 'sweetalert2';
@@ -122,8 +122,8 @@ const ParticipantTable = () => {
     setSelectedParticipant(null);
   };
 
-  const handleViewCertificate = () => {
-    setSelectedCertificate(CertificateSample);
+  const handleViewCertificate = (row) => {
+    setSelectedCertificate(row.certificate_url);
     setOpenCertificate(true);
   };
   const handleCloseCertificate = () => {
@@ -376,7 +376,7 @@ const ParticipantTable = () => {
         row.certificate_sent ? (
           <Button
             variant="text"
-            onClick={handleViewCertificate}
+            onClick={() => handleViewCertificate(row)}
             sx={{
               color: 'success.main',
               fontWeight: 600,
@@ -438,7 +438,7 @@ const ParticipantTable = () => {
         hours_participated: p.hours_participated,
         payment_status: p.payment_status,
         certificate_sent: p.certificate_sent || false,
-        certificate_image_url: p.certificate_image_url,
+        certificate_url: p.certificate_url,
         feedback: p.feedback || [],
         price: p.price,
         regular_price: p.regular_price,
