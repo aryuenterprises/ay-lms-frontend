@@ -161,11 +161,14 @@ const StudentView = () => {
         if (userType === 'tutor') {
           response = await axiosInstance.get(`${APP_PATH_BASE_URL}api/trainer/${regId}/student_list/${student_id}`);
 
+          
+
         } else {
           response = await axiosInstance.get(`${APP_PATH_BASE_URL}api/student_profile/${student_id}`);
         }
         const result = response.data;
         setProfileData(result.data);
+        console.log(response,"new reponse")
       }
 
     } catch (err) {
@@ -297,6 +300,13 @@ const StudentView = () => {
             <Stack direction="row" justifyContent="flex-end" spacing={2}>
               <Button
                 variant="contained"
+                sx={{
+                  backgroundColor: "#0984E3",
+                  color: "#fff",
+                  "&:hover": {
+                    backgroundColor: "#0984E3"
+                  }
+                }} 
                 color="primary"
                 onClick={handleEdit}
               >

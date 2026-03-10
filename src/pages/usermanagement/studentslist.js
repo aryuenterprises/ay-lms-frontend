@@ -51,6 +51,7 @@ import axiosInstance from 'utils/axios';
 import { formatDateTime } from 'utils/dateUtils';
 // import { Notes } from '@mui/icons-material';
 import { usePermission } from 'hooks/usePermission';
+// import { a } from 'react-spring';
 
 const StudentTable = () => {
   const navigate = useNavigate();
@@ -270,8 +271,8 @@ const StudentTable = () => {
         text: "You won't be able to revert this!",
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
+        confirmButtonColor: '#D63031',
+        cancelButtonColor: '#636E72',
         confirmButtonText: 'Yes, delete it!'
       });
 
@@ -438,6 +439,18 @@ const StudentTable = () => {
       sortable: true,
     },
     {
+      name:'source_type',
+      cell:(row)=>(
+        
+         <Tooltip title="source_type">
+          <Typography variant="body1" color="#b22639" style={{ cursor: 'pointer' }}>
+            {row.source_type}
+          </Typography>
+        </Tooltip>
+      )
+
+    },
+    {
       name: 'Attendance',
       cell: (row) => (
         <Tooltip title="View Attendance">
@@ -548,8 +561,10 @@ const StudentTable = () => {
     dob: Yup.string().required('Date of birth is required'),
 
     contact_no: Yup.string()
-      .matches(/^[0-9]{10}$/, 'Phone number must be 10 digits')
-      .required('Phone number is required'),
+  .matches(/^[0-9]{7,15}$/, 'Phone number must contain only digits (7–15)')
+  .min(7,"phone number must be greater than 6")
+  .max(16,"phone nmber cannot exceed 15")
+  .required('Phone number is required'),
 
     status: Yup.string().required('Status is required'),
 
@@ -595,13 +610,16 @@ const StudentTable = () => {
     parent_guardian_phone: Yup.string()
       .required('Parent (or) Guardian Number is required')
       .matches(/^\d+$/, 'Enter only numbers')
-      .length(10, 'Mobile number must be exactly 10 digits'),
+      .min(7,"phone must be at least 7 digit")
+      .length(10, 'Phone number cannot exceed 15 digits'),
 
     parent_guardian_occupation: Yup.string()
       .required('Parent/Guardian occupation is required')
       .test('no-only-spaces', 'Parent/Guardian occupation cannot be only spaces', (value) => {
         return value && value.trim().length > 0;
       }),
+
+    source_type:Yup.string().required('source is required'),
 
     student_type: Yup.string().required('Student type is required'),
 
@@ -773,6 +791,7 @@ const StudentTable = () => {
       reference_number: currentStudent?.reference_number || '',
       student_type: currentStudent?.student_type || '',
       internship: currentStudent?.internship || '',
+      source_type:currentStudent?.source_type||'',
       notes: '',
       resume: currentStudent?.jobseeker?.resume || currentStudent?.college_student?.resume || null,
 
@@ -793,6 +812,8 @@ const StudentTable = () => {
       experience: currentStudent?.employee?.experience || '',
       skills: currentStudent?.employee?.skills || '',
       company_name: currentStudent?.employee?.company_name || '',
+
+      
 
       // Get company_id from any of the possible locations
       company_id:
@@ -823,6 +844,7 @@ const StudentTable = () => {
       formData.append('city', values.city);
       formData.append('state', values.state);
       formData.append('country', values.country);
+      formData.append('source_type',values.source_type);
       // formData.append('course_ids', JSON.stringify(values.course_name));
       formData.append('parent_guardian_name', values.parent_guardian_name);
       formData.append('parent_guardian_phone', values.parent_guardian_phone);
@@ -945,6 +967,7 @@ const StudentTable = () => {
           student.email?.toLowerCase().includes(searchTermLower) ||
           student.contact_no?.toLowerCase().includes(searchTermLower) ||
           student.registration_id?.toLowerCase().includes(searchTermLower);
+          student.source_type?.toLowerCase().includes(searchTermLower)
         if (!matchesSearch) return false;
       }
 
@@ -1061,10 +1084,17 @@ const StudentTable = () => {
     filterText
   ]);
 
-  const filteredItems = filteredStudents.map((item, index) => ({
+
+ 
+  const filteredItems = [...filteredStudents].
+  sort((a,b)=>new Date(b.created_at) 
+  - new Date(a.created_at))
+  .map((item, index) => ({
     ...item,
     sno: index + 1
   }));
+
+   console.log(filteredItems,"filter items in it")
 
   const subHeaderComponentMemo = useMemo(() => {
     const handleClear = () => {
@@ -1669,10 +1699,12 @@ const StudentTable = () => {
                     }}
                   >
                     <MenuItem value="">Select internship</MenuItem>
-                    {[1, 2, 3, 4, 5, 6].map((month) => (
+                    {["Not",1, 2, 3, 4, 5, 6].map((month) => (
                       <MenuItem key={month} value={month.toString()}>
-                        {month} month{month !== 1 ? 's' : ''}
-                      </MenuItem>
+                      {typeof month === 'number'
+                        ? `${month} month${month !== 1 ? 's' : ''}`
+                        : month}
+                    </MenuItem>
                     ))}
                   </TextField>
                 </Stack>
@@ -1747,6 +1779,25 @@ const StudentTable = () => {
                 </Stack>
               </Grid>
               {/*Student Type*/}
+
+              <Grid item xs={12} md={6}>
+                    <Stack sx={{ mt: 2, gap: 1 }}>
+                      <FormLabel>source*</FormLabel>
+                      <TextField
+                        fullWidth
+                        id="source_type"
+                        placeholder="source"
+                        name="source_type"
+                        type="text"
+                        value={formik.values.source_type}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
+                        error={formik.touched.source_type && Boolean(formik.errors.source_type)}
+                         helperText={formik.touched.source_type && formik.errors.source_type}
+
+                      />
+                    </Stack>
+                  </Grid>
               <Grid item xs={12} md={6}>
                 <Stack sx={{ mt: 2, gap: 1 }}>
                   <FormLabel>Student Type*</FormLabel>
@@ -1846,25 +1897,12 @@ const StudentTable = () => {
                         helperText={formik.touched.degree && formik.errors.degree}
                       />
                     </Stack>
+
+                    
+
                   </Grid>
-                  {/*Year of Study*/}
-                  <Grid item xs={12} md={6}>
-                    <Stack sx={{ mt: 2, gap: 1 }}>
-                      <FormLabel>Year of Completion*</FormLabel>
-                      <TextField
-                        fullWidth
-                        id="year_of_study"
-                        placeholder="Year of Completion"
-                        name="year_of_study"
-                        type="number"
-                        value={formik.values.year_of_study}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                        error={formik.touched.year_of_study && Boolean(formik.errors.year_of_study)}
-                        helperText={formik.touched.year_of_study && formik.errors.year_of_study}
-                      />
-                    </Stack>
-                  </Grid>
+                
+                  
                   {/*Resume*/}
                   <Grid item xs={12} md={6}>
                     <Stack sx={{ mt: 2, gap: 1 }}>
@@ -2186,7 +2224,13 @@ const StudentTable = () => {
               )}
             </Grid>
             <DialogActions>
-              <Button onClick={handleClose}>Cancel</Button>
+              <Button sx={{backgroundColor: "#636E72",
+                  color: "#fff",
+                  "&:hover": {
+                    backgroundColor: "#636E72",
+                    color: "#fff",
+                  }
+                }}onClick={handleClose}>Cancel</Button>
               <Button
                 type="submit"
                 variant="contained"
@@ -2251,7 +2295,13 @@ const StudentTable = () => {
           </Grid>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
+          <Button sx={{backgroundColor: "#636E72",
+                  color: "#fff",
+                  "&:hover": {
+                    backgroundColor: "#636E72",
+                    color: "#fff",
+                  }
+                }}onClick={handleClose}>Cancel</Button>
           <Button onClick={handleResetSubmit} variant="contained" color="primary">
             Reset Password
           </Button>
@@ -2433,7 +2483,13 @@ const StudentTable = () => {
           </Grid>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
+          <Button sx={{backgroundColor: "#636E72",
+                  color: "#fff",
+                  "&:hover": {
+                    backgroundColor: "#636E72",
+                    color: "#fff",
+                  }
+                }}onClick={handleClose}>Cancel</Button>
         </DialogActions>
       </Dialog>
     </MainCard >
