@@ -8,6 +8,8 @@ export const usePermission = () => {
       const userType = data?.loginType;
       const permissions = data?.user?.permissions || [];
 
+
+
       if (userType === 'super_admin') return true;
 
       if (userType === 'admin') {
