@@ -3,12 +3,8 @@ import { FormattedMessage } from 'react-intl';
 
 // assets
 import { KyberNetwork, Messages2, Calendar1, Kanban, Profile2User, Bill, UserSquare, ShoppingBag, Ticket } from 'iconsax-react';
-
-// icons
-
 import FeedbackIcon from '@mui/icons-material/Feedback';
-
-
+// icons
 const icons = {
   applications: KyberNetwork,
   chat: Messages2,
@@ -20,6 +16,8 @@ const icons = {
   ecommerce: ShoppingBag,
   icon: Ticket
 };
+
+
 // Get login type from session storage
 const auth = JSON.parse(localStorage.getItem('auth'));
 const loginType = auth?.loginType;
