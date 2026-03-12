@@ -32,14 +32,20 @@ import Tooltip from '@mui/material/Tooltip';
 // import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
 import { Container } from '@mui/system';
 // import { People, CalendarToday, Description } from '@mui/icons-material';
-import DataTable from 'react-data-table-component';
+// import DataTable from 'react-data-table-component';
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
+import "assets/css/commonStyle.css";
+import "primereact/resources/themes/lara-light-indigo/theme.css";
+import "primereact/resources/primereact.min.css";
+import "primeicons/primeicons.css";
 import { capitalize } from 'lodash';
 import { formatDateTime } from 'utils/dateUtils';
 import * as XLSX from 'xlsx';
 // import { jsPDF } from 'jspdf';
 // import autoTable from 'jspdf-autotable';
 // import LinkIcon from "@mui/icons-material/Link";
-import CertificateSample from '../../assets/certificate/4016369-ai.png';
+// import CertificateSample from '../../assets/certificate/4016369-ai.png';
 import FeedbackIcon from '@mui/icons-material/Feedback';
 import WebinarFeedbackDialog from 'components/webinarfeedbackpop';
 import Swal from 'sweetalert2';
@@ -53,10 +59,10 @@ import InputAdornment from "@mui/material/InputAdornment";
 
 const ParticipantTable = () => {
 
-  const today = new Date().toISOString().split("T")[0];
+  // const today = new Date().toISOString().split("T")[0];
   const navigate = useNavigate();
-  const [startDate, setStartDate] = useState(today);
-  const [endDate, setEndDate] = useState(today);
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
   const location = useLocation();
   const [attendanceFilter, setAttendanceFilter] = useState('All');
   const [nameFilter, setNameFilter] = useState("");
@@ -77,7 +83,9 @@ const ParticipantTable = () => {
   const [selectedLogs, setSelectedLogs] = useState([]);
   const [selectedLogsUser, setSelectedLogsUser] = useState(null);
 
-  console.log(webinarDetail, "Detail is give to it")
+  console.log("certificate",selectedCertificate);
+  console.log(webinarDetail, "Detail is give to it");
+
 
   useEffect(() => {
     // We use the slug from location.state to call the retrieve endpoint.
@@ -125,8 +133,9 @@ const ParticipantTable = () => {
     setSelectedParticipant(null);
   };
 
-  const handleViewCertificate = () => {
-    setSelectedCertificate(CertificateSample);
+  const handleViewCertificate = (row) => {
+    // console.log("rowcertifacre:",row)
+    setSelectedCertificate(row?.certificate_url);
     setOpenCertificate(true);
   };
   const handleCloseCertificate = () => {
@@ -379,14 +388,16 @@ const ParticipantTable = () => {
         row.certificate_sent ? (
           <Button
             variant="text"
-            onClick={handleViewCertificate}
-            sx={{
-              color: 'success.main',
-              fontWeight: 600,
-              textDecoration: 'underline',
-              padding: 0,
-              minWidth: 0
-            }}
+            // onClick={ () => handleViewCertificate(row.certificate_url)}
+            // sx={{
+            //   color: 'success.main',
+            //   fontWeight: 600,
+            //   textDecoration: 'underline',
+            //   padding: 0,
+            //   minWidth: 0
+            // }}
+
+
           >
             Yes
           </Button>
@@ -417,10 +428,10 @@ const ParticipantTable = () => {
     setVisibleColumns(initialVisibility);
   }, []);
 
-  const filteredColumns = useMemo(() => {
-    return columns.filter((col) => visibleColumns[col.id] !== false);
-  }, [visibleColumns]);
-
+  // const filteredColumns = useMemo(() => {
+  //   return columns.filter((col) => visibleColumns[col.id] !== false);
+  // }, [visibleColumns]);
+  // const[feedbackRows,setFeedbackRows]=useState("");
   const allRows = useMemo(() => {
     // Previously: webinarData?.participants?.map(...)
     // Now: webinarDetail?.participants?.map(...)
@@ -437,19 +448,21 @@ const ParticipantTable = () => {
         webinar_uuid: webinarDetail?.uuid,
         scheduled_start: webinarDetail?.scheduled_start || '-',
         attended: p.attended || false,
-        total_hours_participated: Number(p.total_hours_participated) || 0,
+        total_hours_participated: p.total_hours_participated ||'0',
         hours_participated: p.hours_participated,
         payment_status: p.payment_status,
         certificate_sent: p.certificate_sent || false,
-        certificate_image_url: p.certificate_image_url,
-        feedback: p.feedback || [],
+        certificate_url: p.certificate_url,
+        feedback: p.feedback_data || [],
         price: p.price,
         regular_price: p.regular_price,
-        eligible_for_certificate: p.eligible_for_certificate
+        eligible_for_certificate: p.eligible_for_certificate,
+        // setFeedbackRows(feedback)
       })) || []
     );
+      
   }, [webinarDetail]); // dependency is now webinarDetail, not webinarData
-
+ 
   // Filter rows based on attendance
   const filteredRows = useMemo(() => {
     return allRows.filter((r) => {
@@ -510,8 +523,9 @@ const ParticipantTable = () => {
   };
   if (detailLoading) {
     return (
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-        <Card sx={{ mb: 4, borderRadius: 4, p: 4 }}>
+      
+      <Container sx={{ mt: 4, mb: 4 }} maxWidth={false}>
+        <Card sx={{ mb: 4, borderRadius: 2, p: 4 }}>
           <Typography variant="h4" sx={{ fontWeight: 700, color: '#1f2937' }}>
             {webinarData?.title}
           </Typography>
@@ -524,7 +538,7 @@ const ParticipantTable = () => {
   // ─── GUARD: show if the retrieve API call failed ─────────────────────────────
   if (detailError) {
     return (
-      <Container maxWidth="lg" sx={{ mt: 4 }}>
+     <Container sx={{ mt: 4, mb: 4 }} maxWidth={false}>
         <Typography color="error">Error: {detailError}</Typography>
         <Button sx={{
           backgroundColor: "#2D3436",
@@ -541,19 +555,19 @@ const ParticipantTable = () => {
   }
   /* ================= UI ================= */
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Card
+    <Container sx={{ mt: 4, mb: 4 }} maxWidth={false}>
+      {/* <Card
         sx={{
           mb: 4,
-          borderRadius: 4,
+          borderRadius: 3,
           background: '#ffffff',
           border: '1px solid #e6e8ec',
           boxShadow: '0 12px 35px rgba(17, 24, 39, 0.08)',
           overflow: 'hidden'
         }}
-      >
+      > */}
         {/* Premium Header Section */}
-        <Box
+        {/* <Box
           sx={{
             px: 4,
             py: 3,
@@ -594,20 +608,62 @@ const ParticipantTable = () => {
               </Button>
             </Grid>
           </Grid>
-        </Box>
+        </Box> */}
 
-      </Card>
+      {/* </Card> */}
 
       <Card
         sx={{
           mb: 4,
-          borderRadius: 4,
+          borderRadius: 3,
           background: '#ffffff',
           border: '1px solid #e6e8ec',
           boxShadow: '0 18px 45px rgba(15, 23, 42, 0.08)',
           overflow: 'hidden'
         }}
       >
+        {/* <Box
+          sx={{
+            px: 4,
+            py: 3,
+            borderBottom: '1px solid #eef1f5',
+            background: 'linear-gradient(180deg, #ffffff 0%, #fafbfc 100%)'
+          }}
+        > */}
+          {/* <Grid container alignItems="center">
+            <Grid item xs>
+              <Typography
+                variant="h4"
+                sx={{
+                  fontWeight: 700,
+                  letterSpacing: 0.5,
+                  color: '#1f2937'
+                }}
+              >
+                {webinarData?.title}
+              </Typography>
+            </Grid>
+
+            <Grid item>
+              <Button
+                variant="outlined"
+                size="medium"
+                onClick={() => navigate(-1)}
+                startIcon={<ArrowBack />}
+                sx={{
+                  backgroundColor: "#2D3436",
+                  color: "#fff",
+                  "&:hover": {
+                    backgroundColor: "#2D3436",
+                    color: "#fff",
+                  }
+                }}
+              >
+                Back
+              </Button>
+            </Grid>
+          </Grid> */}
+        {/* </Box> */}
         {/* Executive Header */}
         <Box
           sx={{
@@ -617,6 +673,22 @@ const ParticipantTable = () => {
             background: 'linear-gradient(180deg, #ffffff 0%, #fafbfc 100%)'
           }}
         >
+          <Grid container alignItems="center">
+            <Grid item xs>
+              <Typography
+                variant="h4"
+                sx={{
+                  fontWeight: 700,
+                  letterSpacing: 0.5,
+                  color: '#1f2937'
+                }}
+              >
+                {webinarData?.title}
+              </Typography>
+            </Grid>
+
+            
+          </Grid>
           <Stack direction="row" alignItems="center" justifyContent="space-between">
             <Typography
               variant="h5"
@@ -662,7 +734,27 @@ const ParticipantTable = () => {
               >
                 Export
               </Button>
+              <Grid item >
+              <Button
+                variant="outlined"
+                size="medium"
+                onClick={() => navigate(-1)}
+                startIcon={<ArrowBack />}
+                sx={{
+                  backgroundColor: "#2D3436",
+                  color: "#fff",
+                  "&:hover": {
+                    backgroundColor: "#2D3436",
+                    color: "#fff",
+                  }
+                }}
+               
+              >
+                Back
+              </Button>
+            </Grid>
             </Stack>
+            
           </Stack>
         </Box>
 
@@ -743,33 +835,178 @@ const ParticipantTable = () => {
 
         {/* Table Section */}
         <Box
-          sx={{
-            px: 4,
-            pb: 4,
-            '& .rdt_Table': {
-              borderRadius: 3,
-              overflow: 'hidden',
-              border: '1px solid #eef1f5'
-            }
-          }}
-        >
-          <DataTable
-            columns={filteredColumns}
-            data={filteredRows}
-            pagination
-            paginationPerPage={10}
-            paginationRowsPerPageOptions={[5, 10, 20, 30]}
+  sx={{
+    px: 4,
+    pb: 4
+  }}
+  // fullWidth="100%"
+>
 
-            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
-            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} courses"
-            paginatorClassName="modern-paginator"
-            className="modern-data-table"
-            highlightOnHover
-            responsive
-            fixedHeader
-            persistTableHead
-          />
-        </Box>
+   {/* PrimeReact DataTable */}
+<DataTable
+  value={filteredRows}
+  paginator
+  rows={10}
+  rowsPerPageOptions={[50,100,150,200]}
+  dataKey="id"
+  emptyMessage="No participants found"
+  rowHover
+  stripedRows
+  paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} participants"
+  className="modern-datatable"
+  // style={{ width: "100%" }}
+>
+
+{/* S.No */}
+<Column
+  header="S.No"
+  body={(data, options) => (
+    <Chip
+      label={options.rowIndex + 1}
+      size="small"
+      sx={{
+                  backgroundColor: '#f3e5f5',
+                  color: '#6a1b9a',
+                  minWidth: 32
+                }}
+    />
+  )}
+/>
+
+{/* Name */}
+<Column
+  header="Name"
+  body={(row) => (
+    <ButtonBase
+      onClick={() => handleViewParticipant(row)}
+      sx={{ justifyContent: "flex-start" }}
+    >
+      <Typography
+        sx={{
+          color: row.attended ? "success.main" : "text.primary",
+          fontWeight: row.attended ? 600 : 400
+        }}
+      >
+        {row.attended && "✓ "} {row.name}
+      </Typography>
+    </ButtonBase>
+  )}
+/>
+
+{/* Total Hours */}
+<Column
+  header="Total Hours"
+  body={(row) =>
+    row.logs?.length ? (
+      <ButtonBase onClick={() => handleViewLogs(row)}>
+        {formatHoursFixed(row.total_hours_participated)}
+      </ButtonBase>
+    ) : (
+      <Typography>—</Typography>
+    )
+  }
+/>
+
+{/* Mobile */}
+<Column field="phone" header="Mobile" />
+
+{/* Email */}
+<Column field="email" header="Email" />
+
+{/* Payment */}
+<Column
+  header="Payment"
+  body={(row) => {
+    const status = row.payment_status?.toLowerCase();
+
+    if (status === "free")
+      return <Chip label="Free" color="info" size="small" />;
+
+    if (
+      status === "paid" ||
+      status === "success" ||
+      status === "done" ||
+      status === "completed"
+    )
+      return <Chip label="Done" color="success" size="small" />;
+
+    return <Chip label="Failed" color="error" size="small" />;
+  }}
+/>
+
+{/* Feedback */}
+<Column
+  header="Feedback"
+  body={(row) => (
+    <IconButton
+      onClick={(e) => {
+        e.stopPropagation();
+        setSelectedWebinarUuid(row.feedback);
+        setFeedbackOpen(true);
+      }}
+    >
+      <FeedbackIcon />
+    </IconButton>
+  )}
+/>
+
+{/* Registered At */}
+<Column
+  header="Registered At"
+  body={(row) => formatDateTime(row.registered_at)}
+/>
+
+{/* Certificate Status */}
+<Column
+  header="Certificate Status"
+  body={(row) =>
+    row?.certificate_sent ? (
+      <Button
+        variant="text"
+        onClick={() => handleViewCertificate(row)}
+        sx={{
+          color: "success.main",
+          // fontWeight: 600,
+          textDecoration: "underline",
+          // minWidth: 0
+        }}
+      >
+        Yes
+      </Button>
+    ) : (
+      <Button
+        variant="text"
+        
+        // sx={{
+        //   color: "success.main",
+        //   // fontWeight: 600,
+        //   textDecoration: "underline",
+        //   // minWidth: 0
+        // }}
+      >
+      No
+      </Button>
+    )
+  }
+/>
+
+{/* Send Certificate */}
+<Column
+  header="Certificate"
+  body={(row) => (
+    <Button
+      variant="contained"
+      size="small"
+      onClick={() => handleWebinarcertification(row)}
+    >
+      Send
+    </Button>
+  )}
+/>
+
+</DataTable>
+</Box>
 
         {/* Column Selection Menu */}
         <Menu
@@ -822,7 +1059,7 @@ const ParticipantTable = () => {
         fullWidth
         PaperProps={{
           sx: {
-            borderRadius: 4,
+            borderRadius: 3,
             overflow: 'hidden',
             boxShadow: '0 20px 50px rgba(15, 23, 42, 0.18)'
           }
@@ -980,7 +1217,7 @@ const ParticipantTable = () => {
         fullWidth
         PaperProps={{
           sx: {
-            borderRadius: 4,
+            borderRadius: 3,
             overflow: 'hidden',
             boxShadow: '0 22px 55px rgba(15, 23, 42, 0.18)'
           }
@@ -1087,19 +1324,20 @@ const ParticipantTable = () => {
         </DialogActions>
       </Dialog>
 
-      <Dialog open={openCertificate} onClose={handleCloseCertificate} maxWidth="md" fullWidth>
+      <Dialog open={openCertificate} onClose={handleCloseCertificate} maxWidth="md" fullWidth maxheight="md" fullScreen>
         <DialogTitle>Certificate Preview</DialogTitle>
 
         <DialogContent dividers>
           {selectedCertificate ? (
             <Box
-              component="img"
+              component="iframe"
               src={selectedCertificate}
               alt="Certificate"
               sx={{
                 width: '100%',
                 borderRadius: 2,
-                border: '1px solid #ddd'
+                border: '1px solid #ddd',
+                height:'100%'
               }}
             />
           ) : (
