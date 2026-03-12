@@ -208,8 +208,12 @@ useEffect(() => {
       // ✅ Use FormData to support optional file upload
       const formData = new FormData();
       formData.append('student',        parseInt(values.student));
-      formData.append('gateway',        values.gateway);
       formData.append('amount',         parseFloat(values.amount));
+            let gatewayValue = values.gateway.replace('_enabled', '');
+
+      console.log(gatewayValue);
+
+      formData.append('gateway', gatewayValue);
       formData.append('currency',       values.currency);
       formData.append('payment_status', values.payment_status);
       formData.append('transaction_id', values.transaction_id);
