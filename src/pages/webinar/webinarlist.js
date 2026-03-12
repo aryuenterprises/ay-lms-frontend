@@ -1,5 +1,9 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import DataTable from 'react-data-table-component';
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
+import "primereact/resources/themes/lara-light-indigo/theme.css";
+import "primereact/resources/primereact.min.css";
+import "primeicons/primeicons.css";
 
 // import * as XLSX from "xlsx";
 
@@ -26,9 +30,10 @@ import {
   Select,
   RadioGroup,
   FormControlLabel,
-  Radio
+  Radio,
+  Chip
 } from '@mui/material';
-import { APP_PATH_BASE_URL } from 'config';
+// import { APP_PATH_BASE_URL } from 'config';
 import { BoxAdd, CloseSquare, Edit, Eye, SearchNormal1, Trash } from 'iconsax-react';
 import { useFormik } from 'formik';
 import { PopupTransition } from 'components/@extended/Transitions';
@@ -121,7 +126,7 @@ const WebinarList = () => {
   const navigate = useNavigate();
   const { checkPermission } = usePermission();
 
-  const canView   = checkPermission('Webinar', 'view');
+  // const canView   = checkPermission('Webinar', 'view');
   const canCreate = checkPermission('Webinar', 'create');
   const canUpdate = checkPermission('Webinar', 'update');
   const canDelete = checkPermission('Webinar', 'delete');
@@ -138,59 +143,59 @@ const WebinarList = () => {
   };
 
   // const [feedbackData, setFeedbackData] = useState(null);
-// const [feedbackLoading, setFeedbackLoading] = useState(false);
+  // const [feedbackLoading, setFeedbackLoading] = useState(false);
 
 
   const [openVideoDialog, setOpenVideoDialog] = useState(false);
-  const [videoUrl, setVideoUrl]               = useState('');
-  const [title, setTitle]                     = useState('');
-  const [subtitle, setSubtitle]               = useState('');
-  const [description, setDescription]         = useState('');
-  const [slug, setSlug]                       = useState('');
-  const [open, setOpen]                       = useState(false);
-  const [viewOpen, setViewOpen]               = useState(false);
-  const [viewDetails, setViewDetails]         = useState(null);
-  const [currentWebinar, setCurrentWebinar]   = useState(null);
-  const [metatitle, setMetatitle]             = useState('');
-  const [metadesc, setMetadesc]               = useState('');
-  const [metaimg, setMetaimg]                 = useState('');
-  const [status, setStatus]                   = useState('');
-  const [wabalink, setWabalink]               = useState('');
-  const [editTools, setEditTools]             = useState([]);
-  const [editToolsOpen, setEditToolsOpen]     = useState(false);
-  const [webinarimage, setWebinarimage]       = useState('');
-  const [Webinar, setWebinar]                 = useState([]);
-  const [language, setLanguage]               = useState('');
-  const [mode, setMode]                       = useState('');
-  const [imagePreview, setImagePreview]       = useState(null);
+  const [videoUrl, setVideoUrl] = useState('');
+  const [title, setTitle] = useState('');
+  const [subtitle, setSubtitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [slug, setSlug] = useState('');
+  const [open, setOpen] = useState(false);
+  const [viewOpen, setViewOpen] = useState(false);
+  const [viewDetails, setViewDetails] = useState(null);
+  const [currentWebinar, setCurrentWebinar] = useState(null);
+  const [metatitle, setMetatitle] = useState('');
+  const [metadesc, setMetadesc] = useState('');
+  const [metaimg, setMetaimg] = useState('');
+  const [status, setStatus] = useState('');
+  const [wabalink, setWabalink] = useState('');
+  const [editTools, setEditTools] = useState([]);
+  const [editToolsOpen, setEditToolsOpen] = useState(false);
+  const [webinarimage, setWebinarimage] = useState('');
+  const [Webinar, setWebinar] = useState([]);
+  const [language, setLanguage] = useState('');
+  const [mode, setMode] = useState('');
+  const [imagePreview, setImagePreview] = useState(null);
   const [imagePreviewweb, setImagePreviewweb] = useState(null);
-  const [error, setError]                     = useState('');
-  const [filterText, setFilterText]           = useState('');
+  const [error, setError] = useState('');
+  const [filterText, setFilterText] = useState('');
   const [resetPaginationToggle, setResetPaginationToggle] = useState(false);
-  const [loading, setLoading]                 = useState(false);
-  const [items, setItems]                     = useState([{ title: '', file: null, preview: null }]);
-  const [faqs, setFaqs]                       = useState([{ question: '', answer: '', preview: null }]);
+  const [loading, setLoading] = useState(false);
+  const [items, setItems] = useState([{ title: '', file: null, preview: null }]);
+  const [faqs, setFaqs] = useState([{ question: '', answer: '', preview: null }]);
 
   // const [feedbackOpen,setFeedbackOpen]=useState('');
 
   // const [columnAnchorEl, setColumnAnchorEl] = useState(null);
 
-// const openColumnMenu = (event) => {
-//   setColumnAnchorEl(event.currentTarget);
-// };
+  // const openColumnMenu = (event) => {
+  //   setColumnAnchorEl(event.currentTarget);
+  // };
 
-// const closeColumnMenu = () => {
-//   setColumnAnchorEl(null);
-// };
+  // const closeColumnMenu = () => {
+  //   setColumnAnchorEl(null);
+  // };
   // const [selectedRow,setSelectedRow]=useState('')
 
   // CopyFBLink is kept inside WebinarList (not at module level) because it
   // closes over the row prop and its own local copied-state is trivial.
   const CopyFBLink = ({ row }) => {
     const [copied, setCopied] = React.useState(false);
-    const webinarUuid  = row.webinar_uuid || row.webinar?.uuid || row.uuid;
+    const webinarUuid = row.webinar_uuid || row.webinar?.uuid || row.uuid;
     const feedbackLink = webinarUuid ? `${window.location.origin}/feedback/${webinarUuid}` : '';
-    const handleCopy   = (e) => {
+    const handleCopy = (e) => {
       e.stopPropagation();
       if (!feedbackLink) return;
       navigator.clipboard.writeText(feedbackLink).then(() => {
@@ -210,18 +215,18 @@ const WebinarList = () => {
     t.toLowerCase().replace(/[^a-zA-Z\s]/g, '').trim().replace(/\s+/g, '-');
 
   // ── Tools list handlers ────────────────────────────────────────────────────
-  const handleAdd      = () => setItems([...items, { title: '', file: null, preview: null }]);
-  const handleEditAdd  = () => setEditTools((prev) => [...prev, { id: uuidv4(), title: '', file: null, preview: null, isFileModify: true, istextModify: true, isDelete: false }]);
-  const handleFaqadd   = () => setFaqs([...faqs, { question: '', answer: '', preview: null }]);
-  const handleFaqremove  = (i) => { const u = [...faqs];  u.splice(i, 1); setFaqs(u); };
-  const handleRemove     = (i) => { const u = [...items]; u.splice(i, 1); setItems(u); };
-  const handleTitleChange    = (i, v) => { const u = [...items]; u[i].title = v; setItems(u); };
-  const handleFileChange     = (i, f) => { const u = [...items]; u[i].file = f; u[i].preview = URL.createObjectURL(f); setItems(u); };
+  const handleAdd = () => setItems([...items, { title: '', file: null, preview: null }]);
+  const handleEditAdd = () => setEditTools((prev) => [...prev, { id: uuidv4(), title: '', file: null, preview: null, isFileModify: true, istextModify: true, isDelete: false }]);
+  const handleFaqadd = () => setFaqs([...faqs, { question: '', answer: '', preview: null }]);
+  const handleFaqremove = (i) => { const u = [...faqs]; u.splice(i, 1); setFaqs(u); };
+  const handleRemove = (i) => { const u = [...items]; u.splice(i, 1); setItems(u); };
+  const handleTitleChange = (i, v) => { const u = [...items]; u[i].title = v; setItems(u); };
+  const handleFileChange = (i, f) => { const u = [...items]; u[i].file = f; u[i].preview = URL.createObjectURL(f); setItems(u); };
   const handleQuestionChange = (i, v) => { const u = [...faqs]; u[i].question = v; setFaqs(u); };
-  const handleAnswerChange   = (i, v) => { const u = [...faqs]; u[i].answer   = v; setFaqs(u); };
+  const handleAnswerChange = (i, v) => { const u = [...faqs]; u[i].answer = v; setFaqs(u); };
   const handleEditTitleChange = (i, v) => setEditTools((prev) => { const u = [...prev]; u[i] = { ...u[i], title: v, istextModify: true }; return u; });
-  const handleEditFileChange  = (i, f) => setEditTools((prev) => { const u = [...prev]; u[i] = { ...u[i], file: f, preview: URL.createObjectURL(f), isFileModify: true }; return u; });
-  const handleEditRemove      = (i)    => setEditTools((prev) => { const u = [...prev]; u[i] = { ...u[i], isDelete: true }; return u; });
+  const handleEditFileChange = (i, f) => setEditTools((prev) => { const u = [...prev]; u[i] = { ...u[i], file: f, preview: URL.createObjectURL(f), isFileModify: true }; return u; });
+  const handleEditRemove = (i) => setEditTools((prev) => { const u = [...prev]; u[i] = { ...u[i], isDelete: true }; return u; });
 
   // ── Data fetching ──────────────────────────────────────────────────────────
   const fetchData = useCallback(async () => {
@@ -250,9 +255,9 @@ const WebinarList = () => {
     formik.resetForm();
     setOpen(true);
   };
-  const handleViewOpen  = (value) => { setViewDetails(value); setViewOpen(true); };
+  const handleViewOpen = (value) => { setViewDetails(value); setViewOpen(true); };
   const handleViewClose = () => setViewOpen(false);
-  const handleClose     = () => { setOpen(false); setItems([]); setEditTools([]); formik.resetForm(); };
+  const handleClose = () => { setOpen(false); setItems([]); setEditTools([]); formik.resetForm(); };
 
   // ── Filtered rows ──────────────────────────────────────────────────────────
   const filteredItems = useMemo(() => {
@@ -264,6 +269,8 @@ const WebinarList = () => {
         item.description?.toLowerCase().includes(filterText.toLowerCase())
     );
   }, [Webinar, filterText]);
+  console.log("filtered items", filteredItems);
+
 
   // ── Search + Add toolbar ───────────────────────────────────────────────────
   const subHeaderComponentMemo = useMemo(() => {
@@ -284,7 +291,13 @@ const WebinarList = () => {
           />
         </Grid>
         <Grid item xs={12} md={6} textAlign="right">
-          <Button color="success" variant="contained" startIcon={<BoxAdd />} onClick={handleOpen}>Add Webinar</Button>
+          <Button color="success" sx={{
+            backgroundColor: "#00C853",
+            color: "#fff",
+            "&:hover": {
+              backgroundColor: "#00C853"
+            }
+          }} variant="contained" startIcon={<BoxAdd />} onClick={handleOpen}>Add Webinar</Button>
         </Grid>
       </Grid>
     );
@@ -319,7 +332,7 @@ const WebinarList = () => {
 
   // ── Delete ─────────────────────────────────────────────────────────────────
   const handleDelete = async (id) => {
-    const result = await Swal.fire({ title: 'Are you sure?', text: "You won't be able to revert this!", icon: 'warning', showCancelButton: true, confirmButtonColor: '#3085d6', cancelButtonColor: '#d33', confirmButtonText: 'Yes, delete it!' });
+    const result = await Swal.fire({ title: 'Are you sure?', text: "You won't be able to revert this!", icon: 'warning', showCancelButton: true, confirmButtonColor: '#D63031', cancelButtonColor: '#636E72', confirmButtonText: 'Yes, delete it!' });
     if (result.isConfirmed) {
       try {
         const response = await axiosInstance.delete(`api/webinar/web/${id}/`);
@@ -336,17 +349,17 @@ const WebinarList = () => {
   };
 
   // ── Status / session handlers ──────────────────────────────────────────────
-  const handleStatusChange = async (row, newStatus) => {
-    try {
-      setLoading(true);
-      await axiosInstance.patch(`${APP_PATH_BASE_URL}api/live-webinar/${row.webinar_link}`, { webinar_status: newStatus });
-      setWebinar((prev) => prev.map((w) => (w.webinar_link === row.webinar_link ? { ...w, webinar_status: newStatus } : w)));
-    } catch (error) {
-      console.error('Failed to change webinar status', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const handleStatusChange = async (row, newStatus) => {
+  //   try {
+  //     setLoading(true);
+  //     await axiosInstance.patch(`${APP_PATH_BASE_URL}api/live-webinar/${row.webinar_link}`, { webinar_status: newStatus });
+  //     setWebinar((prev) => prev.map((w) => (w.webinar_link === row.webinar_link ? { ...w, webinar_status: newStatus } : w)));
+  //   } catch (error) {
+  //     console.error('Failed to change webinar status', error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const handleViewChange = useCallback((webinar) => {
     if (webinar) navigate(`/webinar/${webinar.uuid}/`, { state: { webinarData: { ...webinar } } });
@@ -367,7 +380,29 @@ const WebinarList = () => {
 
   const handleWebinarChange = async (action, currentWebinar) => {
     try {
-      const confirmation = await Swal.fire({ title: 'Confirm', text: `Are you sure you want to ${action} this webinar?`, icon: 'warning', showCancelButton: true, confirmButtonColor: '#3085d6', cancelButtonColor: '#d33', confirmButtonText: `Yes, ${action} it!`, cancelButtonText: 'Cancel' });
+      const confirmation = await Swal.fire({
+        title: 'Confirm',
+        text: `Are you sure you want to ${action} this webinar?`,
+        icon: 'warning',
+        showCancelButton: true,
+
+        confirmButtonText: `Yes, ${action} it!`,
+        cancelButtonText: 'Cancel',
+
+        confirmButtonColor: '#D63031',
+        cancelButtonColor: '#636E72',
+
+        customClass: {
+          confirmButton: 'swal-confirm-fixed',
+          cancelButton: 'swal-cancel-fixed'
+        },
+
+        buttonsStyling: true
+      });
+
+      if (confirmation.isConfirmed) {
+        // your action code here
+      }
       if (!confirmation.isConfirmed) return;
       const response = await axiosInstance.patch(`api/webinar/web/${currentWebinar.uuid}/`, { status: action });
       const result = response.data;
@@ -384,105 +419,105 @@ const WebinarList = () => {
 
 
 
-// const feedbackColumns = [
-// {
-//   name:"Webinar ID",
-//   selector:row=>row.webinarId,
-//   key:"webinarId"
-// },
-// {
-//   name:"Name",
-//   selector:row=>row.name,
-//   key:"name"
-// },
-// {
-//   name:"Phone",
-//   selector:row=>row.phone,
-//   key:"phone"
-// },
-// {
-//   name:"Content Quality",
-//   selector:row=>row.content_quality,
-//   key:"content_quality"
-// },
-// {
-//   name:"Interaction",
-//   selector:row=>row.interaction,
-//   key:"interaction"
-// },
-// {
-//   name:"Pace",
-//   selector:row=>row.pace,
-//   key:"pace"
-// },
-// {
-//   name:"Speaker",
-//   selector:row=>row.speaker,
-//   key:"speaker"
-// },
-// {
-//   name:"Overall",
-//   selector:row=>row.overall,
-//   key:"overall"
-// },
-// {
-//   name:"Future Webinar",
-//   selector:row=>row.Future_Webinars,
-//   key:"Future_Webinars"
-// },
-// {
-//   name:"Paid Course",
-//   selector:row=>row.paid_course,
-//   key:"paid_course"
-// },
-// {
-//   name:"Learned",
-//   selector:row=>row.learned,
-//   key:"learned"
-// },
-// {
-//   name:"Recommend",
-//   selector:row=>row.recommend,
-//   key:"recommend"
-// },
-// {
-//   name:"Suggestion",
-//   selector:row=>row.imporove,
-//   key:"imporove"
-// }
-// ];
+  // const feedbackColumns = [
+  // {
+  //   name:"Webinar ID",
+  //   selector:row=>row.webinarId,
+  //   key:"webinarId"
+  // },
+  // {
+  //   name:"Name",
+  //   selector:row=>row.name,
+  //   key:"name"
+  // },
+  // {
+  //   name:"Phone",
+  //   selector:row=>row.phone,
+  //   key:"phone"
+  // },
+  // {
+  //   name:"Content Quality",
+  //   selector:row=>row.content_quality,
+  //   key:"content_quality"
+  // },
+  // {
+  //   name:"Interaction",
+  //   selector:row=>row.interaction,
+  //   key:"interaction"
+  // },
+  // {
+  //   name:"Pace",
+  //   selector:row=>row.pace,
+  //   key:"pace"
+  // },
+  // {
+  //   name:"Speaker",
+  //   selector:row=>row.speaker,
+  //   key:"speaker"
+  // },
+  // {
+  //   name:"Overall",
+  //   selector:row=>row.overall,
+  //   key:"overall"
+  // },
+  // {
+  //   name:"Future Webinar",
+  //   selector:row=>row.Future_Webinars,
+  //   key:"Future_Webinars"
+  // },
+  // {
+  //   name:"Paid Course",
+  //   selector:row=>row.paid_course,
+  //   key:"paid_course"
+  // },
+  // {
+  //   name:"Learned",
+  //   selector:row=>row.learned,
+  //   key:"learned"
+  // },
+  // {
+  //   name:"Recommend",
+  //   selector:row=>row.recommend,
+  //   key:"recommend"
+  // },
+  // {
+  //   name:"Suggestion",
+  //   selector:row=>row.imporove,
+  //   key:"imporove"
+  // }
+  // ];
 
-// const visibleColumns = feedbackColumns.filter(col =>
-//  selectedColumns.includes(col.key)
-// );
-// const exportToExcel = () => {
-// 
-// const exportData =  feedbackRows.map(row=>{
+  // const visibleColumns = feedbackColumns.filter(col =>
+  //  selectedColumns.includes(col.key)
+  // );
+  // const exportToExcel = () => {
+  // 
+  // const exportData =  feedbackRows.map(row=>{
 
-//  let obj={}
+  //  let obj={}
 
-//  selectedColumns.forEach(col=>{
-//    obj[col] = row[col]
-//  })
+  //  selectedColumns.forEach(col=>{
+  //    obj[col] = row[col]
+  //  })
 
-//  return obj
+  //  return obj
 
-// })
+  // })
 
-// const worksheet = XLSX.utils.json_to_sheet(exportData)
-// const workbook = XLSX.utils.book_new()
+  // const worksheet = XLSX.utils.json_to_sheet(exportData)
+  // const workbook = XLSX.utils.book_new()
 
-// XLSX.utils.book_append_sheet(workbook,worksheet,"Feedback")
+  // XLSX.utils.book_append_sheet(workbook,worksheet,"Feedback")
 
-// XLSX.writeFile(workbook,"feedback.xlsx")
+  // XLSX.writeFile(workbook,"feedback.xlsx")
 
-// }
+  // }
 
 
-// const columnOptions = feedbackColumns.map(col => ({
-//   label: col.name,
-//   value: col.key
-// }));
+  // const columnOptions = feedbackColumns.map(col => ({
+  //   label: col.name,
+  //   value: col.key
+  // }));
   // ── Formik submit ──────────────────────────────────────────────────────────
   const formik = useFormik({
     enableReinitialize: true,
@@ -498,30 +533,30 @@ const WebinarList = () => {
       try {
         const payload = new FormData();
         const date = values.webinarDateTime;
-        const pad  = (n) => String(n).padStart(2, '0');
-        const formatted = `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}+05:30`;
+        const pad = (n) => String(n).padStart(2, '0');
+        const formatted = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}+05:30`;
         const appendIfExists = (key, value) => {
           if (value !== undefined && value !== null && value !== '' && !(value instanceof File && value.size === 0)) payload.append(key, value);
         };
-        appendIfExists('title',          title?.trim());
-        appendIfExists('sub_title',      subtitle?.trim());
-        appendIfExists('description',    description?.trim());
+        appendIfExists('title', title?.trim());
+        appendIfExists('sub_title', subtitle?.trim());
+        appendIfExists('description', description?.trim());
         appendIfExists('scheduled_start', formatted);
-        appendIfExists('language',       language);
-        appendIfExists('slug',           slug);
+        appendIfExists('language', language);
+        appendIfExists('slug', slug);
         appendIfExists('webinar_status', status);
         appendIfExists('seats_available', Number(values.seats_available));
-        appendIfExists('waba_link',      wabalink?.trim());
+        appendIfExists('waba_link', wabalink?.trim());
         payload.append('video_url', videoUrl);
         if (!currentWebinar) payload.append('is_registration_open', true);
         if (values?.webinarType === 'Paid') { payload.append('regular_price', Number(values.regular_price)); payload.append('price', Number(values.price)); }
         payload.append('is_paid', values?.webinarType === 'Paid');
         payload.append('mentor', values?.mentor?.trim());
-        payload.append('mode',   mode);
+        payload.append('mode', mode);
         const isFile = (val) => val instanceof File || val instanceof Blob;
         if (isFile(webinarimage)) payload.append('webinar_image', webinarimage);
-        if (isFile(metaimg))      payload.append('metadata[0][meta_image]', metaimg);
-        payload.append('metadata[0][meta_title]',       metatitle);
+        if (isFile(metaimg)) payload.append('metadata[0][meta_image]', metaimg);
+        payload.append('metadata[0][meta_title]', metatitle);
         payload.append('metadata[0][meta_description]', metadesc);
         let di = 0;
         if (!editToolsOpen) {
@@ -531,15 +566,15 @@ const WebinarList = () => {
             if (value.isDelete && value.oldData) { payload.append(`tools[${di}][id]`, value.id); payload.append(`tools[${di}][is_deleted]`, true); di++; }
             else if (value?.oldData) {
               if (value.istextModify) { payload.append(`tools[${di}][id]`, value.id); payload.append(`tools[${di}][tools_title]`, value.title); di++; }
-              if (value.isFileModify) { payload.append(`tools[${di}][id]`, value.id); payload.append(`tools[${di}][tools_image]`, value.file);  di++; }
+              if (value.isFileModify) { payload.append(`tools[${di}][id]`, value.id); payload.append(`tools[${di}][tools_image]`, value.file); di++; }
             } else { payload.append(`tools[${di}][tools_title]`, value.title); payload.append(`tools[${di}][tools_image]`, value.file); di++; }
           });
         }
         payload.append('faqs', JSON.stringify(faqs));
-        const method   = currentWebinar ? 'PATCH' : 'POST';
-        const url      = currentWebinar ? `api/webinar/web/${currentWebinar.id}/` : 'api/webinar/web';
+        const method = currentWebinar ? 'PATCH' : 'POST';
+        const url = currentWebinar ? `api/webinar/web/${currentWebinar.id}/` : 'api/webinar/web';
         const response = await axiosInstance({ method, url, data: payload });
-        const result   = response.data;
+        const result = response.data;
         if (result.status === true) {
           Swal.fire({ title: 'Success!', text: currentWebinar ? 'Webinar updated successfully!' : 'Webinar added successfully!', icon: 'success', confirmButtonText: 'OK' });
           setTitle(''); setSlug(''); setDescription(''); setSubtitle(''); setMetatitle(''); setMetaimg(null);
@@ -558,105 +593,210 @@ const WebinarList = () => {
   });
 
   // ── DataTable column definitions ───────────────────────────────────────────
-  const columns = [
-    { name: 'S.No', cell: (_row, index) => index + 1, sortable: true, width: '80px' },
-    { name: 'Webinar Name', selector: (row) => row.title, sortable: true, wrap: true },
-    { name: 'Date & Time', cell: (row) => <div style={{ whiteSpace: 'normal', lineHeight: '1.4' }}>{formatDateTime(row.scheduled_start)}</div>, sortable: true, wrap: true },
-    {
-      name: 'Reg Count', sortable: true, center: true, wrap: true,
-      cell: (row) => (
-        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-          <Tooltip title="View Participants">
-            <Button variant="text" onClick={(e) => { e.stopPropagation(); handleViewChange(row); }}
-              sx={{ minWidth: 0, padding: 0, color: row.participants_count >= row.seats_available ? '#d32f2f' : '#1976d2', textDecoration: 'underline', fontWeight: 600 }}>
-              {row.participants_count} / {row.seats_available}
-            </Button>
-          </Tooltip>
-        </Box>
-      )
-    },
-    {
-      name: 'Reg Link', center: true,
-      cell: () => (<Tooltip title="Open registration link"><a href="https://workshop.aryuacademy.com/" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center' }}><LinkIcon color="primary" /></a></Tooltip>)
-    },
-    {
-      name: 'Scheduled', sortable: true,
-      cell: (row) => (
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          {row.is_completed === true
-            ? <Button variant="contained" color="success" size="small">Completed</Button>
-            : row.status === 'DRAFT'
-              ? <Button variant="contained" color="error"   size="small" onClick={() => handleWebinarChange('SHEDULED', row)}>No</Button>
-              : <Button variant="contained" color="success" size="small" onClick={() => handleWebinarChange('DRAFT',    row)}>Yes</Button>
-          }
-        </Box>
-      )
-    },
-    {
-      name: 'Status', sortable: true,
-      cell: (row) => (
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          {row.webinar_status === true
-            ? <Button variant="outlined" color="success" size="small">Active</Button>
-            : row.webinar_status === 'DRAFT'
-              ? <Button variant="outlined" color="error" size="small" onClick={() => handleStatusChange('SHEDULED', row)}>No</Button>
-              : <Button variant="outlined" color="error" size="small" onClick={() => handleStatusChange('DRAFT',    row)}>Inactivate</Button>
-          }
-        </Box>
-      )
-    },
-    {
-      name:"feedback",sortable:true,
-      cell:(row)=>(
-        <Tooltip title="view Feedback">
-          <IconButton  onClick={() => {
-
-            navigate(`/webinar/feedback/${row.slug}`,{
-              state:{
-                feedbackId:row.slug
-
-              }
-            })
-          
-         
-          // console.log(e.target.value,row.slug,"welcome")// 👈 send row id
-        }}>
-             <QuestionAnswerIcon/>
-
-          </IconButton>
-         
-
-        </Tooltip>
-      )
+  // <DataTable
+  //   value={filteredItems}
+  //   paginator
+  //   rows={10}
+  //   dataKey="uuid"
+  //   rowHover
+  //   stripedRows
+  //   loading={loading}
+  // >
 
 
-    },
-    {
-      name: 'Start', sortable: true,
-      cell: (row) => (
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          {row.status === 'COMPLETED'
-            ? <Button variant="contained" size="small" sx={{ px: 1.2, py: 0.4, minWidth: 'auto' }} onClick={() => handleWebinarstart(row)}>Finished</Button>
-            : row.status === 'LIVE'
-              ? <Button variant="contained" color="error" size="small" onClick={() => handleWebinarend(row)}>Live</Button>
-              : <Button variant="contained" color="error" size="small" onClick={() => handleWebinarstart(row)}>Go Live</Button>
-          }
-        </Box>
-      )
-    },
-    { name: 'FB Link',   width: '80px', center: true, cell: (row) => <CopyFBLink row={row} /> },
-    { name: 'Zoom Link', width: '90px', center: true, cell: (row) => (<IconButton size="small" onClick={() => window.open(row?.zoom_link, '_blank')}><InsertLinkOutlinedIcon fontSize="small" /></IconButton>) },
-    ...(canUpdate || canDelete || canView ? [{
-      name: 'Actions',
-      cell: (row) => (
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Tooltip title="View Details"><IconButton onClick={(e) => { e.stopPropagation(); handleViewOpen(row); }}><Eye /></IconButton></Tooltip>
-          {canUpdate && (<Tooltip title="Edit"><IconButton   color="info"  onClick={() => handleEdit(row)}><Edit  /></IconButton></Tooltip>)}
-          {canDelete && (<Tooltip title="Delete"><IconButton color="error" onClick={() => handleDelete(row.uuid)}><Trash /></IconButton></Tooltip>)}
-        </Box>
-      )
-    }] : [])
-  ];
+  //   {/* S.No */}
+  //   <Column
+  //     header="S.No"
+  //     body={(data, options) => options.rowIndex + 1}
+  //   />
+
+  //   {/* Webinar Name */}
+  //   <Column
+  //     field="title"
+  //     header="Webinar Name"
+  //   />
+
+  //   {/* Date & Time */}
+  //   <Column
+  //     header="Date & Time"
+  //     body={(row) => formatDateTime(row.scheduled_start)}
+  //   />
+
+  //   {/* Reg Count */}
+  //   <Column
+  //     header="Reg Count"
+  //     body={(row) => (
+  //       <Button
+  //         variant="text"
+  //         onClick={() => handleViewChange(row)}
+  //         sx={{
+  //           textDecoration: "underline",
+  //           fontWeight: 600
+  //         }}
+  //       >
+  //         {row.participants_count} / {row.seats_available}
+  //       </Button>
+  //     )}
+  //   />
+
+  //   {/* Reg Link */}
+  //   <Column
+  //     header="Reg Link"
+  //     body={() => (
+  //       <Tooltip title="Open registration link">
+  //         <a
+  //           href="https://workshop.aryuacademy.com/"
+  //           target="_blank"
+  //           rel="noopener noreferrer"
+  //         >
+  //           <LinkIcon color="primary" />
+  //         </a>
+  //       </Tooltip>
+  //     )}
+  //   />
+
+  //   {/* Scheduled */}
+  //   <Column
+  //     header="Scheduled"
+  //     body={(row) =>
+  //       row.is_completed ? (
+  //         <Button variant="contained" color="success" size="small">
+  //           Completed
+  //         </Button>
+  //       ) : row.status === "DRAFT" ? (
+  //         <Button
+  //           size="small"
+  //           color="error"
+  //           onClick={() => handleWebinarChange("SCHEDULED", row)}
+  //         >
+  //           No
+  //         </Button>
+  //       ) : (
+  //         <Button
+  //           size="small"
+  //           color="success"
+  //           onClick={() => handleWebinarChange("DRAFT", row)}
+  //         >
+  //           Yes
+  //         </Button>
+  //       )
+  //     }
+  //   />
+
+  //   {/* Status */}
+  //   <Column
+  //     header="Status"
+  //     body={(row) =>
+  //       row.webinar_status ? (
+  //         <Button variant="outlined" color="success" size="small">
+  //           Active
+  //         </Button>
+  //       ) : (
+  //         <Button variant="outlined" color="error" size="small">
+  //           Inactive
+  //         </Button>
+  //       )
+  //     }
+  //   />
+
+  //   {/* Feedback */}
+  //   <Column
+  //     header="Feedback"
+  //     body={(row) => (
+  //       <Tooltip title="View Feedback">
+  //         <IconButton
+  //           onClick={() =>
+  //             navigate(`/webinar/feedback/${row.slug}`, {
+  //               state: { feedbackId: row.slug }
+  //             })
+  //           }
+  //         >
+  //           <QuestionAnswerIcon />
+  //         </IconButton>
+  //       </Tooltip>
+  //     )}
+  //   />
+
+  //   {/* Start */}
+  //   <Column
+  //     header="Start"
+  //     body={(row) =>
+  //       row.status === "COMPLETED" ? (
+  //         <Button size="small" variant="contained">
+  //           Finished
+  //         </Button>
+  //       ) : row.status === "LIVE" ? (
+  //         <Button
+  //           size="small"
+  //           color="error"
+  //           variant="contained"
+  //           onClick={() => handleWebinarend(row)}
+  //         >
+  //           Live
+  //         </Button>
+  //       ) : (
+  //         <Button
+  //           size="small"
+  //           color="primary"
+  //           variant="contained"
+  //           onClick={() => handleWebinarstart(row)}
+  //         >
+  //           Go Live
+  //         </Button>
+  //       )
+  //     }
+  //   />
+  
+
+  // {/* FB Link */ }
+  // <Column
+  //   header="FB Link"
+  //   body={(row) => <CopyFBLink row={row} />}
+  // />
+
+  // {/* Zoom Link */ }
+  // <Column
+  //   header="Zoom"
+  //   body={(row) => (
+  //     <IconButton
+  //       size="small"
+  //       onClick={() => window.open(row?.zoom_link, "_blank")}
+  //     >
+  //       <InsertLinkOutlinedIcon fontSize="small" />
+  //     </IconButton>
+  //   )}
+  // />
+
+  // {/* Actions */ }
+  // <Column
+  //   header="Actions"
+  //   body={(row) => (
+  //     <Stack direction="row" spacing={1}>
+  //       <Tooltip title="View">
+  //         <IconButton onClick={() => handleViewOpen(row)}>
+  //           <Eye size={18} />
+  //         </IconButton>
+  //       </Tooltip>
+
+  //       {canUpdate && (
+  //         <Tooltip title="Edit">
+  //           <IconButton onClick={() => handleEdit(row)}>
+  //             <Edit size={18} />
+  //           </IconButton>
+  //         </Tooltip>
+  //       )}
+
+  //       {canDelete && (
+  //         <Tooltip title="Delete">
+  //           <IconButton onClick={() => handleDelete(row.uuid)}>
+  //             <Trash size={18} />
+  //           </IconButton>
+  //         </Tooltip>
+  //       )}
+  //     </Stack>
+  //   )}
+  // />
+  // </DataTable>
 
   if (error) {
     return (<MainCard sx={{ borderRadius: 2 }}><Box p={3} color="error.main">Error: {error}</Box></MainCard>);
@@ -664,7 +804,7 @@ const WebinarList = () => {
 
 
 
-  
+
   // ===========================================================================
   // RENDER
   // ===========================================================================
@@ -673,11 +813,248 @@ const WebinarList = () => {
       {subHeaderComponentMemo}
 
       <Box sx={{ overflowX: 'auto', '&::-webkit-scrollbar': { height: '24px' }, maxWidth: 1500 }}>
-        <DataTable
+        {/* <DataTable
           columns={columns} data={filteredItems} pagination paginationPerPage={10}
-          paginationRowsPerPageOptions={[5, 10, 20, 30]} highlightOnHover
+          paginationRowsPerPageOptions={[50, 100, 150, 200]} highlightOnHover
           progressPending={loading} responsive fixedHeader persistTableHead
-        />
+          emptyMessage="No participants found"
+  rowHover
+  stripedRows
+  paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} participants"
+  className="modern-datatable"
+        /> */}
+        <DataTable
+          value={filteredItems}
+          paginator
+          rows={50}
+          rowsPerPageOptions={[50, 100, 150, 200]}
+          dataKey="uuid"
+          loading={loading}
+          rowHover
+          stripedRows
+          emptyMessage="No webinars found"
+          className="modern-datatable"
+        >
+
+        {/* <DataTable
+    value={filteredItems}
+    paginator
+    rows={10}
+    dataKey="uuid"
+    rowHover
+    stripedRows
+    loading={loading}
+  > */}
+
+
+    {/* S.No */}
+    <Column
+                header="S.No"
+                body={(data, options) => (
+                  <Chip
+                    label={options.rowIndex + 1}
+                    size="small"
+                    sx={{
+                      backgroundColor: '#f3e5f5',
+                      color: '#6a1b9a',
+                      minWidth: 32
+                    }}
+                  />
+                )}
+                // style={{ width: '4rem' }}
+              />
+
+    {/* Webinar Name */}
+    <Column
+      field="title"
+      header="Webinar Name"
+    />
+
+    {/* Date & Time */}
+    <Column
+      header="Date & Time"
+      body={(row) => formatDateTime(row.scheduled_start)}
+    />
+
+    {/* Reg Count */}
+    <Column
+      header="Reg Count"
+      body={(row) => (
+        <Button
+          variant="text"
+          onClick={() => handleViewChange(row)}
+          sx={{
+            textDecoration: "underline",
+            fontWeight: 600
+          }}
+        >
+          {row.participants_count} / {row.seats_available}
+        </Button>
+      )}
+    />
+
+    {/* Reg Link */}
+    <Column
+      header="Reg Link"
+      body={() => (
+        <Tooltip title="Open registration link">
+          <a
+            href="https://workshop.aryuacademy.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <LinkIcon color="primary" />
+          </a>
+        </Tooltip>
+      )}
+    />
+
+    {/* Scheduled */}
+    <Column
+      header="Scheduled"
+      body={(row) =>
+        row.is_completed ? (
+          <Button variant="contained" color="success" size="small">
+            Completed
+          </Button>
+        ) : row.status === "DRAFT" ? (
+          <Button
+            size="small"
+            color="error"
+            onClick={() => handleWebinarChange("SCHEDULED", row)}
+          >
+            No
+          </Button>
+        ) : (
+          <Button
+            size="small"
+            color="success"
+            onClick={() => handleWebinarChange("DRAFT", row)}
+          >
+            Yes
+          </Button>
+        )
+      }
+    />
+
+    {/* Status */}
+    <Column
+      header="Status"
+      body={(row) =>
+        row.webinar_status ? (
+          <Button variant="outlined" color="success" size="small">
+            Active
+          </Button>
+        ) : (
+          <Button variant="outlined" color="error" size="small">
+            Inactive
+          </Button>
+        )
+      }
+    />
+
+    {/* Feedback */}
+    <Column
+      header="Feedback"
+      body={(row) => (
+        <Tooltip title="View Feedback">
+          <IconButton
+            onClick={() =>
+              navigate(`/webinar/feedback/${row.slug}`, {
+                state: { feedbackId: row.slug }
+              })
+            }
+          >
+            <QuestionAnswerIcon />
+          </IconButton>
+        </Tooltip>
+      )}
+    />
+
+    {/* Start */}
+    <Column
+      header="Start"
+      body={(row) =>
+        row.status === "COMPLETED" ? (
+          <Button size="small" variant="contained">
+            Finished
+          </Button>
+        ) : row.status === "LIVE" ? (
+          <Button
+            size="small"
+            color="error"
+            variant="contained"
+            onClick={() => handleWebinarend(row)}
+          >
+            Live
+          </Button>
+        ) : (
+          <Button
+            size="medium"
+            color="primary"
+            variant="contained"
+            onClick={() => handleWebinarstart(row)}
+             sx={{
+    whiteSpace: "nowrap"
+  }}
+          >
+            Go Live
+          </Button>
+        )
+      }
+    />
+  
+
+  {/* FB Link */ }
+  <Column
+    header="FB Link"
+    body={(row) => <CopyFBLink row={row} />}
+  />
+
+  {/* Zoom Link */ }
+  <Column
+    header="Zoom"
+    body={(row) => (
+      <IconButton
+        size="small"
+        onClick={() => window.open(row?.zoom_link, "_blank")}
+      >
+        <InsertLinkOutlinedIcon fontSize="small" />
+      </IconButton>
+    )}
+  />
+
+  {/* Actions */ }
+  <Column
+    header="Actions"
+    body={(row) => (
+      <Stack direction="row" spacing={1}>
+        <Tooltip title="View">
+          <IconButton onClick={() => handleViewOpen(row)}>
+            <Eye size={18} />
+          </IconButton>
+        </Tooltip>
+
+        {canUpdate && (
+          <Tooltip title="Edit">
+            <IconButton onClick={() => handleEdit(row)}>
+              <Edit size={18} />
+            </IconButton>
+          </Tooltip>
+        )}
+
+        {canDelete && (
+          <Tooltip title="Delete">
+            <IconButton onClick={() => handleDelete(row.uuid)}>
+              <Trash size={18} />
+            </IconButton>
+          </Tooltip>
+        )}
+      </Stack>
+    )}
+  />
+  </DataTable>
 
         {/* ==============================================================
             ADD / EDIT WEBINAR DIALOG  (unchanged from original)
@@ -760,7 +1137,16 @@ const WebinarList = () => {
                                   <TextField fullWidth label="YouTube Video URL" placeholder="https://www.youtube.com/watch?v=xxxxx" value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} margin="dense" />
                                 </DialogContent>
                                 <DialogActions>
-                                  <Button onClick={() => setOpenVideoDialog(false)}>Cancel</Button>
+                                  <Button
+                                    variant="contained"
+                                    sx={{
+                                      bgcolor: "#636E72",
+                                      "&:hover": { bgcolor: "#636E72" }
+                                    }}
+                                    onClick={() => setOpenVideoDialog(false)}
+                                  >
+                                    Cancel
+                                  </Button>
                                   <Button variant="contained" onClick={() => setOpenVideoDialog(false)}>Add</Button>
                                 </DialogActions>
                               </Dialog>
@@ -779,7 +1165,7 @@ const WebinarList = () => {
                             <Typography fontWeight={400}>Mode Type</Typography>
                             <RadioGroup row value={mode} onChange={(e) => setMode(e.target.value === 'true')}>
                               <FormControlLabel value="false" control={<Radio />} label="Offline" />
-                              <FormControlLabel value="true"  control={<Radio />} label="Online"  />
+                              <FormControlLabel value="true" control={<Radio />} label="Online" />
                             </RadioGroup>
                           </Stack>
                         </Grid>
@@ -901,8 +1287,20 @@ const WebinarList = () => {
                     </LocalizationProvider>
                     {!currentWebinar?.viewOnly && (
                       <DialogActions sx={{ mt: 3 }}>
-                        <Button onClick={handleClose}>Cancel</Button>
-                        <Button type="submit" variant="contained">{currentWebinar ? 'Update' : 'Submit'}</Button>
+                        <Button variant="contained"
+                          sx={{
+                            bgcolor: "#636E72",
+                            "&:hover": { bgcolor: "#636E72" }
+                          }} onClick={handleClose}>Cancel</Button>
+                        <Button type="submit"
+                          sx={{
+                            backgroundColor: "#0984E3",
+                            color: "#fff",
+                            "&:hover": {
+                              backgroundColor: "#0984E3"
+                            }
+                          }} variant="contained"
+                        >{currentWebinar ? 'Update' : 'Submit'}</Button>
                       </DialogActions>
                     )}
                     {currentWebinar?.viewOnly && (
@@ -919,7 +1317,7 @@ const WebinarList = () => {
 
 
 
- 
+
 
 
         {/* ==============================================================
@@ -937,7 +1335,7 @@ const WebinarList = () => {
                widescreen container that scales to any width correctly.
         ============================================================== */}
 
-{/* 
+        {/* 
         <Dialog open={feedbackOpen} onClose={() => setFeedbackOpen(false)} maxWidth="sm" fullWidth>
   <DialogTitle>Participant Feedback</DialogTitle>
 
@@ -984,8 +1382,8 @@ const WebinarList = () => {
               {/* Active / Inactive status badge */}
               <Box sx={{
                 px: 2, py: 0.6, borderRadius: 10, fontSize: 12, fontWeight: 700, letterSpacing: 0.5,
-                bgcolor: viewDetails?.webinar_status ? 'rgba(34,197,94,0.2)'  : 'rgba(239,68,68,0.2)',
-                color:  viewDetails?.webinar_status ? '#4ade80'               : '#f87171',
+                bgcolor: viewDetails?.webinar_status ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.2)',
+                color: viewDetails?.webinar_status ? '#4ade80' : '#f87171',
                 border: `1px solid ${viewDetails?.webinar_status ? 'rgba(34,197,94,0.4)' : 'rgba(239,68,68,0.4)'}`
               }}>
                 {viewDetails?.webinar_status ? 'Active' : 'Inactive'}
@@ -994,7 +1392,7 @@ const WebinarList = () => {
               <Box sx={{
                 px: 2, py: 0.6, borderRadius: 10, fontSize: 12, fontWeight: 700, letterSpacing: 0.5,
                 bgcolor: viewDetails?.is_paid ? 'rgba(251,191,36,0.2)' : 'rgba(99,102,241,0.2)',
-                color:  viewDetails?.is_paid ? '#fbbf24'               : '#a5b4fc',
+                color: viewDetails?.is_paid ? '#fbbf24' : '#a5b4fc',
                 border: `1px solid ${viewDetails?.is_paid ? 'rgba(251,191,36,0.4)' : 'rgba(99,102,241,0.4)'}`
               }}>
                 {viewDetails?.is_paid ? 'Paid' : 'Free'}
@@ -1042,9 +1440,9 @@ const WebinarList = () => {
               {/* SECTION 2: BASIC INFORMATION */}
               <SectionCard label="Basic Information" sx={{ mb: 2.5 }}>
                 <Grid container spacing={2}>
-                  <Grid item xs={12} md={6}><FieldRow label="Title"             value={viewDetails?.title}       /></Grid>
-                  <Grid item xs={12} md={6}><FieldRow label="Slug"              value={viewDetails?.slug}  mono  /></Grid>
-                  <Grid item xs={12} md={6}><FieldRow label="Sub Title"         value={viewDetails?.sub_title}   /></Grid>
+                  <Grid item xs={12} md={6}><FieldRow label="Title" value={viewDetails?.title} /></Grid>
+                  <Grid item xs={12} md={6}><FieldRow label="Slug" value={viewDetails?.slug} mono /></Grid>
+                  <Grid item xs={12} md={6}><FieldRow label="Sub Title" value={viewDetails?.sub_title} /></Grid>
                   <Grid item xs={12} md={6}><FieldRow label="Description / Key" value={viewDetails?.description} /></Grid>
                 </Grid>
               </SectionCard>
@@ -1053,9 +1451,9 @@ const WebinarList = () => {
               <SectionCard label="Schedule & Logistics" sx={{ mb: 2.5 }}>
                 <Grid container spacing={2}>
                   <Grid item xs={12} md={4}><FieldRow label="Date & Time" value={viewDetails?.scheduled_start} /></Grid>
-                  <Grid item xs={12} md={4}><FieldRow label="Mode"        value={viewDetails?.mode === true ? 'Online' : 'Offline'} /></Grid>
-                  <Grid item xs={12} md={4}><FieldRow label="Language"    value={viewDetails?.language} /></Grid>
-                  <Grid item xs={12} md={4}><FieldRow label="Mentor"      value={viewDetails?.mentor}   /></Grid>
+                  <Grid item xs={12} md={4}><FieldRow label="Mode" value={viewDetails?.mode === true ? 'Online' : 'Offline'} /></Grid>
+                  <Grid item xs={12} md={4}><FieldRow label="Language" value={viewDetails?.language} /></Grid>
+                  <Grid item xs={12} md={4}><FieldRow label="Mentor" value={viewDetails?.mentor} /></Grid>
 
                   {/* Seats: turns red and shows "Registration Full" when capacity is reached */}
                   <Grid item xs={12} md={4}>
@@ -1080,9 +1478,9 @@ const WebinarList = () => {
                       <Typography variant="caption" sx={{ color: '#6b7280', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>WhatsApp Link</Typography>
                       {viewDetails?.waba_link
                         ? <Box component="a" href={viewDetails.waba_link} target="_blank" rel="noopener noreferrer"
-                            sx={{ mt: 0.5, p: 1.5, borderRadius: 1.5, border: '1px solid #bbf7d0', bgcolor: '#f0fdf4', display: 'flex', alignItems: 'center', textDecoration: 'none', color: '#15803d', fontWeight: 500, fontSize: 13, wordBreak: 'break-all', '&:hover': { bgcolor: '#dcfce7' } }}>
-                            {viewDetails.waba_link}
-                          </Box>
+                          sx={{ mt: 0.5, p: 1.5, borderRadius: 1.5, border: '1px solid #bbf7d0', bgcolor: '#f0fdf4', display: 'flex', alignItems: 'center', textDecoration: 'none', color: '#15803d', fontWeight: 500, fontSize: 13, wordBreak: 'break-all', '&:hover': { bgcolor: '#dcfce7' } }}>
+                          {viewDetails.waba_link}
+                        </Box>
                         : <EmptyValue />
                       }
                     </Box>
@@ -1097,7 +1495,7 @@ const WebinarList = () => {
                   {viewDetails?.is_paid && (
                     <>
                       <Grid item xs={12} md={4}><FieldRow label="Regular Price" value={viewDetails?.regular_price ? `₹${Number(viewDetails.regular_price).toLocaleString('en-IN')}` : '—'} /></Grid>
-                      <Grid item xs={12} md={4}><FieldRow label="Sale Price"    value={viewDetails?.price          ? `₹${Number(viewDetails.price).toLocaleString('en-IN')}`          : '—'} /></Grid>
+                      <Grid item xs={12} md={4}><FieldRow label="Sale Price" value={viewDetails?.price ? `₹${Number(viewDetails.price).toLocaleString('en-IN')}` : '—'} /></Grid>
                     </>
                   )}
                 </Grid>

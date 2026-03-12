@@ -846,7 +846,7 @@ const ParticipantTable = () => {
 <DataTable
   value={filteredRows}
   paginator
-  rows={10}
+  rows={50}
   rowsPerPageOptions={[50,100,150,200]}
   dataKey="id"
   emptyMessage="No participants found"

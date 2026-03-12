@@ -3,7 +3,7 @@ import { FormattedMessage } from 'react-intl';
 
 // assets
 import { KyberNetwork, Messages2, Calendar1, Kanban, Profile2User, Bill, UserSquare, ShoppingBag, Ticket } from 'iconsax-react';
-import FeedbackIcon from '@mui/icons-material/Feedback';
+// import FeedbackIcon from '@mui/icons-material/Feedback';
 // icons
 const icons = {
   applications: KyberNetwork,
@@ -109,14 +109,14 @@ const baseMenuItems = {
       url: '/ticket',
       show: loginType === 'student' || loginType === 'tutor'
     },
-    {
-      id: 'webinar-feedback',
-      title: <FormattedMessage id="webinar-feedback" defaultMessage="Feedback" />,
-      type: 'item',
-      url: '/webinar/feedback',
-      icon: FeedbackIcon,
-      show: true
-    }
+    // {
+    //   id: 'webinar-feedback',
+    //   title: <FormattedMessage id="webinar-feedback" defaultMessage="Feedback" />,
+    //   type: 'item',
+    //   url: '/webinar/feedback',
+    //   icon: FeedbackIcon,
+    //   show: true
+    // }
   ].filter((item) => item.show)
 };
 
