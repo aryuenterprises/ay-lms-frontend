@@ -1,14 +1,30 @@
 // PaymentReportsPage.jsx
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  Typography, Card, CardContent, Grid, Chip, Stack, FormLabel, Box, Button,
-  Autocomplete, TextField, Dialog, DialogTitle, DialogContent, DialogActions,
-  IconButton, Alert, Paper, FormControl, InputLabel, Select, MenuItem
+  Typography,
+  Card,
+  CardContent,
+  Grid,
+  Chip,
+  Stack,
+  FormLabel,
+  Box,
+  Button,
+  Autocomplete,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  IconButton,
+  Alert,
+  Paper,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem
 } from '@mui/material';
-import {
-  Payment, Receipt, Close, Visibility, ArrowBack,
-  Email, Phone, LocationOn, CalendarToday, UploadFile
-} from '@mui/icons-material';
+import { Payment, Receipt, Close, Visibility, ArrowBack, Email, Phone, LocationOn, CalendarToday, UploadFile } from '@mui/icons-material';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
 import MainCard from 'components/MainCard';
@@ -18,6 +34,12 @@ import { Capitalise } from 'utils/capitalise';
 import DataTable from 'react-data-table-component';
 import { formatDateTime } from 'utils/dateUtils';
 import Swal from 'sweetalert2';
+
+const GATEWAY_LABELS = {
+  stripe_enabled:   'Stripe',
+  paypal_enabled:   'PayPal',
+  razorpay_enabled: 'Razorpay',
+};
 
 const parseBackendError = (message) => {
   if (!message) return 'Something went wrong. Please try again.';
@@ -38,19 +60,17 @@ function PaymentReportsPage() {
   const [paymentDialogOpen, setPaymentDialogOpen]           = useState(false);
   const [selectedPayment, setSelectedPayment]               = useState(null);
   const [paymentAmount, setPaymentAmount]                   = useState('');
-  const [quickPayGateway, setQuickPayGateway]               = useState(''); // stores gateway id
+  const [quickPayGateway, setQuickPayGateway]               = useState('');
   const [loading, setLoading]                               = useState(false);
   const [showDetails, setShowDetails]                       = useState(false);
   const [selectedStudentDetails, setSelectedStudentDetails] = useState(null);
   const [paymentAddUserOpen, setPaymentAddUserOpen]         = useState(false);
-  const [gateway, setGateway]                               = useState([]); // [{ id, gatway_name }]
-  const [courses, setCourses]                               = useState([]); // [{ id, name }]
-  const [uploadedFile, setUploadedFile]                     = useState(null);
+  const [gateway, setGateway]                               = useState([]);
+  const [uploadedFile, setUploadedFile]                     = useState(null);  // ✅ file state
 
   const validationSchema = yup.object({
     student:        yup.string().required('Student is required'),
     gateway:        yup.string().required('Gateway is required'),
-    course:         yup.string().required('Course is required'),
     amount:         yup.number().required('Amount is required').positive('Amount must be positive').min(1, 'Amount must be at least 1'),
     currency:       yup.string().required('Currency is required'),
     payment_status: yup.string().required('Payment status is required'),
@@ -65,7 +85,6 @@ function PaymentReportsPage() {
     initialValues: {
       student:        '',
       gateway:        '',
-      course:         '',
       amount:         '',
       currency:       'INR',
       payment_status: 'Success',
@@ -79,33 +98,73 @@ function PaymentReportsPage() {
     },
   });
 
+  // ─── Fetch students + gateway list ───────────────────────────────────────────
+<<<<<<< HEAD
+  const fetchStudents = useCallback(async () => {
+    try {
+      const response = await axiosInstance.get(`${APP_PATH_BASE_URL}api/jarugandi`);
+      const studentList = response.data.students_list || [];
+      setStudents(studentList);
+      const paymentMethod = response.data?.setting?.[0]?.payment_method;
+      setGateway(Array.isArray(paymentMethod) ? paymentMethod : []);
+    } catch (error) {
+      console.error('Error fetching students:', error);
+      setStudents([]);
+      setGateway([]);
+    }
+  }, []);
+
   // ─── Fetch payment transactions ───────────────────────────────────────────────
   const fetchData = useCallback(async () => {
     try {
       const response = await axiosInstance.get(`${APP_PATH_BASE_URL}api/payment_transaction`);
       if (response.data.success) {
-        const students    = response.data.students || [];
-        const gatewayList = response.data.gatway   || []; // [{ id, gatway_name }]
-
-        setStudents(students.map((s) => ({ student_id: s.student_id, student_name: s.student_name })));
-        setAllStudentsData({ students, paymentDetails: students });
-        setGateway(gatewayList);
-        setCourses(response.data.courses || []); // [{ id, name }]
+        setAllStudentsData({
+          students:       response.data.students || [],
+          paymentDetails: response.data.student_payment_summaries || [],
+        });
       } else {
         setAllStudentsData({ students: [], paymentDetails: [] });
-        setStudents([]);
-        setGateway([]);
-        setCourses([]);
       }
     } catch (error) {
       console.error('Error fetching payment data:', error);
       setAllStudentsData({ students: [], paymentDetails: [] });
-      setStudents([]);
-      setGateway([]);
-      setCourses([]);
     }
   }, []);
 
+=======
+
+
+  // ─── Fetch payment transactions ───────────────────────────────────────────────
+const fetchData = useCallback(async () => {
+  try {
+    const response = await axiosInstance.get(`${APP_PATH_BASE_URL}api/payment_transaction`);
+    if (response.data.success) {
+      const students = response.data.students || [];
+      // Build studentsMap for the Autocomplete filter dropdown
+      setStudents(students.map((s) => ({ student_id: s.student_id, student_name: s.student_name })));
+      // Use students array as the table rows (student_payment_summaries is empty)
+      setAllStudentsData({
+        students,
+        paymentDetails: students,
+      });
+      // Get gateway list from response
+      const gatewayList = response.data.gatway || [];
+      setGateway(gatewayList.map((g) => g.gatway_name));
+    } else {
+      setAllStudentsData({ students: [], paymentDetails: [] });
+      setStudents([]);
+      setGateway([]);
+    }
+  } catch (error) {
+    console.error('Error fetching payment data:', error);
+    setAllStudentsData({ students: [], paymentDetails: [] });
+    setStudents([]);
+    setGateway([]);
+  }
+}, []);
+
+>>>>>>> d7fa5e3 (new one is here like this)
   // ─── Filter + sort ────────────────────────────────────────────────────────────
   useEffect(() => {
     const getLatestDate = (student) => {
@@ -118,7 +177,16 @@ function PaymentReportsPage() {
     setFilteredStudentsData(sorted);
   }, [selectedStudent, allStudentsData]);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+<<<<<<< HEAD
+  useEffect(() => {
+    fetchStudents();
+    fetchData();
+  }, [fetchStudents, fetchData]);
+=======
+useEffect(() => {
+  fetchData();
+}, [fetchData]);
+>>>>>>> d7fa5e3 (new one is here like this)
 
   const paymentDetails = data.transactions;
 
@@ -132,6 +200,7 @@ function PaymentReportsPage() {
   };
 
   const formatCurrency = (amount) => `₹${amount?.toLocaleString('en-IN') || '0'}`;
+
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
@@ -154,7 +223,7 @@ function PaymentReportsPage() {
         amount:         parseFloat(paymentAmount),
         currency:       'INR',
         payment_status: 'Success',
-        gateway:        quickPayGateway, // gateway id (number)
+        gateway:        quickPayGateway,
       });
       if (response.data.success) {
         await fetchData();
@@ -178,21 +247,23 @@ function PaymentReportsPage() {
   const handleAddUserSubmit = async (values, resetForm) => {
     setLoading(true);
     try {
+      // ✅ Use FormData to support optional file upload
       const formData = new FormData();
       formData.append('student',        parseInt(values.student));
+      formData.append('gateway',        values.gateway);
       formData.append('amount',         parseFloat(values.amount));
-      formData.append('gateway',        values.gateway); // gateway id
-      formData.append('course',         values.course);  // course id
       formData.append('currency',       values.currency);
       formData.append('payment_status', values.payment_status);
       formData.append('transaction_id', values.transaction_id);
       formData.append('description',    values.description);
-      formData.append('metadata',       JSON.stringify(values.metadata));
-      if (uploadedFile) formData.append('attachment', uploadedFile);
-
+      formData.append('metadata',       JSON.stringify(values.metadata))
+      if (uploadedFile) {
+        formData.append('attachment', uploadedFile);  // ✅ only append if file selected
+      }
       const response = await axiosInstance.post(`${APP_PATH_BASE_URL}api/payment_transaction`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
+
       if (response.data.success) {
         await fetchData();
         setPaymentAddUserOpen(false);
@@ -211,30 +282,20 @@ function PaymentReportsPage() {
   };
 
   // ─── Dialog / navigation handlers ────────────────────────────────────────────
-  const handleOpenPaymentDialog = (student) => {
-    setSelectedPayment(student);
-    setPaymentAmount('');
-    setQuickPayGateway('');
-    setPaymentDialogOpen(true);
-  };
+  const handleOpenPaymentDialog = (student) => { setSelectedPayment(student); setPaymentAmount(''); setQuickPayGateway(''); setPaymentDialogOpen(true); };
   const handleOpenAddUserModal  = () => setPaymentAddUserOpen(true);
   const handleCloseAddUserModal = () => { setPaymentAddUserOpen(false); setUploadedFile(null); formik.resetForm(); };
   const handleViewDetails       = (student) => { setSelectedStudent(student.student_id); setSelectedStudentDetails(student); setData(student); setShowDetails(true); };
-  const handleBackToList = () => { setShowDetails(false); setSelectedStudentDetails(null); setSelectedStudent(''); };
+  const handleBackToList        = () => { setShowDetails(false); setSelectedStudentDetails(null); setSelectedStudent(''); };
 
   // ─── Table columns ────────────────────────────────────────────────────────────
-  const customStyles = {
-    headRow: { style: { backgroundColor: '#f5f5f5', fontWeight: 'bold' } },
-    rows:    { style: { minHeight: '60px' } },
-  };
-
   const columns = [
-    { name: 'S.No',             selector: (row, index) => index + 1,                     sortable: true, width: '80px' },
-    { name: 'Student Name',     selector: (row) => Capitalise(row.student_name),          sortable: true, wrap: true },
-    { name: 'Course',           selector: (row) => row.course_name || 'N/A',             sortable: true, wrap: true },
-    { name: 'Total Amount',     selector: (row) => formatCurrency(row.total_course_fee),  sortable: true, wrap: true },
-    { name: 'Paid Amount',      selector: (row) => formatCurrency(row.paid_amount),       sortable: true, wrap: true },
-    { name: 'Remaining Amount', cell:     (row) => formatCurrency(row.remaining_amount),  sortable: true, wrap: true },
+    { name: 'S.No',             selector: (row, index) => index + 1,                    sortable: true, width: '80px' },
+    { name: 'Student Name',     selector: (row) => Capitalise(row.student_name),         sortable: true, wrap: true },
+    { name: 'Course',           selector: (row) => row.course_name || 'N/A',            sortable: true, wrap: true },
+    { name: 'Total Amount',     selector: (row) => formatCurrency(row.total_course_fee), sortable: true, wrap: true },
+    { name: 'Paid Amount',      selector: (row) => formatCurrency(row.paid_amount),      sortable: true, wrap: true },
+    { name: 'Remaining Amount', cell:     (row) => formatCurrency(row.remaining_amount), sortable: true, wrap: true },
     {
       name: 'Status',
       cell: (row) => {
@@ -255,6 +316,11 @@ function PaymentReportsPage() {
       ignoreRowClick: true,
     },
   ];
+
+  const customStyles = {
+    headRow: { style: { backgroundColor: '#f5f5f5', fontWeight: 'bold' } },
+    rows:    { style: { minHeight: '60px' } },
+  };
 
   const paymentHistoryColumns = [
     { name: 'Date',           selector: (row) => formatDateTime(row.created_at),    sortable: true, width: '180px' },
@@ -299,7 +365,9 @@ function PaymentReportsPage() {
           />
         </Stack>
         <Stack direction="column" spacing={1.5} sx={{ px: 2 }}>
-          <Button variant="contained" sx={{ width: 100 }} onClick={handleOpenAddUserModal}>Add User</Button>
+          <Button variant="contained" sx={{ width: 100 }} onClick={handleOpenAddUserModal}>
+            Add User
+          </Button>
         </Stack>
       </Grid>
 
@@ -310,6 +378,7 @@ function PaymentReportsPage() {
               <IconButton onClick={handleBackToList} color="primary"><ArrowBack /></IconButton>
               <Typography variant="h5">Student Details - {Capitalise(selectedStudentDetails.student_name)}</Typography>
             </Stack>
+
             <Grid container spacing={3}>
               <Grid item xs={12} md={6}>
                 <Paper variant="outlined" sx={{ p: 3 }}>
@@ -317,23 +386,38 @@ function PaymentReportsPage() {
                     <LocationOn sx={{ fontSize: 20, mr: 1 }} />Student Information
                   </Typography>
                   <Stack spacing={2}>
-                    {[
-                      { label: 'Student Name',      value: Capitalise(selectedStudentDetails.student_name) },
-                      { label: 'Course',             value: selectedStudentDetails.course_name || 'N/A' },
-                      { label: 'Student ID',         value: selectedStudentDetails.student_id },
-                      { label: 'Email',              value: selectedStudentDetails.email || 'N/A',      icon: <Email sx={{ fontSize: 16, mr: 0.5 }} /> },
-                      { label: 'Phone',              value: selectedStudentDetails.contact_no || 'N/A', icon: <Phone sx={{ fontSize: 16, mr: 0.5 }} /> },
-                      { label: 'Registration Date',  value: formatDate(selectedStudentDetails.joining_date || 'N/A'), icon: <CalendarToday sx={{ fontSize: 16, mr: 0.5 }} /> },
-                      { label: 'Address',            value: selectedStudentDetails.address || 'N/A',   icon: <LocationOn sx={{ fontSize: 16, mr: 0.5 }} /> },
-                    ].map(({ label, value, icon }) => (
-                      <Box key={label}>
-                        <Typography variant="subtitle2" color="textSecondary">{icon}{label}</Typography>
-                        <Typography variant="body1" fontFamily={label === 'Student ID' ? 'monospace' : undefined}>{value}</Typography>
-                      </Box>
-                    ))}
+                    <Box>
+                      <Typography variant="subtitle2" color="textSecondary">Student Name</Typography>
+                      <Typography variant="body1" fontWeight="bold">{Capitalise(selectedStudentDetails.student_name)}</Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="subtitle2" color="textSecondary">Course</Typography>
+                      <Typography variant="body1">{selectedStudentDetails.course_name || 'N/A'}</Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="subtitle2" color="textSecondary">Student ID</Typography>
+                      <Typography variant="body1" fontFamily="monospace">{selectedStudentDetails.student_id}</Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="subtitle2" color="textSecondary"><Email sx={{ fontSize: 16, mr: 0.5 }} />Email</Typography>
+                      <Typography variant="body1">{selectedStudentDetails.email || 'N/A'}</Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="subtitle2" color="textSecondary"><Phone sx={{ fontSize: 16, mr: 0.5 }} />Phone</Typography>
+                      <Typography variant="body1">{selectedStudentDetails.contact_no || 'N/A'}</Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="subtitle2" color="textSecondary"><CalendarToday sx={{ fontSize: 16, mr: 0.5 }} />Registration Date</Typography>
+                      <Typography variant="body1">{formatDate(selectedStudentDetails.joining_date || 'N/A')}</Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="subtitle2" color="textSecondary"><LocationOn sx={{ fontSize: 16, mr: 0.5 }} />Address</Typography>
+                      <Typography variant="body2">{selectedStudentDetails.address || 'N/A'}</Typography>
+                    </Box>
                   </Stack>
                 </Paper>
               </Grid>
+
               <Grid item xs={12} md={6}>
                 <Paper variant="outlined" sx={{ p: 3 }}>
                   <Typography variant="h6" gutterBottom color="primary">
@@ -362,6 +446,7 @@ function PaymentReportsPage() {
                   </Stack>
                 </Paper>
               </Grid>
+
               {paymentDetails && paymentDetails.length > 0 && (
                 <Grid item xs={12}>
                   <Paper variant="outlined" sx={{ p: 3 }}>
@@ -373,6 +458,7 @@ function PaymentReportsPage() {
                 </Grid>
               )}
             </Grid>
+
             <Box sx={{ mt: 3, display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
               <Button variant="outlined" startIcon={<Receipt />} onClick={() => handleOpenPaymentDialog(selectedStudentDetails)}>Payment Details</Button>
               {getPaymentStatus(selectedStudentDetails).status === 'pending' && (
@@ -422,16 +508,18 @@ function PaymentReportsPage() {
                   Remaining: {formatCurrency((selectedPayment.total_amount || 0) - (selectedPayment.total_paid || 0))}
                 </Typography>
               </Box>
-              {/* Gateway — value is gateway.id */}
+
+              {/* Gateway */}
               <FormControl fullWidth>
                 <InputLabel>Gateway *</InputLabel>
                 <Select value={quickPayGateway} onChange={(e) => setQuickPayGateway(e.target.value)} label="Gateway *">
                   <MenuItem value="" disabled>Select gateway</MenuItem>
                   {gateway.map((gw) => (
-                    <MenuItem key={gw.id} value={gw.id}>{gw.gatway_name}</MenuItem>
+                    <MenuItem key={gw} value={gw}>{GATEWAY_LABELS[gw] || gw}</MenuItem>
                   ))}
                 </Select>
               </FormControl>
+
               {/* Amount */}
               <TextField
                 label="Payment Amount"
@@ -442,6 +530,7 @@ function PaymentReportsPage() {
                 placeholder="Enter amount"
                 InputProps={{ startAdornment: <Typography sx={{ mr: 1 }}>₹</Typography> }}
               />
+
               {paymentDetails && paymentDetails.length > 0 && (
                 <Box>
                   <Typography variant="subtitle2" gutterBottom>Recent Payments:</Typography>
@@ -481,6 +570,7 @@ function PaymentReportsPage() {
           </DialogTitle>
           <DialogContent>
             <Grid container spacing={3} sx={{ mt: 0.5 }}>
+
               {/* Student */}
               <Grid item xs={12} md={6}>
                 <Stack spacing={2}>
@@ -500,7 +590,8 @@ function PaymentReportsPage() {
                   </FormControl>
                 </Stack>
               </Grid>
-              {/* Gateway — value is gateway.id */}
+
+              {/* Gateway */}
               <Grid item xs={12} md={6}>
                 <Stack spacing={2}>
                   <InputLabel>Gateway *</InputLabel>
@@ -508,7 +599,7 @@ function PaymentReportsPage() {
                     <Select name="gateway" value={formik.values.gateway} onChange={formik.handleChange} onBlur={formik.handleBlur} displayEmpty>
                       <MenuItem value="" disabled>Select gateway</MenuItem>
                       {gateway.map((gw) => (
-                        <MenuItem key={gw.id} value={gw.id}>{gw.gatway_name}</MenuItem>
+                        <MenuItem key={gw} value={gw}>{GATEWAY_LABELS[gw] || gw}</MenuItem>
                       ))}
                     </Select>
                     {formik.touched.gateway && formik.errors.gateway && (
@@ -517,23 +608,7 @@ function PaymentReportsPage() {
                   </FormControl>
                 </Stack>
               </Grid>
-              {/* Course — value is course.id */}
-              <Grid item xs={12} md={6}>
-                <Stack spacing={2}>
-                  <InputLabel>Course *</InputLabel>
-                  <FormControl fullWidth error={formik.touched.course && Boolean(formik.errors.course)}>
-                    <Select name="course" value={formik.values.course} onChange={formik.handleChange} onBlur={formik.handleBlur} displayEmpty>
-                      <MenuItem value="" disabled>Select course</MenuItem>
-                      {courses.map((c) => (
-                        <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>
-                      ))}
-                    </Select>
-                    {formik.touched.course && formik.errors.course && (
-                      <Typography variant="caption" color="error" sx={{ mt: 0.5, display: 'block' }}>{formik.errors.course}</Typography>
-                    )}
-                  </FormControl>
-                </Stack>
-              </Grid>
+
               {/* Amount */}
               <Grid item xs={6}>
                 <Stack spacing={2}>
@@ -551,6 +626,7 @@ function PaymentReportsPage() {
                   />
                 </Stack>
               </Grid>
+
               {/* Currency */}
               <Grid item xs={6}>
                 <Stack spacing={2}>
@@ -563,6 +639,7 @@ function PaymentReportsPage() {
                   </FormControl>
                 </Stack>
               </Grid>
+
               {/* Transaction ID */}
               <Grid item xs={12} md={6}>
                 <Stack spacing={2}>
@@ -570,6 +647,7 @@ function PaymentReportsPage() {
                   <TextField name="transaction_id" value={formik.values.transaction_id} onChange={formik.handleChange} fullWidth placeholder="TXN_889933" />
                 </Stack>
               </Grid>
+
               {/* Description */}
               <Grid item xs={12} md={6}>
                 <Stack spacing={2}>
@@ -577,6 +655,7 @@ function PaymentReportsPage() {
                   <TextField name="description" value={formik.values.description} onChange={formik.handleChange} fullWidth multiline rows={2} placeholder="Full payment" />
                 </Stack>
               </Grid>
+
               {/* Payment Mode */}
               <Grid item xs={12} md={6}>
                 <Stack spacing={2}>
@@ -592,7 +671,8 @@ function PaymentReportsPage() {
                   </FormControl>
                 </Stack>
               </Grid>
-              {/* File Upload */}
+
+              {/* ✅ File Upload — optional */}
               <Grid item xs={12} md={6}>
                 <Stack spacing={2}>
                   <InputLabel>Attachment <Typography component="span" variant="caption" color="textSecondary">(Optional)</Typography></InputLabel>
@@ -600,7 +680,10 @@ function PaymentReportsPage() {
                     sx={{
                       border: '1.5px dashed',
                       borderColor: uploadedFile ? 'success.main' : 'grey.400',
-                      borderRadius: 1, p: 2, textAlign: 'center', cursor: 'pointer',
+                      borderRadius: 1,
+                      p: 2,
+                      textAlign: 'center',
+                      cursor: 'pointer',
                       backgroundColor: uploadedFile ? 'success.lighter' : 'grey.50',
                       '&:hover': { borderColor: 'primary.main', backgroundColor: 'primary.lighter' },
                       transition: 'all 0.2s',
@@ -612,13 +695,21 @@ function PaymentReportsPage() {
                       type="file"
                       hidden
                       accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                      onChange={(e) => { const file = e.target.files[0]; if (file) setUploadedFile(file); }}
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) setUploadedFile(file);
+                      }}
                     />
                     <UploadFile sx={{ fontSize: 30, color: uploadedFile ? 'success.main' : 'grey.500', mb: 0.5 }} />
                     {uploadedFile ? (
                       <Stack direction="row" alignItems="center" justifyContent="center" spacing={1}>
-                        <Typography variant="body2" color="success.main" fontWeight="bold" noWrap sx={{ maxWidth: 150 }}>{uploadedFile.name}</Typography>
-                        <IconButton size="small" onClick={(e) => { e.stopPropagation(); setUploadedFile(null); document.getElementById('file-upload-input').value = ''; }}>
+                        <Typography variant="body2" color="success.main" fontWeight="bold" noWrap sx={{ maxWidth: 150 }}>
+                          {uploadedFile.name}
+                        </Typography>
+                        <IconButton
+                          size="small"
+                          onClick={(e) => { e.stopPropagation(); setUploadedFile(null); document.getElementById('file-upload-input').value = ''; }}
+                        >
                           <Close fontSize="small" />
                         </IconButton>
                       </Stack>
@@ -631,6 +722,7 @@ function PaymentReportsPage() {
                   </Box>
                 </Stack>
               </Grid>
+
             </Grid>
           </DialogContent>
           <DialogActions>
@@ -646,6 +738,7 @@ function PaymentReportsPage() {
           </DialogActions>
         </form>
       </Dialog>
+
     </MainCard>
   );
 }
