@@ -218,7 +218,14 @@ const CourseAdd = () => {
                 </Grid>
                 <DialogActions sx={{ mt: 3 }}>
                   <Button onClick={handleClose}>Cancel</Button>
-                  <Button type="submit" variant="contained">
+                  <Button type="submit"
+                  sx={{
+                  backgroundColor: "#6C5CE7",
+                  color: "#fff",
+                  "&:hover": {
+                    backgroundColor: "#6C5CE7"
+                  }
+                }} variant="contained">
                     {currentCourse ? 'Update' : 'Submit'}
                   </Button>
                 </DialogActions>

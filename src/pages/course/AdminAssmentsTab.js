@@ -652,9 +652,15 @@ const AdminAssmentsTab = () => {
               <Box sx={{ mt: 3, display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
                 <Button
                   variant="outlined"
-                  color="secondary"
+                  sx={{backgroundColor: "#636E72",
+                  color: "#fff",
+                  "&:hover": {
+                    backgroundColor: "#636E72",
+                    color: "#fff",
+                  }
+                }}
                   onClick={handleCancel}
-                  sx={{ borderRadius: 2, px: 3 }}
+                  
                   disabled={formik.isSubmitting}
                 >
                   Cancel
