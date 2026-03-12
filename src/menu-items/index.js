@@ -63,12 +63,16 @@ import widget from './widget';
 import user from './user';
 import coorprate from './coorprate';
 import course from './course';
+import Ebook from './ebook';
 import roles from './roles';
 import logs from './logs';
 import reports from './reports';
 import settings from './settings';
 import support from './supports';
 import events from './events';
+// import  {Feedback as feedback } from './feedback';
+import feedback from './feedback'
+// import logs from './logs.js';
 
 
 // Get loginType from sessionStorage or localStorage
@@ -86,11 +90,12 @@ if (auth?.user?.user_type === 'super_admin') {
     reports,
     logs,
     settings,
+    Ebook,
   ];
 } else if (auth?.user?.permissions) {
   const allowedModules = auth.user.permissions
     .filter((perm) => perm.allowed_actions.includes('read'))
-    .map((perm) => perm.module_name);
+    .map((perm) => perm.module_name.trim().toLowerCase());
 
   // Special handling for Events group
   if (allowedModules.includes('Webinar') || allowedModules.includes('Events')) {
@@ -107,27 +112,42 @@ if (auth?.user?.user_type === 'super_admin') {
   }
 
   // Add other modules normally
-  const moduleMenuMap = {
-    Tutors: user,
-    Organizations: coorprate,
-    Students: user,
-    Attendance: user,
-    Course: course,
-    Reports: reports,
-    Ticket: support,
-    Logs: logs,
-    Schedule: course,
-    Roles: roles,
-    Settings: settings,
- 
-    Support: support
-  };
+const moduleMenuMap = {
+  tutors: user,
+  students: user,
+  organizations: coorprate,
+  batch: user,
+  course: course,
+  category: course,
+  schedule: course,
+  assessment: course,
+  attendance: user,
+  "attendance logs": logs,
+  logs: logs,
+  ticket: support,
+  feedback: feedback,
+  reports: reports,
+  roles: roles,
+  ebook: Ebook,
+  settings: settings,
+  support: support
+};
 
-  const otherMenus = allowedModules
-    .filter((name) => moduleMenuMap[name])
-    .map((name) => moduleMenuMap[name]);
+console.log("Permissions:", allowedModules);
 
-  items = [widget, ...items.slice(1), ...otherMenus];
+
+const otherMenus = [
+  ...new Set(
+    allowedModules
+      .filter((name) => moduleMenuMap[name])
+      .map((name) => moduleMenuMap[name])
+  )
+];
+
+items = [widget, ...otherMenus];
+
+
+  console.log(otherMenus,"new menus ")
 }
 
 const menuItems = { items };

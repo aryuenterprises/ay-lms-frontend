@@ -20,14 +20,13 @@ const permissions = auth?.user?.permissions || [];
 const hasReadPermission = (moduleName) => {
   // Super admin has all permissions
   if (loginType === 'super_admin') return true;
-
-  // For admin, check permissions array
-  if (loginType === 'admin') {
-    return permissions.some((permission) => permission.module_name === moduleName && permission.allowed_actions.includes('read'));
-  }
-
-  // For other user types, rely on loginType only
-  return false;
+  
+  // ✅ All other users check their permissions array
+  return permissions.some(
+    (permission) =>
+      permission.module_name === moduleName &&
+      permission.allowed_actions.includes('read')
+  );
 };
 
 // ==============================|| MENU ITEMS - SUPPORT ||============================== //
@@ -37,54 +36,47 @@ const baseMenuItems = {
   title: <FormattedMessage id="course" defaultMessage="Course Management" />,
   type: 'group',
   children: [
-    {
-      id: 'category',
-      title: <FormattedMessage id="category" defaultMessage="Category" />,
-      type: 'item',
-      url: '/category',
-      icon: icons.samplePage,
-      show: (loginType === 'admin' || loginType === 'super_admin') && hasReadPermission('Category')
-    },
-    {
-      id: 'course',
-      title: <FormattedMessage id="course" defaultMessage="Course" />,
-      type: 'item',
-      url: '/course',
-      icon: icons.Note1,
-      show:
-        ['super_admin', 'admin', 'tutor', 'student', 'employer'].includes(loginType) &&
-        (loginType !== 'admin' || hasReadPermission('Course'))
-    },
-    {
-      id: 'batch-list',
-      title: <FormattedMessage id="batch-list" defaultMessage="Batch" />,
-      type: 'item',
-      url: '/batch',
-      icon: icons.roadmap,
-      show:
-        ((loginType === 'admin' || loginType === 'super_admin') && hasReadPermission('Batch')) ||
-        loginType === 'tutor' ||
-        loginType === 'student'
-    },
-    
-    
-    {
-      id: 'schedule',
-      title: <FormattedMessage id="schedule" defaultMessage="Schedule" />,
-      type: 'item',
-      url: '/schedule',
-      icon: icons.samplePage,
-      show: ['super_admin', 'admin', 'tutor'].includes(loginType) && (loginType !== 'admin' || hasReadPermission('Schedule'))
-    },
-    {
-      id: 'assessment',
-      title: <FormattedMessage id="assessment" defaultMessage="Assessment" />,
-      type: 'item',
-      url: '/assessment',
-      icon: icons.samplePage,
-      show: (loginType === 'admin' || loginType === 'super_admin') && hasReadPermission('Assessment')
-    }
-  ]
+  {
+    id: 'category',
+    title: <FormattedMessage id="category" defaultMessage="Category" />,
+    type: 'item',
+    url: '/category',
+    icon: icons.samplePage,
+    show: hasReadPermission('Category')  // ✅ super_admin auto passes, others check permission
+  },
+  {
+    id: 'course',
+    title: <FormattedMessage id="course" defaultMessage="Course" />,
+    type: 'item',
+    url: '/course',
+    icon: icons.Note1,
+    show: hasReadPermission('Course')
+  },
+  {
+    id: 'batch-list',
+    title: <FormattedMessage id="batch-list" defaultMessage="Batch" />,
+    type: 'item',
+    url: '/batch',
+    icon: icons.roadmap,
+    show: hasReadPermission('Batch')
+  },
+  {
+    id: 'schedule',
+    title: <FormattedMessage id="schedule" defaultMessage="Schedule" />,
+    type: 'item',
+    url: '/schedule',
+    icon: icons.samplePage,
+    show: hasReadPermission('Schedule')
+  },
+  {
+    id: 'assessment',
+    title: <FormattedMessage id="assessment" defaultMessage="Assessment" />,
+    type: 'item',
+    url: '/assessment',
+    icon: icons.samplePage,
+    show: hasReadPermission('Assessment')
+  }
+]
 };
 
 // Filter menu items based on login type

@@ -21,6 +21,8 @@ const auth = JSON.parse(localStorage.getItem('auth'));
 const loginType = auth?.loginType;
 const permissions = auth?.user?.permissions || [];
 
+
+
 // Function to check if user has read permission for a module
 const hasReadPermission = (moduleName) => {
   // Super admin has all permissions
