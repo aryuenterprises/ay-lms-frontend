@@ -65,7 +65,8 @@ const ParticipantTable = () => {
   const [endDate, setEndDate] = useState(null);
   const location = useLocation();
   const [attendanceFilter, setAttendanceFilter] = useState('All');
-  const [nameFilter, setNameFilter] = useState("");
+  // const [nameFilter, setNameFilter] = useState("");
+  const [searchText,setSearchText] = useState("");
   const [hoursFilter, setHoursFilter] = useState('All');
   const { webinarData } = location.state || {};
   const [selectedWebinarUuid, setSelectedWebinarUuid] = useState(null);
@@ -464,29 +465,29 @@ const ParticipantTable = () => {
   }, [webinarDetail]); // dependency is now webinarDetail, not webinarData
  
   // Filter rows based on attendance
-  const filteredRows = useMemo(() => {
-    return allRows.filter((r) => {
+const filteredRows = useMemo(() => {
+  return allRows.filter((r) => {
+    const search = searchText || ''; // use searchText instead of nameFilter
 
-      // Name filter
-      if (
-        nameFilter &&
-        !r.name?.toLowerCase().includes(nameFilter.toLowerCase())
-      )
-        return false;
+    const matchesText =
+      search === '' ||
+      (r.name && r.name.toLowerCase().includes(search.toLowerCase())) ||
+      (r.phone && r.phone.toString().replace(/\D/g, "").includes(search.replace(/\D/g, ""))) ||
+      (r.email && r.email.toLowerCase().includes(search.toLowerCase()));
 
-      // Attendance filter
-      if (attendanceFilter === "Attended" && !r.attended) return false;
-      if (attendanceFilter === "Not Attended" && r.attended) return false;
+    const matchesAttendance =
+      attendanceFilter === 'All' || 
+      (attendanceFilter === 'Attended' && r.attended) ||
+      (attendanceFilter === 'Not Attended' && !r.attended);
 
-      // Date filter
-      const rowDate = r.registered_at?.split(" ")[0];
+    const rowDate = r.registered_at?.split(' ')[0] || '';
+    const matchesDate =
+      (!startDate || rowDate >= startDate) &&
+      (!endDate || rowDate <= endDate);
 
-      if (startDate && rowDate < startDate) return false;
-      if (endDate && rowDate > endDate) return false;
-
-      return true;
-    });
-  }, [allRows, attendanceFilter, startDate, endDate, nameFilter]);
+    return matchesText && matchesAttendance && matchesDate;
+  });
+}, [allRows, searchText, attendanceFilter, startDate, endDate]);
 
   const exportToExcel = useCallback(() => {
     if (!filteredRows || filteredRows.length === 0) {
@@ -763,9 +764,9 @@ const ParticipantTable = () => {
           <Stack direction="row" spacing={3}>
             <TextField
               size="small"
-              label="Search Name"
-              value={nameFilter}
-              onChange={(e) => setNameFilter(e.target.value)}
+              label="Search"
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
               sx={{ minWidth: 180 }}
               InputProps={{
                 startAdornment: (
